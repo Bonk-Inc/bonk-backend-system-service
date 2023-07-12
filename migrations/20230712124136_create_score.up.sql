@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS score
+CREATE TABLE IF NOT EXISTS "score"
 (
     id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
     username VARCHAR(50) NOT NULL,

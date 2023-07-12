@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS game
+CREATE TABLE IF NOT EXISTS "game"
 (
     game_id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(50) NOT NULL,
