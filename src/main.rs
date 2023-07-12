@@ -1,14 +1,16 @@
-use actix_web::{HttpServer, App, web, HttpResponse};
+use actix_web::{HttpServer, App, middleware::Logger};
 
-async fn index() -> HttpResponse {
-    HttpResponse::Ok().body("Hello")
-}
+mod controller;
+mod entity;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    HttpServer::new(|| {
+    env_logger::init_from_env(env_logger::Env::default().default_filter_or("info"));
+
+    HttpServer::new(move || {
         App::new()
-            .route("/", web::get().to(index))
+            .wrap(Logger::default())
+            .service(controller::score::index)
     })
     .bind(("127.0.0.1", 8080))?
     .run()
