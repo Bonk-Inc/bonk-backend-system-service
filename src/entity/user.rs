@@ -1,6 +1,6 @@
-use chrono::{DateTime, Utc};
+use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
+use sqlx::types::Uuid;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct User<'a> {
@@ -9,5 +9,5 @@ pub struct User<'a> {
     #[serde(skip)]
     pub password: &'a str,
     pub email: &'a str,
-    pub created_at: DateTime<Utc>,
+    pub created_at: NaiveDateTime,
 }

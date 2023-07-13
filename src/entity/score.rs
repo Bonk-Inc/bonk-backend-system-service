@@ -1,14 +1,14 @@
-use chrono::{DateTime, Utc};
+use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
+use sqlx::{FromRow, types::Uuid};
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Score<'a> {
+#[derive(Debug, FromRow, Serialize, Deserialize)]
+pub struct Score {
     pub id: Uuid,
-    pub username: &'a str,
+    pub username: String,
     pub score: i32,
     pub is_hidden: bool,
     pub game_id: Uuid,
-    pub created_at: DateTime<Utc>,
-    pub updated_at: Option<DateTime<Utc>>,
+    pub created_at: NaiveDateTime,
+    pub updated_at: Option<NaiveDateTime>,
 }
