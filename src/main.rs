@@ -1,6 +1,6 @@
 use std::env;
 
-use actix_web::{middleware::Logger, App, HttpServer, web};
+use actix_web::{middleware::{Logger, self}, App, HttpServer, web};
 use dotenvy::dotenv;
 use sqlx::postgres::PgPoolOptions;
 
@@ -26,8 +26,9 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(db_pool.clone()))
+            .wrap(middleware::NormalizePath::new(middleware::TrailingSlash::Always))
             .wrap(Logger::default())
-            .service(controller::score::index)
+            .service(controller::api_scope())
     })
     .bind((port, 8080))?
     .run()

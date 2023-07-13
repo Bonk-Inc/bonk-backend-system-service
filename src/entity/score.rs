@@ -6,6 +6,9 @@ use uuid::Uuid;
 pub struct Score<'a> {
     pub id: Uuid,
     pub username: &'a str,
+    pub score: i32,
+    pub is_hidden: bool,
+    pub game_id: Uuid,
     pub created_at: DateTime<Utc>,
     pub updated_at: Option<DateTime<Utc>>,
 }
