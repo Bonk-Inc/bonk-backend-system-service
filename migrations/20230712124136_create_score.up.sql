@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS "score"
 (
-    "id" uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+    "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     "username" VARCHAR(50) NOT NULL,
     "score" INTEGER NOT NULL,
     "is_hidden" BOOLEAN NOT NULL DEFAULT FALSE,
