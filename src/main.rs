@@ -1,11 +1,14 @@
 use std::env;
 
 use actix_web::{middleware::{Logger, self}, App, HttpServer, web};
+use diesel::{PgConnection, r2d2::ConnectionManager};
 use dotenvy::dotenv;
-use sqlx::postgres::PgPoolOptions;
 
-mod controller;
-mod entity;
+pub mod controller;
+pub mod models;
+pub mod schema;
+
+type DbPool = r2d2::Pool<ConnectionManager<PgConnection>>;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -17,11 +20,7 @@ async fn main() -> std::io::Result<()> {
         Err(_) => "127.0.0.1".to_owned()
     };
 
-    let db_pool = PgPoolOptions::new()
-        .max_connections(5)
-        .connect(env::var("DATABASE_URL").expect("Database URL must be set").as_str())
-        .await
-        .expect("Database connection could not be made");
+    let db_pool = initialize_db_pool();
 
     HttpServer::new(move || {
         App::new()
@@ -33,4 +32,13 @@ async fn main() -> std::io::Result<()> {
     .bind((port, 8080))?
     .run()
     .await
+}
+
+fn initialize_db_pool() -> DbPool {
+    let database_url = env::var("DATAbASE_URL").expect("Database Url must be set");
+    let manager = ConnectionManager::<PgConnection>::new(database_url);
+
+    r2d2::Pool::builder()
+        .build(manager)
+        .expect("Database URL should link to the external database server")
 }

@@ -9,6 +9,8 @@ CREATE TABLE IF NOT EXISTS "score"
     "updated_at" TIMESTAMP,
     CONSTRAINT "fk_game_score"
         FOREIGN KEY ("game_id")
-            REFERENCES "game" ("game_id")
+            REFERENCES "game" ("id")
             ON DELETE CASCADE
 );
+
+SELECT diesel_manage_updated_at('score');
