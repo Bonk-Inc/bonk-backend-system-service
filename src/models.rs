@@ -12,13 +12,14 @@ pub struct Game {
     pub updated_at: Option<NaiveDateTime>
 }
 
-#[derive(Debug, Selectable, Identifiable, Queryable, Associations, Serialize, Deserialize)]
+#[derive(Debug, Clone, Selectable, Identifiable, Queryable, Associations, Serialize, Deserialize)]
 #[diesel(table_name = crate::schema::score)]
 #[diesel(belongs_to(Game))]
 pub struct Score {
     pub id: Uuid,
     pub username: String,
-    pub score: i32,
+    #[serde(rename = "score")]
+    pub highscore: i32,
     pub is_hidden: bool,
     pub game_id: Uuid,
     pub created_at: NaiveDateTime,

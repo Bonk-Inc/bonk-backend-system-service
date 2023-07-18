@@ -1,14 +1,15 @@
 use std::env;
 
 use actix_web::{middleware::{Logger, self}, App, HttpServer, web};
-use diesel::{PgConnection, r2d2::ConnectionManager};
+use diesel::{PgConnection, r2d2::{ConnectionManager, self}};
 use dotenvy::dotenv;
 
 pub mod controller;
 pub mod models;
+pub mod repository;
 pub mod schema;
 
-type DbPool = r2d2::Pool<ConnectionManager<PgConnection>>;
+type DbPool = r2d2::Pool<r2d2::ConnectionManager<PgConnection>>;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -35,7 +36,7 @@ async fn main() -> std::io::Result<()> {
 }
 
 fn initialize_db_pool() -> DbPool {
-    let database_url = env::var("DATAbASE_URL").expect("Database Url must be set");
+    let database_url = env::var("DATABASE_URL").expect("Database Url must be set");
     let manager = ConnectionManager::<PgConnection>::new(database_url);
 
     r2d2::Pool::builder()
