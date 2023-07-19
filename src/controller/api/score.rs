@@ -1,5 +1,5 @@
-use actix_web::{error, get, post, web, HttpResponse, Responder, delete};
-use diesel::{Insertable, RunQueryDsl};
+use actix_web::{error, web, HttpResponse, Responder, get, post, put, delete};
+use diesel::{Insertable, AsChangeset, RunQueryDsl, ExpressionMethods, OptionalExtension};
 use serde::Deserialize;
 use uuid::Uuid;
 use validator::Validate;
@@ -11,7 +11,7 @@ use crate::{
     DbPool, 
 };
 
-#[derive(Deserialize, Insertable, Validate)]
+#[derive(Deserialize, Insertable, AsChangeset, Validate)]
 #[diesel(table_name = score)]
 pub struct ScoreForm {
     #[validate(length(min = 5, max = 49))]
@@ -55,22 +55,23 @@ pub async fn show(
     .await?
     .map_err(error::ErrorInternalServerError)?;
 
-    Ok(match score {
-        Some(score) => HttpResponse::Ok().json(serde_json::json!({
-            "status": "success",
-            "data": { "score": score }
-        })),
-        None => HttpResponse::NotFound().json(serde_json::json!({
+    if score.is_none() {
+        return Ok(HttpResponse::NotFound().json(serde_json::json!({
             "status": "failed",
-            "message": format!("No score found with id '{}'", score_id.to_string())
-        })),
-    })
+            "message": format!("Could not delete score with id '{}'", score_id.to_string())
+        })));
+    }
+
+    Ok(HttpResponse::Ok().json(serde_json::json!({
+        "status": "success",
+        "data": { "score": score.unwrap() }
+    })))
 }
 
 #[post("/")]
 pub async fn store(
     pool: web::Data<DbPool>,
-    data: web::Json<ScoreForm>
+    data: web::Json<ScoreForm>,
 ) -> actix_web::Result<impl Responder> {
     use crate::schema::score::dsl::*;
 
@@ -96,6 +97,49 @@ pub async fn store(
     Ok(HttpResponse::Created().json(serde_json::json!({
         "status": "success",
         "data": { "score": new_score }
+    })))
+}
+
+#[put("/{id}/")]
+pub async fn update(
+    pool: web::Data<DbPool>,
+    data: web::Json<ScoreForm>,
+    path: web::Path<(Uuid,)>
+) -> actix_web::Result<impl Responder> {
+    use crate::schema::score::dsl::*;
+
+    let (score_id,) = path.into_inner();
+    if let Err(errors) = data.validate() {
+        return Ok(HttpResponse::BadRequest().json(serde_json::json!({
+            "status": "failed",
+            "message": "Input data invalid",
+            "errors": errors.field_errors()
+        })));
+    }
+
+    let updated_score = web::block(move || {
+        let mut conn = pool.get().expect("Couldn't get connection from pool");
+        let result = diesel::update(score)
+            .filter(id.eq(score_id))
+            .set(data.0)
+            .get_result::<Score>(&mut conn)
+            .optional();
+
+        result
+    })
+    .await?
+    .map_err(error::ErrorInternalServerError)?;
+
+    if updated_score.is_none() {
+        return Ok(HttpResponse::NotFound().json(serde_json::json!({
+            "status": "failed",
+            "message": format!("Could not delete score with id '{}'", score_id.to_string())
+        })));
+    }
+
+    Ok(HttpResponse::Ok().json(serde_json::json!({
+        "status": "success",
+        "data": { "score": updated_score.unwrap() }
     })))
 }
 

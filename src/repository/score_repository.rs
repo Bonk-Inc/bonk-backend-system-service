@@ -20,8 +20,6 @@ impl Repository<'_> for ScoreRepository {
         use crate::schema::score::dsl::*;
 
         let result = score
-            .filter(is_hidden.eq(false))
-            .limit(100)
             .select(Score::as_select())
             .load(&mut self.conn)?;
         
