@@ -5,4 +5,5 @@ pub mod api;
 pub fn api_scope() -> Scope {
     web::scope("/api")
         .service(api::score_scope())
+        .service(api::game_scope())
 }

@@ -7,7 +7,7 @@ use super::{Repository, DbError, DbConnection};
 
 pub struct ScoreRepository;
 
-impl Repository<'_> for ScoreRepository {
+impl Repository for ScoreRepository {
     type Output = Score;
     
     fn new() -> Self {

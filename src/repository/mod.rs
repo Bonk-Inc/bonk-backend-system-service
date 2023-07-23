@@ -3,12 +3,13 @@ use std::error::Error;
 use diesel::{PgConnection, r2d2::{PooledConnection, ConnectionManager}};
 use uuid::Uuid;
 
+pub mod game_repository;
 pub mod score_repository;
 
 type DbError = Box<dyn Error + Send + Sync>;
 type DbConnection = PooledConnection<ConnectionManager<PgConnection>>;
 
-pub trait Repository<'a> {
+pub trait Repository {
     type Output;
 
     fn new() -> Self;
