@@ -1,7 +1,13 @@
 use std::env;
 
-use actix_web::{middleware::{Logger, self}, App, HttpServer, web};
-use diesel::{PgConnection, r2d2::{ConnectionManager, self}};
+use actix_web::{
+    middleware::Logger,
+    web, App, HttpServer,
+};
+use diesel::{
+    r2d2::{self, ConnectionManager},
+    PgConnection,
+};
 use dotenvy::dotenv;
 
 pub mod controller;
@@ -18,7 +24,7 @@ async fn main() -> std::io::Result<()> {
 
     let port = match env::var("APP_PORT") {
         Ok(val) => val,
-        Err(_) => "127.0.0.1".to_owned()
+        Err(_) => "127.0.0.1".to_owned(),
     };
 
     let db_pool = initialize_db_pool();
@@ -26,7 +32,9 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(db_pool.clone()))
-            .wrap(middleware::NormalizePath::new(middleware::TrailingSlash::Always))
+            .wrap(actix_web::middleware::NormalizePath::new(
+                actix_web::middleware::TrailingSlash::Always,
+            ))
             .wrap(Logger::default())
             .service(controller::api_scope())
     })

@@ -25,10 +25,10 @@ pub struct ScoreForm {
 #[get("/")]
 pub async fn index(pool: web::Data<DbPool>) -> actix_web::Result<impl Responder> {
     let scores = web::block(move || {
-        let conn = pool.get().expect("Couldn't get connection from pool");
-        let repository: ScoreRepository = Repository::new(conn);
+        let mut conn = pool.get().expect("Couldn't get connection from pool");
+        let repository: ScoreRepository = Repository::new();
 
-        repository.find_all()
+        repository.find_all(&mut conn)
     })
     .await?
     .map_err(error::ErrorInternalServerError)?;
@@ -47,10 +47,10 @@ pub async fn show(
 ) -> actix_web::Result<impl Responder> {
     let (score_id,) = id.into_inner();
     let score = web::block(move || {
-        let conn = pool.get().expect("Couldn't get connection from pool");
-        let repository: ScoreRepository = Repository::new(conn);
+        let mut conn = pool.get().expect("Couldn't get connection from pool");
+        let repository: ScoreRepository = Repository::new();
 
-        repository.find(score_id)
+        repository.find(&mut conn, score_id)
     })
     .await?
     .map_err(error::ErrorInternalServerError)?;
@@ -150,10 +150,10 @@ pub async fn destroy(
 ) -> actix_web::Result<impl Responder> {
     let (score_id,) = path.into_inner();
     let is_deleted = web::block(move || {
-        let conn = pool.get().expect("Couldn't get connection from pool");
-        let repository: ScoreRepository = Repository::new(conn);
+        let mut conn = pool.get().expect("Couldn't get connection from pool");
+        let repository: ScoreRepository = Repository::new();
 
-        repository.drop(score_id)
+        repository.drop(&mut conn, score_id)
     })
     .await?
     .map_err(error::ErrorInternalServerError)?;

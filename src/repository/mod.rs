@@ -11,8 +11,8 @@ type DbConnection = PooledConnection<ConnectionManager<PgConnection>>;
 pub trait Repository<'a> {
     type Output;
 
-    fn new(conn: DbConnection) -> Self;
-    fn find_all(self) -> Result<Vec<Self::Output>, DbError>;
-    fn find(self, item_id: Uuid) -> Result<Option<Self::Output>, DbError>;
-    fn drop(self, item_id: Uuid) -> Result<bool, DbError>;
+    fn new() -> Self;
+    fn find_all(self, conn: &mut DbConnection) -> Result<Vec<Self::Output>, DbError>;
+    fn find(self, conn: &mut DbConnection, item_id: Uuid) -> Result<Option<Self::Output>, DbError>;
+    fn drop(self, conn: &mut DbConnection, item_id: Uuid) -> Result<bool, DbError>;
 }
