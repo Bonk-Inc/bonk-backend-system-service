@@ -8,6 +8,21 @@ use super::{DbConnection, DbError, Repository};
 
 pub struct ScoreRepository;
 
+impl ScoreRepository {
+    
+    pub fn find_all_by_game(&self, conn: &mut DbConnection, item_id: Uuid) -> Result<Vec<Score>, DbError> {
+        use crate::schema::score::dsl::*;
+
+        let result = score
+            .select(Score::as_select())
+            .filter(game_id.eq(item_id))
+            .load(conn)?;
+
+        Ok(result)
+    }
+
+}
+
 impl Repository for ScoreRepository {
     type Output = Score;
     type Input = ScoreForm;

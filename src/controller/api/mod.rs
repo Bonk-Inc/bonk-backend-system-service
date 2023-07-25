@@ -8,6 +8,7 @@ pub fn score_scope() -> Scope {
         .service(score::index)
         .service(score::show)
         .service(score::store)
+        .service(score::game_scores)
         .service(score::update)
         .service(score::destroy)
 }

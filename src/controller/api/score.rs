@@ -21,6 +21,11 @@ pub struct ScoreForm {
     pub game_id: Uuid
 }
 
+#[derive(Deserialize)]
+pub struct QueryParams {
+    is_hidden: Option<bool>
+}
+
 #[get("/")]
 pub async fn index(pool: web::Data<DbPool>) -> actix_web::Result<impl Responder> {
     let scores = web::block(move || {
@@ -42,9 +47,9 @@ pub async fn index(pool: web::Data<DbPool>) -> actix_web::Result<impl Responder>
 #[get("/{id}/")]
 pub async fn show(
     pool: web::Data<DbPool>,
-    id: web::Path<(Uuid,)>
+    path: web::Path<(Uuid,)>
 ) -> actix_web::Result<impl Responder> {
-    let (score_id,) = id.into_inner();
+    let (score_id,) = path.into_inner();
     let score = web::block(move || {
         let mut conn = pool.get().expect("Couldn't get connection from pool");
         let repository: ScoreRepository = Repository::new();
@@ -64,6 +69,36 @@ pub async fn show(
     Ok(HttpResponse::Ok().json(serde_json::json!({
         "status": "success",
         "data": { "score": score.unwrap() }
+    })))
+}
+
+#[get("/game/{id}/")]
+pub async fn game_scores(
+    pool: web::Data<DbPool>,
+    path: web::Path<(Uuid,)>,
+    query: web::Query<QueryParams>
+) -> actix_web::Result<impl Responder> {
+    let (game_id,) = path.into_inner();
+
+    let mut scores = web::block(move || {
+        let mut conn = pool.get().expect("Couldn't get connection from pool");
+        let repository: ScoreRepository = Repository::new();
+
+        repository.find_all_by_game(&mut conn, game_id)
+    })
+    .await?
+    .map_err(error::ErrorInternalServerError)?;
+
+    if query.is_hidden.is_some() {
+        scores = scores.into_iter()
+            .filter(|score| score.is_hidden == query.is_hidden.unwrap())
+            .collect()
+    }
+
+    Ok(HttpResponse::Ok().json(serde_json::json!({
+        "status": "success",
+        "results": scores.len(),
+        "data": scores
     })))
 }
 
