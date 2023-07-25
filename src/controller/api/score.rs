@@ -1,11 +1,10 @@
 use actix_web::{error, web, HttpResponse, Responder, get, post, put, delete};
-use diesel::{Insertable, AsChangeset, RunQueryDsl, ExpressionMethods, OptionalExtension};
+use diesel::{Insertable, AsChangeset};
 use serde::Deserialize;
 use uuid::Uuid;
 use validator::Validate;
 
 use crate::{
-    models::Score,
     repository::{score_repository::ScoreRepository, Repository},
     schema::score,
     DbPool, 
@@ -73,7 +72,6 @@ pub async fn store(
     pool: web::Data<DbPool>,
     data: web::Json<ScoreForm>,
 ) -> actix_web::Result<impl Responder> {
-    use crate::schema::score::dsl::*;
 
     if let Err(errors) = data.validate() {
         return Ok(HttpResponse::BadRequest().json(serde_json::json!({
@@ -85,11 +83,9 @@ pub async fn store(
 
     let new_score = web::block(move || {
         let mut conn = pool.get().expect("Couldn't get connection from pool");
-        let result = diesel::insert_into(score)
-            .values(data.0)
-            .get_result::<Score>(&mut conn);
+        let repository: ScoreRepository = Repository::new();
 
-        result
+        repository.store(&mut conn, data)
     })
     .await?
     .map_err(error::ErrorInternalServerError)?;
@@ -106,7 +102,6 @@ pub async fn update(
     data: web::Json<ScoreForm>,
     path: web::Path<(Uuid,)>
 ) -> actix_web::Result<impl Responder> {
-    use crate::schema::score::dsl::*;
 
     let (score_id,) = path.into_inner();
     if let Err(errors) = data.validate() {
@@ -119,13 +114,9 @@ pub async fn update(
 
     let updated_score = web::block(move || {
         let mut conn = pool.get().expect("Couldn't get connection from pool");
-        let result = diesel::update(score)
-            .filter(id.eq(score_id))
-            .set(data.0)
-            .get_result::<Score>(&mut conn)
-            .optional();
-
-        result
+        let repository: ScoreRepository = Repository::new();
+        
+        repository.update(&mut conn, score_id, data)
     })
     .await?
     .map_err(error::ErrorInternalServerError)?;

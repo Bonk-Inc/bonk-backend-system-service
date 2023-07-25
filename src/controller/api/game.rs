@@ -1,5 +1,5 @@
 use actix_web::{error, get, post, put, delete, web, HttpResponse, Responder};
-use diesel::{AsChangeset, Insertable, RunQueryDsl, ExpressionMethods, OptionalExtension};
+use diesel::{AsChangeset, Insertable};
 use serde::Deserialize;
 use uuid::Uuid;
 use validator::Validate;
@@ -68,7 +68,6 @@ pub async fn store(
     pool: web::Data<DbPool>,
     data: web::Json<GameForm>,
 ) -> actix_web::Result<impl Responder> {
-    use crate::schema::game::dsl::*;
 
     if let Err(errors) = data.validate() {
         return Ok(HttpResponse::BadRequest().json(serde_json::json!({
@@ -80,14 +79,13 @@ pub async fn store(
 
     let new_game = web::block(move || {
         let mut conn = pool.get().expect("Couldn't get connection from pool");
-        let result = diesel::insert_into(game)
-            .values(data.0)
-            .get_result::<Game>(&mut conn);
+        let respository: GameRepository = Repository::new();
 
-        result
+        respository.store(&mut conn, data)
     })
     .await?
     .map_err(error::ErrorInternalServerError)?;
+
 
     Ok(HttpResponse::Created().json(serde_json::json!({
         "status": "success",
@@ -101,7 +99,6 @@ pub async fn update(
     data: web::Json<GameForm>,
     path: web::Path<(Uuid,)>
 ) -> actix_web::Result<impl Responder> {
-    use crate::schema::game::dsl::*;
 
     let (game_id,) = path.into_inner();
     if let Err(errors) = data.validate() {
@@ -112,15 +109,11 @@ pub async fn update(
         })));
     }
 
-    let updated_game = web::block(move || {
-        let mut conn: diesel::r2d2::PooledConnection<diesel::r2d2::ConnectionManager<diesel::PgConnection>> = pool.get().expect("Couldn't get connection from pool");
-        let result = diesel::update(game)
-            .filter(id.eq(game_id))
-            .set(data.0)
-            .get_result::<Game>(&mut conn)
-            .optional();
+    let updated_game: Option<Game> = web::block(move || {
+        let mut conn = pool.get().expect("Couldn't get connection from pool");
+        let respository: GameRepository = Repository::new();
 
-        result
+        respository.update(&mut conn, game_id, data)
     })
     .await?
     .map_err(error::ErrorInternalServerError)?;
@@ -145,7 +138,7 @@ pub async fn destroy(
 ) -> actix_web::Result<impl Responder> {
     let (game_id,) = path.into_inner();
     let is_deleted = web::block(move || {
-        let mut conn: diesel::r2d2::PooledConnection<diesel::r2d2::ConnectionManager<diesel::PgConnection>> = pool.get().expect("Couldn't get connection from pool");
+        let mut conn = pool.get().expect("Couldn't get connection from pool");
         let repository: GameRepository = Repository::new();
 
         repository.drop(&mut conn, game_id)
