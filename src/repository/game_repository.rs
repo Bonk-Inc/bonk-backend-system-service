@@ -7,21 +7,6 @@ use super::{Repository, DbConnection, DbError};
 
 pub struct GameRepository;
 
-impl GameRepository {
-    
-    pub fn find_by_name(&self, conn: &mut DbConnection, game_name: &String) -> Result<Option<Game>, DbError> {
-        use crate::schema::game::dsl::*;
-
-        let result = game
-            .filter(name.eq(game_name))
-            .first::<Game>(conn)
-            .optional()?;
-
-        Ok(result)
-    }
-
-}
-
 impl Repository for GameRepository {
     type Output = Game;
     type Input = GameForm;
