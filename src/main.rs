@@ -20,7 +20,7 @@ async fn main() -> std::io::Result<()> {
     env_logger::init_from_env(env_logger::Env::default().default_filter_or("info"));
     
 
-    let app_host = env::var("APP_HOST").expect("APP_PORT must be set");
+    let app_host = env::var("APP_HOST").expect("APP_HOST must be set");
     let app_port = env::var("APP_PORT").expect("APP_PORT must be set");
     let app_url = format!("{}:{}", app_host, app_port);
 
