@@ -4,7 +4,7 @@ use actix_web::{
     middleware::Logger,
     web, App, HttpServer,
 };
-use config::db::{init_db_pool, run_migration};
+use config::{db::{init_db_pool, run_migration}, oauth2::OAuth2Client};
 use dotenvy::dotenv;
 
 pub mod config;
@@ -18,10 +18,13 @@ pub mod service;
 async fn main() -> std::io::Result<()> {
     dotenv().expect(".env file not found");
     env_logger::init_from_env(env_logger::Env::default().default_filter_or("info"));
+    
 
     let app_host = env::var("APP_HOST").expect("APP_PORT must be set");
     let app_port = env::var("APP_PORT").expect("APP_PORT must be set");
     let app_url = format!("{}:{}", app_host, app_port);
+
+    let oauth2_client = OAuth2Client::new();
 
     let db_url = env::var("DATABASE_URL").expect("APP_PORT must be set");
     let db_pool = init_db_pool(&db_url);
@@ -30,6 +33,7 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(db_pool.clone()))
+            .app_data(web::Data::new(oauth2_client.clone()))
             .wrap(actix_web::middleware::NormalizePath::new(
                 actix_web::middleware::TrailingSlash::Always,
             ))
