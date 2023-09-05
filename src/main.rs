@@ -4,30 +4,28 @@ use actix_web::{
     middleware::Logger,
     web, App, HttpServer,
 };
-use diesel::{
-    r2d2::{self, ConnectionManager},
-    PgConnection,
-};
+use config::db::{init_db_pool, run_migration};
 use dotenvy::dotenv;
 
+pub mod config;
 pub mod controller;
+pub mod error;
 pub mod models;
-pub mod repository;
 pub mod schema;
-
-type DbPool = r2d2::Pool<r2d2::ConnectionManager<PgConnection>>;
+pub mod service;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     dotenv().expect(".env file not found");
     env_logger::init_from_env(env_logger::Env::default().default_filter_or("info"));
 
-    let port = match env::var("APP_PORT") {
-        Ok(val) => val,
-        Err(_) => "127.0.0.1".to_owned(),
-    };
+    let app_host = env::var("APP_HOST").expect("APP_PORT must be set");
+    let app_port = env::var("APP_PORT").expect("APP_PORT must be set");
+    let app_url = format!("{}:{}", app_host, app_port);
 
-    let db_pool = initialize_db_pool();
+    let db_url = env::var("DATABASE_URL").expect("APP_PORT must be set");
+    let db_pool = init_db_pool(&db_url);
+    run_migration(&mut db_pool.get().unwrap());
 
     HttpServer::new(move || {
         App::new()
@@ -36,18 +34,10 @@ async fn main() -> std::io::Result<()> {
                 actix_web::middleware::TrailingSlash::Always,
             ))
             .wrap(Logger::default())
+            .service(controller::auth_scope())
             .service(controller::api_scope())
     })
-    .bind((port, 8080))?
+    .bind(&app_url)?
     .run()
     .await
-}
-
-fn initialize_db_pool() -> DbPool {
-    let database_url = env::var("DATABASE_URL").expect("Database Url must be set");
-    let manager = ConnectionManager::<PgConnection>::new(database_url);
-
-    r2d2::Pool::builder()
-        .build(manager)
-        .expect("Database URL should link to the external database server")
 }
