@@ -7,7 +7,6 @@ pub fn auth_scope() -> Scope {
     web::scope("/auth")
         .service(auth::authorize)
         .service(auth::login)
-        .service(auth::refresh)
 }
 
 pub fn api_scope() -> Scope {
