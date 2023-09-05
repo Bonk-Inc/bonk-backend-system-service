@@ -26,7 +26,7 @@ async fn main() -> std::io::Result<()> {
 
     let oauth2_client = OAuth2Client::new();
 
-    let db_url = env::var("DATABASE_URL").expect("APP_PORT must be set");
+    let db_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     let db_pool = init_db_pool(&db_url);
     run_migration(&mut db_pool.get().unwrap());
 
