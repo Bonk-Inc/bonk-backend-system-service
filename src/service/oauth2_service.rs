@@ -1,3 +1,8 @@
+use std::{
+    env,
+    error
+};
+
 use actix_web::web;
 use oauth2::{
     basic::BasicTokenType, CsrfToken,
@@ -6,6 +11,8 @@ use oauth2::{
     EmptyExtraTokenFields,
     StandardTokenResponse, RefreshToken,
 };
+
+extern crate jsonwebtoken as jwt;
 
 use crate::config::oauth2::OAuth2Client;
 
@@ -60,4 +67,14 @@ pub async fn refresh_token(
     }
 
     None
+}
+
+pub async fn get_jwk_tokens() -> Result<jwt::jwk::JwkSet, Box<dyn error::Error>> {
+    let jwsk_url = env::var("OAUTH_JWSK_URL").expect("OAUTH_JWSK_URL must be set");
+    let tokens = reqwest::get(jwsk_url)
+        .await?
+        .json::<jwt::jwk::JwkSet>()
+        .await?;
+
+    Ok(tokens)
 }

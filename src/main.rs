@@ -10,6 +10,7 @@ use dotenvy::dotenv;
 pub mod config;
 pub mod controller;
 pub mod error;
+pub mod middleware;
 pub mod models;
 pub mod schema;
 pub mod service;
@@ -24,7 +25,7 @@ async fn main() -> std::io::Result<()> {
     let app_port = env::var("APP_PORT").expect("APP_PORT must be set");
     let app_url = format!("{}:{}", app_host, app_port);
 
-    let oauth2_client = OAuth2Client::new();
+    let mut oauth2_client = OAuth2Client::new().await;
 
     let db_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     let db_pool = init_db_pool(&db_url);

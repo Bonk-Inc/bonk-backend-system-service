@@ -1,5 +1,6 @@
 use std::env;
 
+use log::error;
 use oauth2::{
     AuthUrl,
     basic::BasicClient,
@@ -8,14 +9,18 @@ use oauth2::{
     RedirectUrl,
     TokenUrl
 };
+extern crate jsonwebtoken as jwt;
+
+use crate::service::oauth2_service;
 
 #[derive(Clone)]
 pub struct OAuth2Client {
     pub client: BasicClient,
+    pub jwt_token: Option<jwt::jwk::Jwk>,
 }
 
 impl OAuth2Client {
-    pub fn new() -> OAuth2Client {
+    pub async fn new() -> OAuth2Client {
         let client_secret = env::var("OAUTH_CLIENT_SECRET").expect("OAUTH_CLIENT_SECRET must be set");
         let client_id = env::var("OAUTH_CLIENT_ID").expect("OAUTH_CLIENT_ID must be set");
         let auth_url = env::var("OAUTH_AUTH_URL").expect("OAUTH_AUTH_URL must be set");
@@ -25,12 +30,25 @@ impl OAuth2Client {
 
         let client = BasicClient::new(
             ClientId::new(client_id),
-            Some(ClientSecret::new(client_secret)),
+            Some(ClientSecret::new(client_secret.clone())),
             AuthUrl::new(auth_url).expect("Invalid authorization endpoint URL"),
             Some(TokenUrl::new(token_url).expect("Invalid token endpoint URL")),
         )
         .set_redirect_uri(RedirectUrl::new(redirect_url).expect("Invalid redirect URL"));
 
-        OAuth2Client { client }
+        let jwt_token = match oauth2_service::get_jwk_tokens().await {
+            Ok(tokens) => {
+                match tokens.keys.get(0) {
+                    Some(key) => Some(key.clone()),
+                    None => None,
+                }
+            },
+            Err(_) => {
+                error!("Error fetching JWSK from authentication service");
+                None
+            }
+        };
+
+        OAuth2Client { client, jwt_token }
     }
 }

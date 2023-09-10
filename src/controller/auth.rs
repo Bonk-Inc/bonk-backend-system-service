@@ -14,6 +14,11 @@ pub struct LoginQueryParams {
     state: String,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct RefreshQueryPArams {
+    token: String,
+}
+
 #[get("/authorize/")]
 pub async fn authorize(
     oauth2_client: web::Data<OAuth2Client>,
@@ -33,6 +38,22 @@ pub async fn login(
 
     match access_token {
         Some(token) => Ok(HttpResponse::Ok().json(ResponseBody::new("Access Token recieved", token))),
+        None => Err(ServiceError::Unautherized { 
+            error_message: "Unautherized".to_string()
+        })
+    }
+}
+
+#[get("/refresh/")]
+pub async fn refresh(
+    query: web::Query<RefreshQueryPArams>,
+    oauth2_client: web::Data<OAuth2Client>,
+) -> Result<HttpResponse, ServiceError> {
+    let params = query.into_inner();
+    let refresh_token = oauth2_service::refresh_token(params.token, oauth2_client).await;
+    
+    match refresh_token {
+        Some(token) => Ok(HttpResponse::Ok().json(ResponseBody::new("New access token", token))),
         None => Err(ServiceError::Unautherized { 
             error_message: "Unautherized".to_string()
         })
