@@ -477,3 +477,4 @@ FodyWeavers.xsd
 *.sln.iml
 
 .env
+jwk.json

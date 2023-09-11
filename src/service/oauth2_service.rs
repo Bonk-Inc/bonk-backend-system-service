@@ -1,9 +1,11 @@
 use std::{
-    env,
-    error
+    error, 
+    fs::File,
+    io::{prelude::*, BufReader},
 };
 
 use actix_web::web;
+use jsonwebtoken::jwk::{Jwk, JwkSet};
 use oauth2::{
     basic::BasicTokenType, CsrfToken,
     reqwest::http_client, 
@@ -12,9 +14,10 @@ use oauth2::{
     StandardTokenResponse, RefreshToken,
 };
 
-extern crate jsonwebtoken as jwt;
-
-use crate::config::oauth2::OAuth2Client;
+use crate::{
+    config::oauth2::OAuth2Client,
+    JWK_FILE_PATH
+};
 
 pub fn get_authorize_url(client: web::Data<OAuth2Client>) -> String {
     let oauth2: &OAuth2Client = client.get_ref();
@@ -69,12 +72,12 @@ pub async fn refresh_token(
     None
 }
 
-pub async fn get_jwk_tokens() -> Result<jwt::jwk::JwkSet, Box<dyn error::Error>> {
-    let jwsk_url = env::var("OAUTH_JWSK_URL").expect("OAUTH_JWSK_URL must be set");
-    let tokens = reqwest::get(jwsk_url)
-        .await?
-        .json::<jwt::jwk::JwkSet>()
-        .await?;
+pub fn get_jwk_tokens() -> Result<Option<Jwk>, Box<dyn error::Error>> {
+    let file = File::open(JWK_FILE_PATH)?;
+    let mut buffer_reader = BufReader::new(file);
+    let mut contents = String::new();
+    buffer_reader.read_to_string(&mut contents)?;
 
-    Ok(tokens)
+    let tokens: JwkSet = serde_json::from_str(&contents)?;
+    Ok(tokens.keys.get(0).cloned())
 }
