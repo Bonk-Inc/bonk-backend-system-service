@@ -1,5 +1,5 @@
 [package]
-name = "bonk-inc-backend"
+name = "babs_backend"
 version = "0.1.0"
 authors = ["Traxx186"]
 edition = "2021"
@@ -8,7 +8,8 @@ readme = "README.md"
 
 [dependencies]
 actix-web = "4.4.0"
-chrono = { version = "0.4.28", features = ["serde"] }
+babs_common = { version = "0.1.0", path = "../common" }
+chrono = { version = "0.4.30", features = ["serde"] }
 derive_more = "0.99.17"
 diesel = { version = "2.1.1", features = ["postgres", "chrono", "uuid", "r2d2"] }
 diesel_migrations = "2.1.0"
