@@ -1,0 +1,10 @@
+[package]
+name = "babs-common"
+version = "0.1.0"
+authors = ["Traxx186"]
+edition = "2021"
+rust-version = "1.70"
+readme = "README.md"
+
+[dependencies]
+serde = { version = "1.0.188", features = ["derive"] }
