@@ -4,7 +4,10 @@ use uuid::Uuid;
 use crate::{
     config::db::Pool,
     error::ServiceError,
-    models::game::{Game, GameDTO},
+    models::{
+        game::{Game, GameDTO},
+        Delete, FindAll, FindById, Insert, Update
+    }
 };
 
 pub fn find_all(pool: &web::Data<Pool>) -> Result<Vec<Game>, ServiceError> {

@@ -1,10 +1,10 @@
 #####################################################################
-## Builder
+## Build Backend
 ####################################################################
-FROM rust:1.70.0-alpine3.18 AS builder
+FROM rust:1.70.0-alpine3.18 AS backend-build
 
 RUN rustup target add x86_64-unknown-linux-musl
-RUN apk update && apk add --no-cache musl-dev pkgconfig openssl-dev
+RUN apk update && apk add --no-cache musl-dev pkgconfig openssl-dev libpq-dev
 RUN update-ca-certificates
 
 # create appuser
@@ -24,7 +24,8 @@ WORKDIR /bonk-inc-backend
 
 COPY ./ .
 
-RUN cargo build --target x86_64-unknown-linux-musl --release
+RUN cargo build --target x86_64-unknown-linux-musl --release -p babs_backend
+
 
 #####################################################################
 ## Final image
@@ -32,13 +33,13 @@ RUN cargo build --target x86_64-unknown-linux-musl --release
 FROM alpine
 
 # Import from builder.
-COPY --from=builder /etc/passwd /etc/passwd
-COPY --from=builder /etc/group /etc/group
+COPY --from=backend-build /etc/passwd /etc/passwd
+COPY --from=backend-build /etc/group /etc/group
 
 WORKDIR /bonk-inc-backend
 
 # Copy our build
-COPY --from=builder /bonk-inc-backend/target/x86_64-unknown-linux-musl/release/bonk-inc-backend ./
+COPY --from=backend-build /bonk-inc-backend/target/x86_64-unknown-linux-musl/release/bonk-inc-backend ./
 
 # Use an unprivileged user.
 USER bonk-inc-backend:bonk-inc-backend

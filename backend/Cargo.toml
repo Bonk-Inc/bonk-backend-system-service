@@ -6,9 +6,13 @@ edition = "2021"
 rust-version = "1.70"
 readme = "README.md"
 
+[[bin]]
+name = "bonk-inc-backend"
+path = "src/main.rs"
+
 [dependencies]
 actix-web = "4.4.0"
-babs_common = { version = "0.1.0", path = "../common" }
+babs = { version = "0.1.0", path = "..", features = ["backend"] }
 chrono = { version = "0.4.30", features = ["serde"] }
 derive_more = "0.99.17"
 diesel = { version = "2.1.1", features = ["postgres", "chrono", "uuid", "r2d2"] }

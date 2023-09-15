@@ -4,7 +4,10 @@ use uuid::Uuid;
 use crate::{
     config::db::Pool,
     error::ServiceError,
-    models::score::{Score, ScoreDTO},
+    models::{
+        score::{Score, ScoreDTO, self},
+        Delete, FindAll, FindById, Insert, Update
+    }
 };
 
 use super::game_service;
@@ -38,7 +41,7 @@ pub fn find_by_game(
         });
     }
 
-    match Score::find_by_game(game_id, include_hidden, &mut pool.get().unwrap()) {
+    match score::find_by_game(game_id, include_hidden, &mut pool.get().unwrap()) {
         Ok(score) => Ok(score),
         Err(_) => Err(ServiceError::InternalServerError {
             error_message: "An error occured when trying to fetch scores".to_string(),

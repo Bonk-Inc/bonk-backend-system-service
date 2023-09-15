@@ -1,54 +1,53 @@
-use chrono::NaiveDateTime;
-use diesel::{prelude::*, AsChangeset, Insertable, Queryable};
+pub use babs::{
+    models::Game,
+    schema::game::dsl::*
+};
+use diesel::{prelude::*, AsChangeset, Insertable};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::{
-    config::db::Connection, 
-    schema::game::dsl::*
+    config::db::Connection,
+    models::{Delete, FindAll, FindById, Insert, Update},
 };
 
-#[derive(Queryable, Serialize, Deserialize)]
-pub struct Game {
-    pub id: Uuid,
-    pub name: String,
-    pub created_at: NaiveDateTime,
-    pub updated_at: Option<NaiveDateTime>,
-}
-
 #[derive(Insertable, AsChangeset, Serialize, Deserialize)]
-#[diesel(table_name = crate::schema::game)]
+#[diesel(table_name = babs::schema::game)]
 pub struct GameDTO {
     pub name: String,
 }
 
-impl Game {
-    pub fn find_all(conn: &mut Connection) -> QueryResult<Vec<Game>> {
+impl FindAll<Game> for Game {
+    fn find_all(conn: &mut Connection) -> QueryResult<Vec<Game>> {
         game.load::<Game>(conn)
     }
+}
 
-    pub fn find_by_id(game_id: Uuid, conn: &mut Connection) -> QueryResult<Game> {
+impl FindById<Game, Uuid> for Game {
+    fn find_by_id(game_id: Uuid, conn: &mut Connection) -> QueryResult<Game> {
         game.find(game_id).get_result::<Game>(conn)
     }
+}
 
-    pub fn insert(new_game: GameDTO, conn: &mut Connection) -> QueryResult<Game> {
+impl Insert<GameDTO, Game> for Game {
+    fn insert(data: GameDTO, conn: &mut Connection) -> QueryResult<Game> {
         diesel::insert_into(game)
-            .values(&new_game)
+            .values(&data)
             .get_result::<Game>(conn)
     }
+}
 
-    pub fn update(
-        game_id: Uuid,
-        updated_game: GameDTO,
-        conn: &mut Connection,
-    ) -> QueryResult<Game> {
+impl Update<GameDTO, Uuid, Game> for Game {
+    fn update(model_id: Uuid, data: GameDTO, conn: &mut Connection) -> QueryResult<Game> {
         diesel::update(game)
-            .filter(id.eq(game_id))
-            .set(updated_game)
+            .filter(id.eq(model_id))
+            .set(data)
             .get_result::<Game>(conn)
     }
+}
 
-    pub fn delete(game_id: Uuid, conn: &mut Connection) -> QueryResult<usize> {
-        diesel::delete(game).filter(id.eq(game_id)).execute(conn)
+impl Delete<Uuid> for Game {
+    fn delete(model_id: Uuid, conn: &mut Connection) -> QueryResult<usize> {
+        diesel::delete(game).filter(id.eq(model_id)).execute(conn)
     }
 }

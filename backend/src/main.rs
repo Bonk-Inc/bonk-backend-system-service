@@ -26,7 +26,6 @@ pub mod controller;
 pub mod error;
 pub mod middleware;
 pub mod models;
-pub mod schema;
 pub mod service;
 
 pub const JWK_FILE_PATH: &str = "jwk.json";

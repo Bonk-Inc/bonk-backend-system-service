@@ -266,11 +266,21 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d468802bab17cbc0cc575e9b053f41e72aa36bfa6b7f55e3529ffa43161b97fa"
 
 [[package]]
+name = "babs"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "diesel",
+ "serde",
+ "uuid",
+]
+
+[[package]]
 name = "babs_backend"
 version = "0.1.0"
 dependencies = [
  "actix-web",
- "babs_common",
+ "babs",
  "chrono",
  "derive_more",
  "diesel",
@@ -289,20 +299,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "babs_common"
-version = "0.1.0"
-dependencies = [
- "chrono",
- "serde",
- "uuid",
-]
-
-[[package]]
 name = "babs_frontend"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "babs_common",
+ "babs",
  "serde",
  "serde_json",
  "wasm-bindgen",

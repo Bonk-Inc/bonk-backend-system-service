@@ -1,8 +1,23 @@
+[package]
+name = "babs"
+version = "0.1.0"
+authors = ["Traxx186"]
+edition = "2021"
+rust-version = "1.70"
+readme = "README.md"
+
+[dependencies]
+chrono = { version = "0.4.30", features = ["serde"] }
+diesel = { version = "2.1.1", features = ["postgres", "chrono", "uuid", "r2d2"], optional = true }
+serde = { version = "1.0.188", features = ["derive"] }
+uuid = { version = "1.4.1", features = ["serde", "v4"] }
+
+[features]
+backend = ["diesel"]
+
 [workspace]
 members = [
     "backend",
-    "frontend",
-
-    #Internal
-    "common"
+    "frontend"
 ]
+# https://github.com/saschagrunert/webapp.rs
