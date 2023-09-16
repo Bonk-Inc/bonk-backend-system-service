@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="nl-NL">
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <link data-trunk rel="rust" href="." />
+      <link data-trunk rel="copy-file" href="sw.js" />
+      <script>
+          if ("serviceWorker" in navigator) {
+            window.addEventListener("load", () => {
+              navigator.serviceWorker.register("/sw.js").then(
+                (registration) => {
+                  console.log(
+                    "ServiceWorker registration successful with scope: ",
+                    registration.scope
+                  );
+                },
+                (err) => {
+                  console.log("ServiceWorker registration failed: ", err);
+                }
+              );
+            });
+          }
+      </script>
+      <title>Bonk Inc Backend System</title>
+  </head>
+  <body></body>
+</html>

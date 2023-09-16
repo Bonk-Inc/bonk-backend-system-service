@@ -7,6 +7,7 @@ use std::{
     process
 };
 
+use actix_files::Files;
 use actix_web::{
     middleware::Logger,
     rt::{time::interval, spawn},
@@ -63,6 +64,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(Logger::default())
             .service(controller::auth_scope())
             .service(controller::api_scope())
+            .service(Files::new("/", "./dist/").index_file("index.html"))
     })
     .bind(&app_url)?
     .run()
