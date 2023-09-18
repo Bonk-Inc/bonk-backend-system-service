@@ -1,7 +1,7 @@
 [build]
 dist = "../dist/"
 
-[[hook]]
-stage = "post_build"
+[[hooks]]
+stage = "pre_build"
 command = "sh"
-command_arguments = ["-c", "npx tailwindcss -i ./styles/tailwind.css -o ./dist/.stage/index.css"]
+command_arguments = ["-c", "npx tailwindcss -i ./styles/tailwind.css -o ../dist/assets/index.css"]
