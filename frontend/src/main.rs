@@ -1,46 +1,42 @@
 use yew::{Component, Context, Html, html};
+use yew_router::prelude::*;
 
-pub enum Msg {
-    Increment,
-    Decrement,
+use crate::pages::authenticate::Authenticate;
+
+pub mod pages;
+pub mod service;
+
+#[derive(Clone, Routable, PartialEq)]
+pub enum Route {
+    #[at("/authenticate")]
+    Athenticate,
+    #[at("/")]
+    Home,
+}
+
+fn switch(routes: Route) -> Html {
+    match routes {
+        Route::Home => html! { <h1>{"Test Test"}</h1> },
+        Route::Athenticate => html! { <Authenticate/> }
+    }
 }
 
 pub struct App {
-    value: isize
 }
 
 impl Component for App {
-    type Message = Msg;
+    type Message = ();
     type Properties = ();
 
     fn create(_ctx: &Context<Self>) -> Self {
-        App { value: 0 }
+        App {  }
     }
 
-    fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
-        match msg {
-            Msg::Increment => {
-                self.value += 1;
-                true
-            },
-            Msg::Decrement => {
-                self.value -= 1;
-                true
-            }
-        }
-    }
-
-    fn view(&self, ctx: &Context<Self>) -> Html {
+    fn view(&self, _ctx: &Context<Self>) -> Html {
         html! {
-            <main>
-                <button onclick={ctx.link().callback(|_| Msg::Increment)}>
-                    {"+"}
-                </button>
-                <button onclick={ctx.link().callback(|_| Msg::Decrement)}>
-                    {"+"}
-                </button>
-                <p>{ self.value }</p>
-            </main>
+            <BrowserRouter>
+                <Switch<Route> render={switch} />
+            </BrowserRouter>
         }
     }
 }

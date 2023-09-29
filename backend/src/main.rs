@@ -7,13 +7,13 @@ use std::{
     process
 };
 
-use actix_files::Files;
+use actix_files::{Files, NamedFile};
 use actix_web::{
     middleware::Logger,
     rt::{time::interval, spawn},
     App, 
     HttpServer, 
-    web
+    web, dev::{ServiceRequest, ServiceResponse}
 };
 use config::{
     db::{init_db_pool, run_migration},
@@ -65,6 +65,13 @@ async fn main() -> std::io::Result<()> {
             .service(controller::auth_scope())
             .service(controller::api_scope())
             .service(Files::new("/", "./dist/").index_file("index.html"))
+            .default_service(|req: ServiceRequest| {
+                let (http_req, _payload) = req.into_parts();
+                async {
+                    let response = NamedFile::open("./dist/index.html")?.into_response(&http_req);
+                    Ok(ServiceResponse::new(http_req, response))
+                }
+            })
     })
     .bind(&app_url)?
     .run()

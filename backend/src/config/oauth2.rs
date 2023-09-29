@@ -21,7 +21,7 @@ impl OAuth2Client {
         let auth_url = env::var("OAUTH_AUTH_URL").expect("OAUTH_AUTH_URL must be set");
         let token_url = env::var("OAUTH_TOKEN_URL").expect("OAUTH_TOKEN_URL must be set");
         let redirect_host = env::var("OAUTH_REDIRECT_HOST").expect("OAUTH_REDIRECT_HOST must be set");
-        let redirect_url = format!("{}/{}", redirect_host, "auth/login/");
+        let redirect_url = format!("{}/{}", redirect_host, "authenticate/");
 
         let client = BasicClient::new(
             ClientId::new(client_id),
