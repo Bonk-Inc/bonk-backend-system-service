@@ -7,6 +7,7 @@ use std::{
     process
 };
 
+use actix_cors::Cors;
 use actix_files::{Files, NamedFile};
 use actix_web::{
     middleware::Logger,
@@ -62,6 +63,7 @@ async fn main() -> std::io::Result<()> {
                 actix_web::middleware::TrailingSlash::Always,
             ))
             .wrap(Logger::default())
+            .wrap(setup_cors())
             .service(controller::auth_scope())
             .service(controller::api_scope())
             .service(Files::new("/", "./dist/").index_file("index.html"))
@@ -107,4 +109,18 @@ async fn refresh_jwk() {
         info!("Refreshing JWK token");
         let _ = fetch_and_save_jwk().await;
     }
+}
+
+fn setup_cors() -> Cors {
+    Cors::default()
+        .allow_any_origin()
+        .allowed_methods(vec!["GET", "POST", "PUT", "PATCH", "DELETE"])
+        .allowed_headers(vec![
+            actix_web::http::header::AUTHORIZATION,
+            actix_web::http::header::ACCEPT,
+        ])
+        .allowed_header(actix_web::http::header::CONTENT_TYPE)
+        .expose_headers(&[actix_web::http::header::CONTENT_DISPOSITION])
+        .supports_credentials()
+        .max_age(3600)
 }
