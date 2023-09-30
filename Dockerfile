@@ -30,7 +30,8 @@ RUN cargo build --target x86_64-unknown-linux-gnu --release -p babs_backend
 ####################################################################
 FROM debian:bullseye-slim
 
-RUN apt-get update && apt-get install -y libpq5
+RUN apt-get update && apt-get install -y libpq5 ca-certificates
+RUN update-ca-certificates
 
 # Import from builder.
 COPY --from=backend-build /etc/passwd /etc/passwd
@@ -41,6 +42,10 @@ WORKDIR /bonk-inc-backend
 # Copy our build
 #COPY --from=backend-build ./bonk-inc-backend/.env ./
 COPY --from=backend-build /bonk-inc-backend/target/x86_64-unknown-linux-gnu/release/bonk-inc-backend ./
+
+# Set file permissions
+RUN chmod +rw * 
+RUN chown -R bonk-inc-backend:bonk-inc-backend *
 
 # Use an unprivileged user.
 USER bonk-inc-backend:bonk-inc-backend
