@@ -84,6 +84,9 @@ jobs:
             OAUTH_JWSK_URL=${{ vars.OAUTH_JWSK_URL }}
             EOT
 
+      - name: List files
+        run: ls
+
       - name: Deploy to Dokku
         uses: dokku/github-action@master
         with:
