@@ -29,6 +29,8 @@ RUN cargo build --target x86_64-unknown-linux-gnu --release -p babs_backend
 ####################################################################
 FROM debian:bullseye-slim
 
+RUN apt-get update && apt-get install -y libpq5
+
 # Import from builder.
 COPY --from=backend-build /etc/passwd /etc/passwd
 COPY --from=backend-build /etc/group /etc/group
