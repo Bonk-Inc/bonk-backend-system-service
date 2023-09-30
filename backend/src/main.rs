@@ -20,6 +20,7 @@ use config::{
     db::{init_db_pool, run_migration},
     oauth2::OAuth2Client
 };
+#[cfg(debug_assertions)]
 use dotenvy::dotenv;
 use log::{info, error};
 
@@ -34,7 +35,9 @@ pub const JWK_FILE_PATH: &str = "jwk.json";
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    #[cfg(debug_assertions)]
     dotenv().expect(".env file not found");
+
     env_logger::init_from_env(env_logger::Env::default().default_filter_or("info"));
 
     let app_host = env::var("APP_HOST").expect("APP_HOST must be set");
