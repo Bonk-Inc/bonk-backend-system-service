@@ -1,6 +1,6 @@
 pub use babs::{
     models::Score,
-    schema::score::dsl::*
+    schema::{score, score::dsl::*}
 };
 use diesel::{prelude::*, AsChangeset, Insertable};
 use serde::{Deserialize, Serialize};
@@ -58,8 +58,13 @@ impl Delete<Uuid> for Score {
 }
 
 pub fn find_by_game(game: Uuid, include_hidden: bool, conn: &mut Connection) -> QueryResult<Vec<Score>> {
-    score.filter(game_id.eq(game))
-        .filter(is_hidden.eq(include_hidden))
-        .select(Score::as_select())
+    let mut query = score::table.into_boxed(); 
+    query = query.filter(game_id.eq(game));
+
+    if !include_hidden {
+        query = query.filter(is_hidden.eq(false));
+    }
+        
+    query.select(Score::as_select())
         .load(conn)
 }
