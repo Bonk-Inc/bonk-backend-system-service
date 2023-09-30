@@ -37,7 +37,8 @@ COPY --from=backend-build /etc/group /etc/group
 
 WORKDIR /bonk-inc-backend
 
-# Copy our build
+# Copy our build and .env
+COPY --from=backend-build ./bonk-inc-backend/.env ./
 COPY --from=backend-build /bonk-inc-backend/target/x86_64-unknown-linux-gnu/release/bonk-inc-backend ./
 
 # Use an unprivileged user.
