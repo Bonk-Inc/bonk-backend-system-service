@@ -85,7 +85,7 @@ jobs:
             EOT
 
       - name: List files
-        run: ls
+        run: ls -a
 
       - name: Deploy to Dokku
         uses: dokku/github-action@master
