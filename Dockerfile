@@ -22,7 +22,7 @@ WORKDIR /bonk-inc-backend
 
 COPY ./ .
 
-RUN ls
+RUN ls -a
 RUN cargo build --target x86_64-unknown-linux-gnu --release -p babs_backend
 
 #####################################################################
