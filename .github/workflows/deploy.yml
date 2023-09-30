@@ -69,22 +69,6 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-        
-      # - name: Create .env file
-      #   run: |
-      #       cat <<EOT >> .env
-      #       APP_HOST=${{ vars.APP_HOST }}
-      #       APP_PORT=${{ vars.APP_PORT }}
-
-      #       DATABASE_URL=${{ secrets.DATABASE_URL }}
-
-      #       OAUTH_AUTH_URL=${{ vars.OAUTH_AUTH_URL }}
-      #       OAUTH_CLIENT_ID=${{ secrets.OAUTH_CLIENT_ID }}
-      #       OAUTH_CLIENT_SECRET=${{ secrets.OAUTH_CLIENT_SECRET }}
-      #       OAUTH_TOKEN_URL=${{ vars.OAUTH_TOKEN_URL }}
-      #       OAUTH_REDIRECT_HOST=${{ vars.OAUTH_REDIRECT_HOST }}
-      #       OAUTH_JWSK_URL=${{ vars.OAUTH_JWSK_URL }}
-      #       EOT
 
       - name: Deploy to Dokku
         uses: dokku/github-action@master

@@ -40,7 +40,6 @@ COPY --from=backend-build /etc/group /etc/group
 WORKDIR /bonk-inc-backend
 
 # Copy our build
-#COPY --from=backend-build ./bonk-inc-backend/.env ./
 COPY --from=backend-build /bonk-inc-backend/target/x86_64-unknown-linux-gnu/release/bonk-inc-backend ./
 
 # Set file permissions
