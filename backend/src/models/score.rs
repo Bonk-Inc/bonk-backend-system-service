@@ -15,6 +15,7 @@ use crate::{
 #[diesel(table_name = babs::schema::score)]
 pub struct ScoreDTO {
     pub username: String,
+    #[serde(rename = "score")]
     pub highscore: i32,
     pub is_hidden: bool,
     pub game_id: Uuid
