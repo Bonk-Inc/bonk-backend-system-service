@@ -3,6 +3,7 @@ use yew_router::prelude::*;
 
 use crate::pages::authenticate::Authenticate;
 
+pub mod models;
 pub mod pages;
 pub mod service;
 

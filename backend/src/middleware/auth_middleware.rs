@@ -3,15 +3,13 @@ use actix_web::{
     dev::{forward_ready, Service, ServiceRequest, ServiceResponse, Transform},
     Error, HttpResponse,
 };
+use babs::respone::ResponseBody;
 use futures_util::future::{ok, LocalBoxFuture, Ready};
 use jsonwebtoken::{Algorithm, DecodingKey, Validation};
 use log::{error, info};
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    models::respone::ResponseBody,
-    service::oauth2_service
-};
+use crate::service::oauth2_service;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct Claims {

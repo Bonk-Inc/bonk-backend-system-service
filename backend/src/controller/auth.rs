@@ -1,10 +1,10 @@
 use actix_web::{get, web, HttpResponse};
+use babs::respone::ResponseBody;
 use serde::{Deserialize, Serialize};
 
 use crate::{
     config::oauth2::OAuth2Client,
     error::ServiceError,
-    models::respone::ResponseBody,
     service::oauth2_service,
 };
 

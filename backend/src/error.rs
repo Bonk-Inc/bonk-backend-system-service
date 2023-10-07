@@ -2,9 +2,8 @@ use actix_web::{
     http::{header::ContentType, StatusCode},
     HttpResponse, ResponseError,
 };
+use babs::respone::ResponseBody;
 use derive_more::{Display, Error};
-
-use crate::models::respone::ResponseBody;
 
 #[derive(Debug, Display, Error)]
 pub enum ServiceError {

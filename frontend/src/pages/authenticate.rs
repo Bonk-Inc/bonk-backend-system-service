@@ -1,19 +1,12 @@
 use babs::respone::ResponseBody;
-use gloo::console::console;
-use serde::{Deserialize, Serialize};
+use wasm_bindgen::JsCast;
 use web_sys::UrlSearchParams;
 use yew::{Component, html, classes};
 
-use crate::service::fetch::Fetch;
+use crate::{service::fetch::Fetch, models::oauth::TokenResponse};
 
 pub struct Authenticate {
     state: LoginState
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-pub struct AuthorizeResponse {
-    message: String,
-    data: String
 }
 
 pub enum Msg {
@@ -52,7 +45,9 @@ impl Component for Authenticate {
                 let url = format!("http://localhost:8080/auth/login?code={}&state={}", code.unwrap(), state.unwrap());
                 match Fetch::get(&url).await {
                     Ok(message) => {
-                        console!(message);
+                        let response: ResponseBody<TokenResponse> = serde_wasm_bindgen::from_value(message).unwrap();
+                        let document = gloo::utils::document().dyn_into::<web_sys::HtmlDocument>().unwrap();
+                        let _ = document.set_cookie(format!("access_token={};max-age={}", response.data.access_token, response.data.expires_in).as_str());
 
                         Msg::Authenticated
                     },
@@ -72,7 +67,7 @@ impl Component for Authenticate {
                 ctx.link().send_future(async {
                     match Fetch::get("http://localhost:8080/auth/authorize").await {
                         Ok(message) => {
-                            let response: AuthorizeResponse = serde_wasm_bindgen::from_value(message).unwrap();
+                            let response: ResponseBody<String> = serde_wasm_bindgen::from_value(message).unwrap();
                             Msg::SetAuthCode(response.data)
                         },
                         Err(_) => Msg::SetError("Error authorizing".to_string()),

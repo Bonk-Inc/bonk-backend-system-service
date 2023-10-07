@@ -1,11 +1,12 @@
 use actix_web::{web, HttpResponse, get, post, put, delete};
+use babs::respone::ResponseBody;
 use serde::Deserialize;
 use uuid::Uuid;
 
 use crate::{
     config::db::Pool,
     error::ServiceError,
-    models::{score::ScoreDTO, respone::ResponseBody},
+    models::score::ScoreDTO,
     service::score_service, 
 };
 
