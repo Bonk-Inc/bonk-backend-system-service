@@ -1,8 +1,12 @@
 use yew::{Component, Context, Html, html};
 use yew_router::prelude::*;
 
-use crate::pages::authenticate::Authenticate;
+use crate::pages::{
+    authenticate::Authenticate,
+    home::Home
+};
 
+pub mod components;
 pub mod models;
 pub mod pages;
 pub mod service;
@@ -10,15 +14,15 @@ pub mod service;
 #[derive(Clone, Routable, PartialEq)]
 pub enum Route {
     #[at("/authenticate")]
-    Athenticate,
+    Authenticate,
     #[at("/")]
-    Home,
+    App,
 }
 
 fn switch(routes: Route) -> Html {
     match routes {
-        Route::Home => html! { <h1>{"Test Test"}</h1> },
-        Route::Athenticate => html! { <Authenticate/> }
+        Route::App => html! { <Home/> },
+        Route::Authenticate => html! { <Authenticate/> }
     }
 }
 

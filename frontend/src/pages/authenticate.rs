@@ -1,9 +1,17 @@
 use babs::respone::ResponseBody;
 use wasm_bindgen::JsCast;
 use web_sys::UrlSearchParams;
-use yew::{Component, html, classes};
+use yew::{Component, html, classes, Context, Html};
+use yew_router::prelude::*;
 
-use crate::{service::fetch::Fetch, models::oauth::TokenResponse};
+use crate::{
+    service::fetch::Fetch,
+    models::oauth::TokenResponse,
+    Route, components::{
+        alert::{Alert, Severity},
+        spinner::Spinner, button::{Button, ButtonVariant}
+    }
+};
 
 pub struct Authenticate {
     state: LoginState
@@ -27,7 +35,7 @@ impl Component for Authenticate {
     type Message = Msg;
     type Properties = ();
 
-    fn create(ctx: &yew::Context<Self>) -> Self {
+    fn create(ctx: &Context<Self>) -> Self {
         let window = gloo::utils::window();
         let search_string = window.location().search().unwrap_or_default();
         let search_params = UrlSearchParams::new_with_str(&search_string);
@@ -47,7 +55,7 @@ impl Component for Authenticate {
                     Ok(message) => {
                         let response: ResponseBody<TokenResponse> = serde_wasm_bindgen::from_value(message).unwrap();
                         let document = gloo::utils::document().dyn_into::<web_sys::HtmlDocument>().unwrap();
-                        let _ = document.set_cookie(format!("access_token={};max-age={}", response.data.access_token, response.data.expires_in).as_str());
+                        let _ = document.set_cookie(&format!("access_token={};max-age={};path=/;samesite=strict", response.data.access_token, response.data.expires_in));
 
                         Msg::Authenticated
                     },
@@ -61,7 +69,7 @@ impl Component for Authenticate {
         }
     }
 
-    fn update(&mut self, ctx: &yew::Context<Self>, msg: Self::Message) -> bool {
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::Login => {
                 ctx.link().send_future(async {
@@ -88,12 +96,15 @@ impl Component for Authenticate {
                 true
             },
             Msg::Authenticated => {
+                let navigator = ctx.link().navigator().unwrap();
+                navigator.push(&Route::App);
+
                 false
             }
         }
     }
 
-    fn view(&self, ctx: &yew::Context<Self>) -> yew::Html {
+    fn view(&self, ctx: &Context<Self>) -> Html {
         html! {
             <main class={classes!("min-h-screen", "bg-zinc-800", "flex", "justify-center", "items-center")}>
                 <div class={classes!("bg-zinc-700", "text-slate-200", "w-[450px]", "px-8", "py-10", "shadow-lg")}>
@@ -101,26 +112,16 @@ impl Component for Authenticate {
                         {"Inloggen in Bonk Inc. Backend System"}
                     </h1>
                     {match &self.state {
-                        LoginState::Failed(error) => html! {
-                            <div class={classes!("bg-red-600", "pr-2", "py-3", "mb-6", "font-bold", "rounded", "inline-flex", "items-center")}>
-                                <i class={classes!("material-symbols-outlined", "px-4")}>{"error"}</i> {error}
-                            </div>
-                        },
-                        LoginState::Autheticanting => html! {
-                            <div class={classes!("inline-flex", "items-center")}>
-                                <svg class="animate-spin ml-1 mr-3 h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                            </div>
-                        },
+                        LoginState::Failed(error) => html! { <Alert severity={Severity::Error}>{error.clone()}</Alert>},
+                        LoginState::Autheticanting => html! { <Spinner /> },
                         _ => html! {
-                            <button 
-                                onclick={ctx.link().callback(|_| Msg::Login)}
-                                class={classes!("text-center", "font-bold", "text-base", "block", "p-2", "w-full", "border", "border-solid", "rounded", "border-zinc-500", "transition-colors")}
+                            <Button 
+                                onclick={ctx.link().callback(|_| Msg::Login)} 
+                                variant={ButtonVariant::Outlined}
+                                class="border-zinc-500"
                             >
                                 {"Inloggen met Authentic"}
-                            </button>
+                            </Button>
                         }
                     }}
                 </div>
