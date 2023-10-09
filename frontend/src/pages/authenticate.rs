@@ -9,7 +9,9 @@ use crate::{
     models::oauth::TokenResponse,
     Route, components::{
         alert::{Alert, Severity},
-        spinner::Spinner, button::{Button, ButtonVariant}
+        spinner::Spinner,
+        button::{Button, ButtonVariant},
+        paper::{Paper, PaperElevation}
     }
 };
 
@@ -107,7 +109,7 @@ impl Component for Authenticate {
     fn view(&self, ctx: &Context<Self>) -> Html {
         html! {
             <main class={classes!("min-h-screen", "bg-zinc-800", "flex", "justify-center", "items-center")}>
-                <div class={classes!("bg-zinc-700", "text-slate-200", "w-[450px]", "px-8", "py-10", "shadow-lg")}>
+                <Paper class="w-[450px] py-10" elevation={PaperElevation::Elevated}>
                     <h1 class={classes!("text-center", "font-bold", "text-xl", "mb-8")}>
                         {"Inloggen in Bonk Inc. Backend System"}
                     </h1>
@@ -124,7 +126,7 @@ impl Component for Authenticate {
                             </Button>
                         }
                     }}
-                </div>
+                </Paper>
             </main>
         }
     }
