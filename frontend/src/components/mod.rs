@@ -1,4 +1,5 @@
 pub mod alert;
+pub mod app_bar;
 pub mod button;
 pub mod icon;
 pub mod list_item_button;

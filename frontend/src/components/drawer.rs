@@ -26,7 +26,7 @@ impl Component for Drawer {
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         html! {
-            <aside class={classes!("grow-0", "shrink-0", "basis-auto", "w-[240px]", &ctx.props().class)}>
+            <aside class={classes!("grow-0", "z-20", "shrink-0", "basis-auto", "w-[240px]", &ctx.props().class)}>
                 <Paper square={true} class="overflow-y-auto border-b-0 border-l-0 h-full flex flex-col grow shrink-0 basis-auto !p-0 fixed t-0 outline-0 w-[240px]">
                     {ctx.props().children.clone()}
                 </Paper>
