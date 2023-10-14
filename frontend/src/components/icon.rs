@@ -10,6 +10,8 @@ pub struct Icon;
 #[derive(PartialEq, Properties)]
 pub struct IconProps {
     pub name: String,
+    #[prop_or_default]
+    pub class: String,
 }
 
 impl Component for Icon {
@@ -22,7 +24,7 @@ impl Component for Icon {
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         html! {
-            <i class={classes!("material-symbols-outlined", "select-none", "inline-block", "text-current", "shrink-0", "w-[1em]", "h-[1em]", "transition-colors", "duration-200")}>
+            <i class={classes!("material-symbols-outlined", "select-none", "inline-block", "text-current", "shrink-0", "w-[1em]", "h-[1em]", "transition-colors", "duration-200", &ctx.props().class)}>
                 {&ctx.props().name}
             </i>
         }

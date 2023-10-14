@@ -5,28 +5,29 @@ use yew::{
     Html
 };
 
-pub struct AppBar;
+pub struct Toolbar;
 
 #[derive(Clone, PartialEq, Properties)]
-pub struct AppBarProps {
+pub struct ToolbarProps {
+    #[prop_or_default]
     pub children: Children,
     #[prop_or_default]
     pub class: String,
 }
 
-impl Component for AppBar {
+impl Component for Toolbar {
     type Message = ();
-    type Properties = AppBarProps;
+    type Properties = ToolbarProps;
 
     fn create(_ctx: &Context<Self>) -> Self {
-        AppBar {}
+        Toolbar {}
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         html! {
-            <header class={classes!("bg-zinc-800", "flex", "flex-col", "box-border", "w-full", "shrink-0", "fixed", "z-30", "top-0", "left-auto", "right-0", &ctx.props().class)}>
+            <div class={classes!("min-h-[56px]", "relative", "flex", "items-center", "px-6", &ctx.props().class)}>
                 {ctx.props().children.clone()}
-            </header>
+            </div>
         }
     }
 }
