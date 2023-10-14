@@ -16,7 +16,7 @@ impl Component for Home {
     fn view(&self, ctx: &Context<Self>) -> Html {
         html! {
             <div class={classes!("min-h-screen", "bg-zinc-800", "text-white")}>
-
+               
             </div>
         }
     }
