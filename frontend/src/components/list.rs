@@ -24,7 +24,7 @@ impl Component for List {
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         html! {
-            <ul class={classes!("list-none", "m-0", "px-0", "py-2", "relative", &ctx.props().class)}>
+            <ul class={classes!("py-2", "relative", &ctx.props().class)}>
                 {ctx.props().children.clone()}
             </ul>
         }
