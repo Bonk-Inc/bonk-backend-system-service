@@ -1,3 +1,4 @@
+use providers::authetication_provider::AuthenticationProvider;
 use yew::{Component, Context, Html, html};
 use yew_router::prelude::*;
 
@@ -9,20 +10,25 @@ use crate::pages::{
 pub mod components;
 pub mod models;
 pub mod pages;
+pub mod providers;
 pub mod service;
 
 #[derive(Clone, Routable, PartialEq)]
-pub enum Route {
+pub enum MainRoute {
     #[at("/authenticate")]
     Authenticate,
     #[at("/")]
     App,
 }
 
-fn switch(routes: Route) -> Html {
+fn switch(routes: MainRoute) -> Html {
     match routes {
-        Route::App => html! { <Home/> },
-        Route::Authenticate => html! { <Authenticate/> }
+        MainRoute::App => html! {
+            <AuthenticationProvider>
+                <Home/>
+            </AuthenticationProvider>
+        },
+        MainRoute::Authenticate => html! { <Authenticate/> }
     }
 }
 
@@ -40,7 +46,7 @@ impl Component for App {
     fn view(&self, _ctx: &Context<Self>) -> Html {
         html! {
             <BrowserRouter>
-                <Switch<Route> render={switch} />
+                <Switch<MainRoute> render={switch} />
             </BrowserRouter>
         }
     }

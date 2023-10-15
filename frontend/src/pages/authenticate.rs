@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use babs::respone::ResponseBody;
 use wasm_bindgen::JsCast;
 use web_sys::UrlSearchParams;
@@ -7,7 +9,7 @@ use yew_router::prelude::*;
 use crate::{
     service::fetch::Fetch,
     models::oauth::TokenResponse,
-    Route, components::{
+    MainRoute, components::{
         alert::{Alert, Severity},
         spinner::Spinner,
         button::{Button, ButtonVariant},
@@ -53,11 +55,14 @@ impl Component for Authenticate {
 
             ctx.link().send_future(async {
                 let url = format!("http://localhost:8080/auth/login?code={}&state={}", code.unwrap(), state.unwrap());
-                match Fetch::get(&url).await {
+                match Fetch::get(&url, HashMap::new()).await {
                     Ok(message) => {
                         let response: ResponseBody<TokenResponse> = serde_wasm_bindgen::from_value(message).unwrap();
                         let document = gloo::utils::document().dyn_into::<web_sys::HtmlDocument>().unwrap();
+                        let local_storage = gloo::utils::window().local_storage().unwrap();
+
                         let _ = document.set_cookie(&format!("access_token={};max-age={};path=/;samesite=strict", response.data.access_token, response.data.expires_in));
+                        let _ = local_storage.unwrap().set_item("refresh_token", &response.data.refresh_token);
 
                         Msg::Authenticated
                     },
@@ -75,7 +80,7 @@ impl Component for Authenticate {
         match msg {
             Msg::Login => {
                 ctx.link().send_future(async {
-                    match Fetch::get("http://localhost:8080/auth/authorize").await {
+                    match Fetch::get("http://localhost:8080/auth/authorize", HashMap::new()).await {
                         Ok(message) => {
                             let response: ResponseBody<String> = serde_wasm_bindgen::from_value(message).unwrap();
                             Msg::SetAuthCode(response.data)
@@ -99,7 +104,7 @@ impl Component for Authenticate {
             },
             Msg::Authenticated => {
                 let navigator = ctx.link().navigator().unwrap();
-                navigator.push(&Route::App);
+                navigator.push(&MainRoute::App);
 
                 false
             }
