@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 
 use babs::respone::ResponseBody;
-use wasm_bindgen::JsCast;
 use web_sys::UrlSearchParams;
 use yew::{Component, html, classes, Context, Html};
 use yew_router::prelude::*;
@@ -58,10 +57,10 @@ impl Component for Authenticate {
                 match Fetch::get(&url, HashMap::new()).await {
                     Ok(message) => {
                         let response: ResponseBody<TokenResponse> = serde_wasm_bindgen::from_value(message).unwrap();
-                        let document = gloo::utils::document().dyn_into::<web_sys::HtmlDocument>().unwrap();
                         let local_storage = gloo::utils::window().local_storage().unwrap();
+                        let session_storage = gloo::utils::window().session_storage().unwrap();
 
-                        let _ = document.set_cookie(&format!("access_token={};max-age={};path=/;samesite=strict", response.data.access_token, response.data.expires_in));
+                        let _ = session_storage.unwrap().set_item("access_token", &response.data.refresh_token);
                         let _ = local_storage.unwrap().set_item("refresh_token", &response.data.refresh_token);
 
                         Msg::Authenticated

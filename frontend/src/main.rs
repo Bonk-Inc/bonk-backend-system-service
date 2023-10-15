@@ -1,4 +1,4 @@
-use providers::authetication_provider::AuthenticationProvider;
+use providers::authentication_provider::AuthenticationProvider;
 use yew::{Component, Context, Html, html};
 use yew_router::prelude::*;
 

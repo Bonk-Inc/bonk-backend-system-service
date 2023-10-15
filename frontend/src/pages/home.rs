@@ -32,7 +32,7 @@ impl Component for Home {
     type Properties = ();
 
     fn create(ctx: &Context<Self>) -> Self {
-       // ctx.link().send_message(Msg::MakeReq);
+       ctx.link().send_message(Msg::MakeReq);
     
         Home { games: Vec::new() }
     }
@@ -40,7 +40,7 @@ impl Component for Home {
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::MakeReq => {
-                ctx.link().send_future(async {
+                ctx.link().send_future(async {                    
                     let headers = HashMap::from([
                         ("Authorization", "Test 123")
                     ]);
@@ -59,7 +59,9 @@ impl Component for Home {
                 
             },
             Msg::Resp(games) => { self.games = games },
-            Msg::Error(_message) => todo!()
+            Msg::Error(_message) => {
+                
+            }
         }
 
         true

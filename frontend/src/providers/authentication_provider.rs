@@ -60,10 +60,10 @@ impl Component for AuthenticationProvider {
                 });
             },
             Msg::RefreshSuccessful(token_data) => {
-                let document = gloo::utils::document().dyn_into::<web_sys::HtmlDocument>().unwrap();
+                let session_storage = gloo::utils::window().session_storage().unwrap();
                 let local_storage = gloo::utils::window().local_storage().unwrap();
                 
-                let _ = document.set_cookie(&format!("access_token={};max-age={};path=/;samesite=strict", token_data.access_token, token_data.expires_in));
+                let _ = session_storage.unwrap().set_item("access_token", &token_data.access_token);
                 let _ = local_storage.unwrap().set_item("refresh_token", &token_data.refresh_token);
             },
             Msg::RefreshFailed => {
