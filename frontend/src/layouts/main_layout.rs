@@ -1,8 +1,6 @@
-use std::collections::HashMap;
-
 use babs::models::Game;
 use babs::respone::ResponseBody;
-use yew::{Component, html, classes, Html, Context};
+use yew::{Component, html, classes, Html, Context, Properties, Children};
 use yew_router::prelude::Link;
 
 use crate::MainRoute;
@@ -26,9 +24,14 @@ pub enum Msg {
     Error(&'static str),
 }
 
+#[derive(Clone, PartialEq, Properties)]
+pub struct MainLayoutProps {
+    pub children: Children,
+}
+
 impl Component for MainLayout {
     type Message = Msg;
-    type Properties = ();
+    type Properties = MainLayoutProps;
 
     fn create(ctx: &Context<Self>) -> Self {
        ctx.link().send_message(Msg::MakeReq);
@@ -40,18 +43,7 @@ impl Component for MainLayout {
         match msg {
             Msg::MakeReq => {
                 ctx.link().send_future(async {                   
-                    let session_storage = gloo::utils::window().session_storage().unwrap();
-                    let access_token = session_storage.unwrap().get_item("access_token").unwrap();
-                    if access_token.is_none() {
-                        return Msg::Error("Failed to fetch games")
-                    }
-
-                    let token = access_token.unwrap();
-                    let headers = HashMap::from([
-                        ("Authorization", token.as_str())
-                    ]);
-
-                    match Fetch::get("http://localhost:8080/api/game", headers).await {
+                    match Fetch::get("http://localhost:8080/api/game", Some(true)).await {
                         Ok(body) => {
                             if let Ok(response) = serde_wasm_bindgen::from_value::<ResponseBody<Vec<Game>>>(body) {
                                 return Msg::Resp(response.data);
@@ -82,7 +74,7 @@ impl Component for MainLayout {
                             <Icon name="database" class="mr-4"/>
                             {"Bonk Inc Backend System"}
                         </Link<MainRoute>>
-                        <div >
+                        <div>
                             
                         </div>
                     </Toolbar>
@@ -91,27 +83,35 @@ impl Component for MainLayout {
                     <Drawer>
                         <Toolbar class="mt-14 [min-h-48px]">
                             <p class={classes!("font-medium", "flex")}>
-                                <Icon name="joystick" class="mr-2"/>
-                                {"Ludem Dare 54"}
+                                <Icon name="list" class="mr-2"/>
+                                {"Games"}
                             </p>
                         </Toolbar>
                         <hr class={classes!("w-11/12", "border-zinc-500", "mx-auto")}/>
                         <List>
-                            <ListItem>
-                                <ListItemButton>
-                                    <ListItemIcon>
-                                        <Icon name="map" />
-                                    </ListItemIcon>
-                                    <p>{"test test"}</p>
-                                </ListItemButton>
-                            </ListItem>
+                            { for self.games.iter().map(|g| self.render_game_item(g)) }
                         </List>
                     </Drawer>
                 </nav>
                 <main style="width: calc(100% - 240px);" class={classes!("grow", "mt-14")}>
-                    
+                    {ctx.props().children.clone()}
                 </main>
             </div>
+        }
+    }
+}
+
+impl MainLayout {
+    fn render_game_item(&self, game: &Game) -> Html {
+        html! {
+            <ListItem>
+                <ListItemButton>
+                    <ListItemIcon>
+                        <Icon name="joystick" />
+                    </ListItemIcon>
+                    {&game.name}
+                </ListItemButton>
+            </ListItem>
         }
     }
 }

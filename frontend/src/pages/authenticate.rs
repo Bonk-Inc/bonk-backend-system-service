@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use babs::respone::ResponseBody;
 use web_sys::UrlSearchParams;
 use yew::{Component, html, classes, Context, Html};
@@ -54,7 +52,7 @@ impl Component for Authenticate {
 
             ctx.link().send_future(async {
                 let url = format!("http://localhost:8080/auth/login?code={}&state={}", code.unwrap(), state.unwrap());
-                match Fetch::get(&url, HashMap::new()).await {
+                match Fetch::get(&url, None).await {
                     Ok(message) => {
                         let response: ResponseBody<TokenResponse> = serde_wasm_bindgen::from_value(message).unwrap();
                         let local_storage = gloo::utils::window().local_storage().unwrap();
@@ -79,7 +77,7 @@ impl Component for Authenticate {
         match msg {
             Msg::Login => {
                 ctx.link().send_future(async {
-                    match Fetch::get("http://localhost:8080/auth/authorize", HashMap::new()).await {
+                    match Fetch::get("http://localhost:8080/auth/authorize", None).await {
                         Ok(message) => {
                             let response: ResponseBody<String> = serde_wasm_bindgen::from_value(message).unwrap();
                             Msg::SetAuthCode(response.data)

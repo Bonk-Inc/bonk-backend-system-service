@@ -1,4 +1,3 @@
-use providers::authentication_provider::AuthenticationProvider;
 use yew::{Component, Context, Html, html};
 use yew_router::prelude::*;
 
@@ -11,7 +10,6 @@ pub mod components;
 pub mod layouts;
 pub mod models;
 pub mod pages;
-pub mod providers;
 pub mod service;
 
 #[derive(Clone, Routable, PartialEq)]
@@ -25,9 +23,7 @@ pub enum MainRoute {
 fn switch(routes: MainRoute) -> Html {
     match routes {
         MainRoute::App => html! {
-            <AuthenticationProvider>
-                <Home/>
-            </AuthenticationProvider>
+            <Home/>
         },
         MainRoute::Authenticate => html! { <Authenticate/> }
     }

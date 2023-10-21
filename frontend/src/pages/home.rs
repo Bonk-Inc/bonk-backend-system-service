@@ -1,4 +1,4 @@
-use yew::{Component, html, Html, Context};
+use yew::{Component, html, Html, Context, classes};
 
 use crate::layouts::main_layout::MainLayout;
 
@@ -20,7 +20,11 @@ impl Component for Home {
     fn view(&self, ctx: &Context<Self>) -> Html {
         html! {
             <MainLayout>
-                
+                <div class={classes!("p-4")}>
+                    <h1 class={classes!("text-2xl", "font-medium")}>
+                        {format!("Welkom, {}!", "Test123")}
+                    </h1>
+                </div>
             </MainLayout>
         }
     }
