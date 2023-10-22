@@ -1,4 +1,5 @@
 use babs::respone::ResponseBody;
+use gloo::utils::window;
 use wasm_bindgen::{JsValue, JsCast};
 use wasm_bindgen_futures::JsFuture;
 use web_sys::{RequestInit, RequestMode, RequestRedirect, Request, Response};
@@ -31,7 +32,7 @@ pub async fn fetch(url: &str, method: &str, access_token: Option<String>) -> Res
         .set("Access-Control-Request-Method", &method)?;
 
     if access_token.is_some() {
-        request.headers().set("Authorization", &access_token.unwrap())?;
+        request.headers().set("Authorization", &format!("Bearer {}", &access_token.unwrap()))?;
     }
 
     let window = web_sys::window().unwrap();
@@ -50,7 +51,7 @@ pub async fn fetch(url: &str, method: &str, access_token: Option<String>) -> Res
 }
 
 pub async fn get_access_token() -> Option<String> {
-    let local_storage = gloo::utils::window().local_storage().unwrap();
+    let local_storage = window().local_storage().unwrap();
     let refresh_token = local_storage.clone().unwrap().get_item("refresh_token").unwrap();
     if refresh_token.is_none() {
         return None;
@@ -60,9 +61,12 @@ pub async fn get_access_token() -> Option<String> {
     match fetch(&url, "GET", None).await {
         Ok(message) => {
             let response: ResponseBody<TokenResponse> = serde_wasm_bindgen::from_value(message).unwrap();
+            let access_token = response.data.access_token;
+
             let _ = local_storage.unwrap().set_item("refresh_token", &response.data.refresh_token);
+            let _ = window().session_storage().unwrap().unwrap().set_item("access_token", &access_token);
             
-            Some(response.data.access_token)
+            Some(access_token)
         },
         Err(_) => None,
     }

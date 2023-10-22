@@ -4,6 +4,7 @@ use yew::{Component, html, classes, Html, Context, Properties, Children};
 use yew_router::prelude::Link;
 
 use crate::MainRoute;
+use crate::components::spinner::Spinner;
 use crate::components::{
     drawer::Drawer,
     icon::Icon,
@@ -16,12 +17,18 @@ use crate::components::{
 use crate::service::fetch::Fetch;
 
 pub struct MainLayout {
+    state: State,
     games: Vec<Game>
 }
 pub enum Msg {
     MakeReq,
     Resp(Vec<Game>),
     Error(&'static str),
+}
+
+pub enum State {
+    Loading,
+    Loaded
 }
 
 #[derive(Clone, PartialEq, Properties)]
@@ -36,13 +43,15 @@ impl Component for MainLayout {
     fn create(ctx: &Context<Self>) -> Self {
        ctx.link().send_message(Msg::MakeReq);
     
-        MainLayout { games: Vec::new() }
+        MainLayout { games: Vec::new(), state: State::Loaded }
     }
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::MakeReq => {
-                ctx.link().send_future(async {                   
+                self.state = State::Loading;
+
+                ctx.link().send_future(async {       
                     match Fetch::get("http://localhost:8080/api/game", Some(true)).await {
                         Ok(body) => {
                             if let Ok(response) = serde_wasm_bindgen::from_value::<ResponseBody<Vec<Game>>>(body) {
@@ -56,7 +65,10 @@ impl Component for MainLayout {
                 })
                 
             },
-            Msg::Resp(games) => { self.games = games },
+            Msg::Resp(games) => { 
+                self.games = games;
+                self.state = State::Loaded
+            },
             Msg::Error(_message) => {
                 
             }
@@ -88,9 +100,20 @@ impl Component for MainLayout {
                             </p>
                         </Toolbar>
                         <hr class={classes!("w-11/12", "border-zinc-500", "mx-auto")}/>
-                        <List>
-                            { for self.games.iter().map(|g| self.render_game_item(g)) }
-                        </List>
+                        {match &self.state {
+                            State::Loading => html! {
+                                <div class={classes!("flex", "justify-center", "items-center", "h-full")}>
+                                    <Spinner class="w-20 h-20" />
+                                </div>
+                            },
+                            State::Loaded => {
+                                html! {
+                                    <List>
+                                        { for self.games.iter().map(|g| self.render_game_item(g)) }
+                                    </List>
+                                }
+                            },
+                        }}
                     </Drawer>
                 </nav>
                 <main style="width: calc(100% - 240px);" class={classes!("grow", "mt-14")}>
