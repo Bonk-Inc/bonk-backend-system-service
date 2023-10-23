@@ -23,7 +23,7 @@ pub struct MainLayout {
 pub enum Msg {
     MakeReq,
     Resp(Vec<Game>),
-    Error(&'static str),
+    Error(String),
 }
 
 pub enum State {
@@ -58,9 +58,9 @@ impl Component for MainLayout {
                                 return Msg::Resp(response.data);
                             }
 
-                            Msg::Error("Failed to fetch games")
+                            Msg::Error("Failed to fetch games".to_string())
                         },
-                        Err(_) => Msg::Error("Failed to fetch games")
+                        Err(_) => Msg::Error("Failed to fetch games".to_string())
                     }
                 })
                 

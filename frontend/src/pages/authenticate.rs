@@ -132,7 +132,7 @@ impl Component for Authenticate {
     fn view(&self, ctx: &Context<Self>) -> Html {
         html! {
             <main class={classes!("min-h-screen", "bg-zinc-800", "flex", "justify-center", "items-center")}>
-                <Paper class="w-[450px] py-10" elevation={PaperElevation::Elevated}>
+                <Paper class="w-[450px] py-10 px-8" elevation={PaperElevation::Elevated}>
                     <h1 class={classes!("text-center", "font-bold", "text-xl", "mb-8")}>
                         {"Inloggen in Bonk Inc. Backend System"}
                     </h1>

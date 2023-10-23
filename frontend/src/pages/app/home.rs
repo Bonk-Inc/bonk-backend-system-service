@@ -1,7 +1,10 @@
 use serde::{Deserialize, Serialize};
 use yew::{Component, html, classes, Context, Html};
 
-use crate::service::fetch::Fetch;
+use crate::{
+    service::fetch::Fetch, 
+    components::stats_card::StatsCard
+};
 
 pub struct Home {
     pub username: String
@@ -48,9 +51,18 @@ impl Component for Home {
     fn view(&self, _ctx: &Context<Self>) -> Html {
         html! {
             <div class={classes!("p-4")}>
-                <h1 class={classes!("text-2xl", "font-medium")}>
+                <h1 class={classes!("text-3xl", "font-medium")}>
                     {format!("Welkom, {}!", self.username)}
                 </h1>
+                <section class={classes!("mt-8")}>
+                    <h2 class={classes!("text-xl", "font-medium")}>
+                        {"Statistieken"}
+                    </h2>
+                    <div class={classes!("flex", "flex-wrap", "w-full", "mt-6")}>
+                       <StatsCard name="Games" value={5} icon="joystick" class="ml-0" />
+                       <StatsCard name="Scores" value={5} icon="scoreboard" />
+                    </div>
+                </section>
             </div>
         }
     }

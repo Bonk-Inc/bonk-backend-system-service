@@ -33,7 +33,7 @@ impl Component for Paper {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        let mut base_classes = vec!["p-8", "text-slate-200", "border-zinc-500"];
+        let mut base_classes = vec!["p-4", "text-slate-200", "border-zinc-500"];
         if !ctx.props().square {
             base_classes.push("rounded")
         }

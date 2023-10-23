@@ -9,4 +9,5 @@ pub mod list;
 pub mod drawer;
 pub mod paper;
 pub mod spinner;
+pub mod stats_card;
 pub mod toolbar;
