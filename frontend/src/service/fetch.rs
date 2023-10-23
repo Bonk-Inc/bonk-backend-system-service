@@ -1,8 +1,7 @@
 use babs::respone::ResponseBody;
-use gloo::utils::window;
 use wasm_bindgen::{JsValue, JsCast};
 use wasm_bindgen_futures::JsFuture;
-use web_sys::{RequestInit, RequestMode, RequestRedirect, Request, Response};
+use web_sys::{RequestInit, RequestMode, RequestRedirect, Request, Response, window};
 
 use crate::models::oauth::TokenResponse;
 
@@ -35,7 +34,7 @@ pub async fn fetch(url: &str, method: &str, access_token: Option<String>) -> Res
         request.headers().set("Authorization", &format!("Bearer {}", &access_token.unwrap()))?;
     }
 
-    let window = web_sys::window().unwrap();
+    let window = window().unwrap();
     let resp_value = JsFuture::from(window.fetch_with_request(&request)).await?;
 
     assert!(resp_value.is_instance_of::<Response>());
@@ -51,7 +50,7 @@ pub async fn fetch(url: &str, method: &str, access_token: Option<String>) -> Res
 }
 
 pub async fn get_access_token() -> Option<String> {
-    let local_storage = window().local_storage().unwrap();
+    let local_storage = window().unwrap().local_storage().unwrap();
     let refresh_token = local_storage.clone().unwrap().get_item("refresh_token").unwrap();
     if refresh_token.is_none() {
         return None;
@@ -64,7 +63,7 @@ pub async fn get_access_token() -> Option<String> {
             let access_token = response.data.access_token;
 
             let _ = local_storage.unwrap().set_item("refresh_token", &response.data.refresh_token);
-            let _ = window().session_storage().unwrap().unwrap().set_item("access_token", &access_token);
+            let _ = window().unwrap().session_storage().unwrap().unwrap().set_item("access_token", &access_token);
             
             Some(access_token)
         },
