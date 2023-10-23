@@ -1,9 +1,11 @@
 use babs::respone::ResponseBody;
+use gloo::utils::window;
 use web_sys::UrlSearchParams;
 use yew::{Component, html, classes, Context, Html};
 use yew_router::prelude::*;
 
 use crate::{
+    app::AppRoute,
     service::fetch::Fetch,
     models::oauth::TokenResponse,
     MainRoute, components::{
@@ -11,7 +13,7 @@ use crate::{
         spinner::Spinner,
         button::{Button, ButtonVariant},
         paper::{Paper, PaperElevation}
-    }
+    }, 
 };
 
 pub struct Authenticate {
@@ -19,10 +21,11 @@ pub struct Authenticate {
 }
 
 pub enum Msg {
+    AlreadyAuthenticated,
+    Authenticated,
     Login,
     SetAuthCode(String),
     SetError(String),
-    Authenticated
 }
 
 pub enum LoginState {
@@ -37,14 +40,35 @@ impl Component for Authenticate {
     type Properties = ();
 
     fn create(ctx: &Context<Self>) -> Self {
-        let window = gloo::utils::window();
-        let search_string = window.location().search().unwrap_or_default();
+        let search_string = window().location().search().unwrap_or_default();
         let search_params = UrlSearchParams::new_with_str(&search_string);
         if let Ok(params) = search_params {
             let code = params.get("code");
             let state = params.get("state");
 
             if code.is_none() || state.is_none() {
+                let local_storage = window().local_storage().unwrap().unwrap();
+                let refresh_token = local_storage.get_item("refresh_token").unwrap();
+
+                if let Some(token) = refresh_token {
+                    ctx.link().send_future(async move {
+                        let url = format!("http://localhost:8080/auth/refresh?token={}", token);
+                        match Fetch::get(&url, None).await {
+                            Ok(message) => {
+                                let response: ResponseBody<TokenResponse> = serde_wasm_bindgen::from_value(message).unwrap();
+                                let local_storage: Option<web_sys::Storage> = window().local_storage().unwrap();
+                                let session_storage = window().session_storage().unwrap();
+        
+                                let _ = session_storage.unwrap().set_item("access_token", &response.data.refresh_token);
+                                let _ = local_storage.unwrap().set_item("refresh_token", &response.data.refresh_token);
+        
+                                Msg::AlreadyAuthenticated
+                            },
+                            Err(_) => Msg::SetError("Error authenticating".to_string()),
+                        }
+                    });
+                }
+
                 return Authenticate { 
                     state: LoginState::Unauthenticated
                 };
@@ -85,27 +109,24 @@ impl Component for Authenticate {
                         Err(_) => Msg::SetError("Error authorizing".to_string()),
                     }
                 });
-
-                false
             }
             Msg::SetAuthCode(state) => {
-                let window = gloo::utils::window();
-                let _ = window.location().assign(&state);
-
-                true
+                let _ = window().location().assign(&state);
             },
             Msg::SetError(error) => {
                 self.state = LoginState::Failed(error);
-
-                true
             },
             Msg::Authenticated => {
-                let navigator = ctx.link().navigator().unwrap();
+                let navigator: Navigator = ctx.link().navigator().unwrap();
                 navigator.push(&MainRoute::App);
-
-                false
             }
+            Msg::AlreadyAuthenticated => {
+                let navigator: Navigator = ctx.link().navigator().unwrap();
+                navigator.push(&AppRoute::Home);
+            },
         }
+
+        true
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {

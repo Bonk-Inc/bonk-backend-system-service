@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
-use yew::{Component, html, Html, Context, classes};
+use yew::{Component, html, classes, Context, Html};
 
-use crate::{layouts::main_layout::MainLayout, service::fetch::Fetch};
+use crate::service::fetch::Fetch;
 
 pub struct Home {
     pub username: String
@@ -45,15 +45,13 @@ impl Component for Home {
         true
     }
 
-    fn view(&self, ctx: &Context<Self>) -> Html {
+    fn view(&self, _ctx: &Context<Self>) -> Html {
         html! {
-            <MainLayout>
-                <div class={classes!("p-4")}>
-                    <h1 class={classes!("text-2xl", "font-medium")}>
-                        {format!("Welkom, {}!", self.username)}
-                    </h1>
-                </div>
-            </MainLayout>
+            <div class={classes!("p-4")}>
+                <h1 class={classes!("text-2xl", "font-medium")}>
+                    {format!("Welkom, {}!", self.username)}
+                </h1>
+            </div>
         }
     }
 }

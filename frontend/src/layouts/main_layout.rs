@@ -3,7 +3,7 @@ use babs::respone::ResponseBody;
 use yew::{Component, html, classes, Html, Context, Properties, Children};
 use yew_router::prelude::Link;
 
-use crate::MainRoute;
+use crate::app::AppRoute;
 use crate::components::spinner::Spinner;
 use crate::components::{
     drawer::Drawer,
@@ -82,10 +82,10 @@ impl Component for MainLayout {
             <div class={classes!("min-h-screen", "bg-zinc-800", "text-white", "flex")}>
                 <AppBar>
                     <Toolbar class="border-b border-zinc-500 border-solid justify-between">
-                        <Link<MainRoute> to={MainRoute::App} classes={classes!("font-medium", "text-xl", "flex", "items-center")}>
+                        <Link<AppRoute> to={AppRoute::Home} classes={classes!("font-medium", "text-xl", "flex", "items-center")}>
                             <Icon name="database" class="mr-4"/>
                             {"Bonk Inc Backend System"}
-                        </Link<MainRoute>>
+                        </Link<AppRoute>>
                         <div>
                             
                         </div>

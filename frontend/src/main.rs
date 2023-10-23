@@ -1,11 +1,12 @@
 use yew::{Component, Context, Html, html};
 use yew_router::prelude::*;
 
-use crate::pages::{
-    authenticate::Authenticate,
-    home::Home
+use crate::{
+    app::AppBase,
+    pages::authenticate::Authenticate,
 };
 
+pub mod app;
 pub mod components;
 pub mod layouts;
 pub mod models;
@@ -14,30 +15,30 @@ pub mod service;
 
 #[derive(Clone, Routable, PartialEq)]
 pub enum MainRoute {
+    #[at("/")]
+    Index,
     #[at("/authenticate")]
     Authenticate,
-    #[at("/")]
+    #[at("/app/*")]
     App,
 }
 
 fn switch(routes: MainRoute) -> Html {
     match routes {
-        MainRoute::App => html! {
-            <Home/>
-        },
-        MainRoute::Authenticate => html! { <Authenticate/> }
+        MainRoute::Index => html!(<Redirect<MainRoute> to={MainRoute::Authenticate} />),
+        MainRoute::App => html!(<AppBase />),
+        MainRoute::Authenticate => html!(<Authenticate/>)
     }
 }
 
-pub struct App {
-}
+pub struct App;
 
 impl Component for App {
     type Message = ();
     type Properties = ();
 
     fn create(_ctx: &Context<Self>) -> Self {
-        App {  }
+        App { }
     }
 
     fn view(&self, _ctx: &Context<Self>) -> Html {
