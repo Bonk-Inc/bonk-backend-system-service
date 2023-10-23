@@ -6,7 +6,7 @@ use crate::{
     error::ServiceError,
     models::{
         score::{Score, ScoreDTO, self},
-        Delete, FindAll, FindById, Insert, Update
+        Model
     }
 };
 

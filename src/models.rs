@@ -27,3 +27,9 @@ pub struct Score {
     pub created_at: NaiveDateTime,
     pub updated_at: Option<NaiveDateTime>
 }
+
+#[derive(Serialize, Deserialize)]
+pub struct Stats {
+    pub games: i64,
+    pub scores: i64
+}

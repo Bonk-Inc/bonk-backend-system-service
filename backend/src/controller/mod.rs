@@ -19,4 +19,8 @@ pub fn api_scope() -> Scope {
             api::game_scope()
                 .wrap(Compat::new(Authentication))
         )
+        .service(
+            api::stats_scope()
+                .wrap(Compat::new(Authentication))
+        )
 }

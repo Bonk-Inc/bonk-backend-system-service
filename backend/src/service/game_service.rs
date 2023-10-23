@@ -6,7 +6,7 @@ use crate::{
     error::ServiceError,
     models::{
         game::{Game, GameDTO},
-        Delete, FindAll, FindById, Insert, Update
+        Model
     }
 };
 
