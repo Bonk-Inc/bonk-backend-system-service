@@ -16,7 +16,7 @@ pub struct StatsCard;
 pub struct StatsCardProps {
     pub name: String,
     pub icon: String,
-    pub value: i32,
+    pub value: i64,
     #[prop_or_default]
     pub class: String
 }
