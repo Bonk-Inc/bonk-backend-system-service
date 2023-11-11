@@ -32,7 +32,7 @@ impl Component for Alert {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        let mut base_classes = vec!["pr-4", "py-3", "mb-6", "font-medium", "rounded", "inline-flex", "items-center"];
+        let mut base_classes = vec!["px-4", "py-3", "mb-6", "font-medium", "w-full", "rounded", "inline-flex", "items-center"];
         let icon = match ctx.props().severity {
             Severity::Success => "task_alt",
             Severity::Info => "info",
@@ -48,8 +48,8 @@ impl Component for Alert {
         };
 
         html! {
-            <div class={classes!(base_classes)}>
-                <Icon name={icon} />
+            <div class={classes!(base_classes)} role="alert">
+                <Icon name={icon} class="mr-4" />
                 {ctx.props().children.clone()}
             </div>
         }

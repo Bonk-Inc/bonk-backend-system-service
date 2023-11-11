@@ -118,7 +118,7 @@ impl Component for Authenticate {
             },
             Msg::Authenticated => {
                 let navigator: Navigator = ctx.link().navigator().unwrap();
-                navigator.push(&MainRoute::App);
+                navigator.push(&AppRoute::Home);
             }
             Msg::AlreadyAuthenticated => {
                 let navigator: Navigator = ctx.link().navigator().unwrap();
@@ -137,16 +137,20 @@ impl Component for Authenticate {
                         {"Inloggen in Bonk Inc. Backend System"}
                     </h1>
                     {match &self.state {
-                        LoginState::Failed(error) => html! { <Alert severity={Severity::Error}>{error.clone()}</Alert>},
-                        LoginState::Autheticanting => html! { <Spinner /> },
+                        LoginState::Autheticanting => html!(<Spinner />),
                         _ => html! {
-                            <Button 
-                                onclick={ctx.link().callback(|_| Msg::Login)} 
-                                variant={ButtonVariant::Outlined}
-                                class="border-zinc-500"
-                            >
-                                {"Inloggen met Authentic"}
-                            </Button>
+                            <>
+                                if let LoginState::Failed(error) = &self.state {
+                                    <Alert severity={Severity::Error}>{error.clone()}</Alert>
+                                }
+                                <Button 
+                                    onclick={ctx.link().callback(|_| Msg::Login)} 
+                                    variant={ButtonVariant::Outlined}
+                                    class="border-zinc-500"
+                                >
+                                    {"Inloggen met Authentic"}
+                                </Button>
+                            </>
                         }
                     }}
                 </Paper>

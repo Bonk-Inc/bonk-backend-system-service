@@ -85,8 +85,8 @@ impl Component for Home {
                                     {"Statistieken"}
                                 </h2>
                                 <div class={classes!("flex", "flex-wrap", "w-full", "mt-6")}>
-                                <StatsCard name="Games" value={self.stats.games} icon="joystick" class="ml-0" />
-                                <StatsCard name="Scores" value={self.stats.scores} icon="scoreboard" />
+                                    <StatsCard name="Games" value={self.stats.games} icon="joystick" class="ml-0" />
+                                    <StatsCard name="Scores" value={self.stats.scores} icon="scoreboard" />
                                 </div>
                             </section>
                         </>
