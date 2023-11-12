@@ -6,6 +6,7 @@ pub mod list_item_button;
 pub mod list_item_icon;
 pub mod list_item;
 pub mod list;
+pub mod dialog;
 pub mod drawer;
 pub mod paper;
 pub mod spinner;
