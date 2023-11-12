@@ -26,6 +26,7 @@ impl Component for Dialog {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
+        let classes = ctx.props().class.clone();
         let hidden = if ctx.props().open {
             "block"
         } else {
@@ -36,7 +37,7 @@ impl Component for Dialog {
             <div class={classes!("z-50", "inset-0", "fixed", hidden)} role="presentation">
                 <div class={classes!("-z-10", "inset-0", "fixed", "flex", "items-center", "bg-black", "opacity-50", "justify-center")} />
                 <div class={classes!("h-full", "outline-0", "flex", "items-center", "justify-center")} tabindex="-1" role="presentation">
-                    <Paper elevation={PaperElevation::Elevated}>
+                    <Paper elevation={PaperElevation::Elevated} class={classes}>
                         {ctx.props().children.clone()}
                     </Paper>
                 </div>

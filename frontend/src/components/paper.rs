@@ -44,7 +44,7 @@ impl Component for Paper {
         }
 
         html! {
-            <div class={classes!(base_classes, &ctx.props().class)}>
+            <div class={classes!(base_classes, ctx.props().class.clone())}>
                 {ctx.props().children.clone()}
             </div>
         }
