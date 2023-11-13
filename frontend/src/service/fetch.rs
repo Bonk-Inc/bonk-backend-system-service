@@ -13,11 +13,15 @@ pub enum Method {
     DELETE
 }
 
-pub async fn fetch(url: &str, method: &str, access_token: Option<String>) -> Result<JsValue, JsValue> {
+pub async fn fetch(url: &str, method: &str, access_token: Option<String>, body: Option<&str>) -> Result<JsValue, JsValue> {
     let mut opts = RequestInit::new();
     opts.method(&method);
     opts.mode(RequestMode::Cors);
     opts.redirect(RequestRedirect::Follow);
+
+    if body.is_some() {
+        opts.body(Some(&JsValue::from(body.unwrap())));
+    }
 
     let request = Request::new_with_str_and_init(&url, &opts)?;
     request.headers().set("Accept", "application/json")?;
@@ -57,7 +61,7 @@ pub async fn get_access_token() -> Option<String> {
     }
     
     let url = format!("http://localhost:8080/auth/refresh?token={}", refresh_token.unwrap());
-    match fetch(&url, "GET", None).await {
+    match fetch(&url, "GET", None, None).await {
         Ok(message) => {
             let response: ResponseBody<TokenResponse> = serde_wasm_bindgen::from_value(message).unwrap();
             let access_token = response.data.access_token;
@@ -74,7 +78,7 @@ pub async fn get_access_token() -> Option<String> {
 pub struct Fetch;
 
 impl Fetch {
-    async fn fetch(url: &str, method: Method, authenication: bool) -> Result<JsValue, JsValue> {
+    async fn fetch(url: &str, method: Method, authenication: bool, body: Option<&str>) -> Result<JsValue, JsValue> {
         let method = match method {
             Method::GET => "GET",
             Method::POST => "POST",
@@ -88,31 +92,31 @@ impl Fetch {
             access_token = get_access_token().await;
         }
 
-        fetch(url, method, access_token).await
+        fetch(url, method, access_token, body).await
     }
 
     pub async fn get(url: &str, authenication: Option<bool>) -> Result<JsValue, JsValue> {
-        Fetch::fetch(url, Method::GET, authenication.unwrap_or_default())
+        Fetch::fetch(url, Method::GET, authenication.unwrap_or_default(), None)
             .await
     }
 
-    pub async fn post(url: &str, authenication: Option<bool>) -> Result<JsValue, JsValue> {
-        Fetch::fetch(url, Method::POST, authenication.unwrap_or_default())
+    pub async fn post(url: &str, body: &str, authenication: Option<bool>) -> Result<JsValue, JsValue> {
+        Fetch::fetch(url, Method::POST, authenication.unwrap_or_default(), Some(body))
             .await
     }
 
-    pub async fn put(url: &str, authenication: Option<bool>) -> Result<JsValue, JsValue> {
-        Fetch::fetch(url, Method::PUT, authenication.unwrap_or_default())
+    pub async fn put(url: &str, body: &str, authenication: Option<bool>) -> Result<JsValue, JsValue> {
+        Fetch::fetch(url, Method::PUT, authenication.unwrap_or_default(), Some(body))
             .await
     }
 
-    pub async fn patch(url: &str, authenication: Option<bool>) -> Result<JsValue, JsValue> {
-        Fetch::fetch(url, Method::PATCH, authenication.unwrap_or_default())
+    pub async fn patch(url: &str, body: &str, authenication: Option<bool>) -> Result<JsValue, JsValue> {
+        Fetch::fetch(url, Method::PATCH, authenication.unwrap_or_default(), Some(body))
             .await
     }
 
     pub async fn delete(url: &str, authenication: Option<bool>) -> Result<JsValue, JsValue> {
-        Fetch::fetch(url, Method::DELETE, authenication.unwrap_or_default())
+        Fetch::fetch(url, Method::DELETE, authenication.unwrap_or_default(), None)
             .await
     }
 }
