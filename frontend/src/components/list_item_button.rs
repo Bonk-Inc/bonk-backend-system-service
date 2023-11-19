@@ -14,6 +14,8 @@ pub struct ListItemButtonProps {
     pub selected: bool,
     #[prop_or_default]
     pub class: String,
+    #[prop_or_default]
+    pub onclick: Callback<MouseEvent>
 }
 
 impl Component for ListItemButton {
@@ -25,13 +27,17 @@ impl Component for ListItemButton {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
+        let onclick = ctx.props().onclick.clone();
         let mut base_classes = vec!["bg-transparent", "outline-0", "border-0", "m-0", "rounded-none", "cursor-pointer", "select-none", "appearance-none", "text-inherit", "flex", "grow", "justify-start", "items-center", "relative", "no-underline", "min-w-0", "box-border", "text-left", "transition-colors", "px-4", "py-2", "hover:appearance-none", "hover:bg-zinc-700"];
         if ctx.props().selected {
-            base_classes[0] = "bg-slate-700";
+            base_classes[0] = "bg-slate-700 shadow-inner-l-solid shadow-blue-500";
         }
 
         html! {
-            <div class={classes!(base_classes, &ctx.props().class)}>
+            <div 
+                class={classes!(base_classes, &ctx.props().class)}
+                onclick={Callback::from(move |e| { onclick.emit(e); })}
+            >
                 {ctx.props().children.clone()}            
             </div>
         }

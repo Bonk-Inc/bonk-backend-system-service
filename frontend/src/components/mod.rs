@@ -14,5 +14,7 @@ pub mod list;
 pub mod paper;
 pub mod spinner;
 pub mod stats_card;
+pub mod tab;
+pub mod tabs;
 pub mod text_field;
 pub mod toolbar;
