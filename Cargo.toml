@@ -7,10 +7,10 @@ rust-version = "1.74"
 readme = "README.md"
 
 [dependencies]
-chrono = { version = "0.4.30", features = ["serde"] }
-diesel = { version = "2.1.1", features = ["postgres", "chrono", "uuid", "r2d2"], optional = true }
-serde = { version = "1.0.188", features = ["derive"] }
-uuid = { version = "1.4.1", features = ["serde", "v4"] }
+chrono = { version = "0.4.31", features = ["serde"] }
+diesel = { version = "2.1.4", features = ["postgres", "chrono", "uuid", "r2d2"], optional = true }
+serde = { version = "1.0.192", features = ["derive"] }
+uuid = { version = "1.6.1", features = ["serde", "v4"] }
 
 [features]
 backend = ["diesel"]
