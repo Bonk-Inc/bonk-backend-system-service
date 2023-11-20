@@ -1,7 +1,7 @@
 #####################################################################
 ## Build Backend
 ####################################################################
-FROM rust:1.72.1-slim-buster AS backend-build
+FROM rust:1.74.0-slim-buster AS backend-build
 
 RUN apt-get update && apt-get install -y libssl-dev libpq-dev pkg-config
 

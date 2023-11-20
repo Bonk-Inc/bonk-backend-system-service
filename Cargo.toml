@@ -3,7 +3,7 @@ name = "babs"
 version = "0.1.0"
 authors = ["Traxx186"]
 edition = "2021"
-rust-version = "1.70"
+rust-version = "1.74"
 readme = "README.md"
 
 [dependencies]
