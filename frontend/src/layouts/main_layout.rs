@@ -1,9 +1,10 @@
 use babs::models::Game;
 use babs::respone::ResponseBody;
 use wasm_bindgen::JsCast;
-use web_sys::{Event, HtmlInputElement};
+use web_sys::{Event, HtmlInputElement, window};
 use yew::{Component, html, classes, Html, Context, Properties, Children};
-use yew_router::prelude::Link;
+use yew_router::prelude::{Link, Navigator};
+use yew_router::scope_ext::{RouterScopeExt, LocationHandle};
 
 use crate::app::AppRoute;
 use crate::components::button::ButtonVariant;
@@ -28,7 +29,8 @@ pub struct MainLayout {
     state: State,
     new_game_name: String,
     create_game_open: bool,
-    games: Vec<Game>
+    games: Vec<Game>,
+    _listener: LocationHandle
 }
 pub enum Msg {
     RequestGames,
@@ -36,6 +38,8 @@ pub enum Msg {
     CancelNewGame,
     SaveGame,
     GameSaved,
+    Rerender,
+    NavigateToGame(String),
     NameChange(Event),
     Resp(Vec<Game>),
     Error(String),
@@ -60,17 +64,23 @@ impl Component for MainLayout {
 
     fn create(ctx: &Context<Self>) -> Self {
        ctx.link().send_message(Msg::RequestGames);
+
+       let listener = ctx.link()
+            .add_location_listener(ctx.link().callback(|_| Msg::Rerender))
+            .unwrap();
     
         MainLayout { 
             games: Vec::new(),
             create_game_open: false,
             state: State::GamesFetched,
-            new_game_name: String::new()
+            new_game_name: String::new(),
+            _listener: listener
         }
     }
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
+            Msg::Rerender => {}
             Msg::RequestGames => {
                 self.state = State::FetchingGames;
 
@@ -120,6 +130,10 @@ impl Component for MainLayout {
                 ctx.link().send_message(Msg::RequestGames);
 
                 self.create_game_open = false;
+            },
+            Msg::NavigateToGame(id) => {
+                let navigator: Navigator = ctx.link().navigator().unwrap();
+                navigator.push(&AppRoute::Game { id });
             }
         }
 
@@ -142,7 +156,7 @@ impl Component for MainLayout {
                 </AppBar>
                 <nav class={classes!("h-full")}>
                     <Drawer>
-                        <Toolbar class="mt-14 [min-h-48px] justify-between items-center">
+                        <Toolbar class="mt-14 !min-h-48px justify-between items-center">
                             <p class={classes!("font-medium", "flex")}>
                                 <Icon name="list" class="mr-2"/>
                                 {"Games"}
@@ -161,7 +175,7 @@ impl Component for MainLayout {
                             _ => {
                                 html! {
                                     <List>
-                                        { for self.games.iter().map(|g| self.render_game_item(g)) }
+                                        { for self.games.iter().map(|g| self.render_game_item(ctx, g)) }
                                     </List>
                                 }
                             },
@@ -222,10 +236,16 @@ impl Component for MainLayout {
 }
 
 impl MainLayout {
-    fn render_game_item(&self, game: &Game) -> Html {
+    fn render_game_item(&self, ctx: &Context<Self>, game: &Game) -> Html {
+        let game_id = game.id.to_string();
+        let path = window().unwrap().location().pathname().unwrap();
+
         html! {
             <ListItem>
-                <ListItemButton>
+                <ListItemButton
+                    selected={path.contains(&game_id)}
+                    onclick={ctx.link().callback(move |_| Msg::NavigateToGame(game_id.clone()))}
+                >
                     <ListItemIcon>
                         <Icon name="joystick" />
                     </ListItemIcon>

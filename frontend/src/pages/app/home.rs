@@ -1,4 +1,4 @@
-use babs::{models::Stats, respone::ResponseBody};
+use babs::{models::GlobalStats, respone::ResponseBody};
 use serde::{Deserialize, Serialize};
 use yew::{Component, html, classes, Context, Html};
 
@@ -12,13 +12,13 @@ use crate::{
 
 pub struct Home {
     pub username: String,
-    pub stats: Stats,
+    pub stats: GlobalStats,
     pub status: Status
 }
 
 pub enum Msg {
     MakeReq,
-    Response((String, Stats)),
+    Response((String, GlobalStats)),
     Failed
 }
 
@@ -34,7 +34,7 @@ impl Component for Home {
     fn create(ctx: &Context<Self>) -> Self {
         ctx.link().send_message(Msg::MakeReq);
 
-        Home { username: String::new(), stats: Stats::default(), status: Status::Fetching }
+        Home { username: String::new(), stats: GlobalStats::default(), status: Status::Fetching }
     }
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
@@ -49,7 +49,7 @@ impl Component for Home {
                     }
 
                     let info_response: UserInfo = serde_wasm_bindgen::from_value(info_message.unwrap()).unwrap();
-                    let stats_data: ResponseBody<Stats> = serde_wasm_bindgen::from_value(stats.unwrap()).unwrap();
+                    let stats_data: ResponseBody<GlobalStats> = serde_wasm_bindgen::from_value(stats.unwrap()).unwrap();
                     Msg::Response((info_response.nickname, stats_data.data))
                 });
             },

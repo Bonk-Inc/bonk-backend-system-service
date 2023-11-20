@@ -62,7 +62,13 @@ pub fn find_by_game(game: Uuid, include_hidden: bool, conn: &mut Connection) -> 
         .load(conn)
 }
 
-pub fn count_score(conn: &mut Connection) -> QueryResult<i64> {
-    score.select(count_star())
+pub fn count_score(game_uuid: Option<Uuid>, conn: &mut Connection) -> QueryResult<i64> {
+    let mut query = score::table.into_boxed();
+    
+    if let Some(value) = game_uuid {
+        query = query.filter(game_id.eq(value));
+    }
+
+    query.select(count_star())
         .first(conn)
 }

@@ -26,4 +26,5 @@ pub fn score_scope() -> Scope {
 pub fn stats_scope() -> Scope {
     web::scope("/stats")
         .service(stats::all)
+        .service(stats::game_stats)
 }

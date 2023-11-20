@@ -117,11 +117,11 @@ impl Component for Authenticate {
                 self.state = LoginState::Failed(error);
             },
             Msg::Authenticated => {
-                let navigator: Navigator = ctx.link().navigator().unwrap();
+                let navigator = ctx.link().navigator().unwrap();
                 navigator.push(&AppRoute::Home);
             }
             Msg::AlreadyAuthenticated => {
-                let navigator: Navigator = ctx.link().navigator().unwrap();
+                let navigator = ctx.link().navigator().unwrap();
                 navigator.push(&AppRoute::Home);
             },
         }
