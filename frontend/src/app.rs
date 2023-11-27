@@ -3,7 +3,7 @@ use yew_router::{Routable, Switch};
 
 use crate::{
     layouts::main_layout::MainLayout, 
-    pages::app::{home::Home, game::Game}
+    pages::app::{home::Home, game::Game, scores::Scores}
 };
 
 pub struct AppBase;
@@ -14,12 +14,15 @@ pub enum AppRoute {
     Home,
     #[at("/app/game/:id")]
     Game { id: String },
+    #[at("/app/game/:game_id/score")]
+    Scores { game_id: String}
 }
 
 fn switch(routes: AppRoute) -> Html {
     match routes {
         AppRoute::Home => html!(<Home />),
         AppRoute::Game { id } => html!(<Game id={id} />),
+        AppRoute::Scores { game_id } => html!(<Scores game_id={game_id} />)
     }
 }
 

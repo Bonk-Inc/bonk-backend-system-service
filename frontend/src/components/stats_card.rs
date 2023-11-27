@@ -36,7 +36,7 @@ impl Component for StatsCard {
                     <Icon name={ctx.props().icon.clone()} class="text-4xl" />
                 </div>
                 <div>
-                    <p class={classes!("mb-3", "text-right")}>
+                    <p class={classes!("mb-3", "text-right", "text-base")}>
                         {&ctx.props().name}
                     </p>
                     <p class={classes!("mt-3", "text-right", "font-medium", "text-xl", "text-blue-500")}>

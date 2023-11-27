@@ -42,7 +42,7 @@ impl Component for Tab {
                 onclick={Callback::from(move |e| { onclick.emit(e); })}
             >
                 {if icon.len() > 0 {
-                    html!(<Icon name={icon} class="mr-1" />)
+                    html!(<Icon name={icon} class="mr-2" />)
                 } else { html!() }}
                 {ctx.props().label.clone()}
             </Button>

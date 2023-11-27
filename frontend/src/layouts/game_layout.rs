@@ -13,7 +13,8 @@ pub struct GameLayoutProps {
 
 pub enum Msg {
     Test,
-    NavigateToGame
+    NavigateToGame,
+    NavigateToScores,
 }
 
 impl Component for GameLayout {
@@ -25,14 +26,17 @@ impl Component for GameLayout {
     }
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
+        let navigator = ctx.link().navigator().unwrap();
+        let id = ctx.props().id.clone();
+
         match msg {
             Msg::Test => {todo!()},
             Msg::NavigateToGame => {
-                let id = ctx.props().id.clone();
-                let navigator = ctx.link().navigator().unwrap();
-
                 navigator.push(&AppRoute::Game { id });
             },
+            Msg::NavigateToScores => {
+                navigator.push(&AppRoute::Scores { game_id: id });
+            }
         }
 
         true
@@ -52,7 +56,12 @@ impl Component for GameLayout {
                             onclick={ctx.link().callback(|_| Msg::NavigateToGame)} 
                             selected={matches!(location, AppRoute::Game { .. })} 
                         />
-                        <Tab icon="scoreboard" label="Scores" onclick={ctx.link().callback(|_| Msg::Test)} />
+                        <Tab 
+                            icon="scoreboard" 
+                            label="Scores" 
+                            onclick={ctx.link().callback(|_| Msg::NavigateToScores)}
+                            selected={matches!(location, AppRoute::Scores { .. })} 
+                        />
                         <Tab icon="map" label="Levels" onclick={ctx.link().callback(|_| Msg::Test)} />
                     </Tabs>
                 </Toolbar>

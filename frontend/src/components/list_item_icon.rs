@@ -22,7 +22,7 @@ impl Component for ListItemIcon {
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         html! {
-            <div class={classes!("min-w-[56px]", "text-white", "shrink-0", "inline-flex")}>
+            <div class={classes!("text-white", "shrink-0", "inline-flex", "mr-2")}>
                 {ctx.props().children.clone()}
             </div>
         }
