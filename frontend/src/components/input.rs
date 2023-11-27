@@ -37,7 +37,7 @@ impl Component for Input {
     fn view(&self, ctx: &Context<Self>) -> Html {
         let classes = ctx.props().class.clone();
         let onchange = ctx.props().onchange.clone();
-        let text_color = if ctx.props().error { "text-red-400 border-red-400 focus:shadow-red-400" } else { "text-current border-white focus:shadow-blue-400 focus:border-blue-400" };
+        let text_color = if ctx.props().error { "text-red-400 border-red-400 focus:shadow-red-400" } else { "text-current border-white focus:shadow-blue-300 focus:border-blue-300" };
         let width = if ctx.props().full_width { "w-full" } else { "w-auto" };
 
         html! {

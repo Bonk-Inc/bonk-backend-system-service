@@ -30,7 +30,7 @@ impl Component for ListItemButton {
         let onclick = ctx.props().onclick.clone();
         let mut base_classes = vec!["bg-transparent", "outline-0", "border-0", "m-0", "rounded-none", "cursor-pointer", "select-none", "appearance-none", "text-inherit", "flex", "grow", "justify-start", "items-center", "relative", "no-underline", "min-w-0", "box-border", "text-left", "transition-colors", "px-4", "py-2", "hover:appearance-none", "hover:bg-zinc-700"];
         if ctx.props().selected {
-            base_classes[0] = "bg-slate-700 shadow-inner-l-solid shadow-blue-500";
+            base_classes[0] = "bg-slate-700 shadow-inner-l-solid shadow-blue-300";
         }
 
         html! {

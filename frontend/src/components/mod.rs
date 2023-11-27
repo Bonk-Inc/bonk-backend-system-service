@@ -1,6 +1,7 @@
 pub mod alert;
 pub mod app_bar;
 pub mod button;
+pub mod checkbox;
 pub mod dialog;
 pub mod drawer;
 pub mod form_control;

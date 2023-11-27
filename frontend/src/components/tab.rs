@@ -33,7 +33,7 @@ impl Component for Tab {
         let onclick = ctx.props().onclick.clone();
         let icon = ctx.props().icon.clone();
 
-        let selected = if ctx.props().selected { "shadow-inner-b-solid shadow-blue-500 text-blue-500" } else { "" };
+        let selected = if ctx.props().selected { "shadow-inner-b-solid shadow-blue-300 text-blue-300" } else { "" };
         let flex_direction = if icon.len() > 0 { "flex-row" } else { "flex-col" };
 
         html! { 
