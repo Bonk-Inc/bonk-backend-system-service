@@ -11,9 +11,9 @@ use crate::{
 };
 
 pub struct Home {
-    pub username: String,
-    pub stats: GlobalStats,
-    pub status: Status
+    username: String,
+    stats: GlobalStats,
+    status: Status
 }
 
 pub enum Msg {

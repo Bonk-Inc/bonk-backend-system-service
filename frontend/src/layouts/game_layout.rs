@@ -3,7 +3,7 @@ use yew_router::scope_ext::RouterScopeExt;
 
 use crate::{components::{toolbar::Toolbar, tabs::Tabs, tab::Tab}, app::AppRoute};
 
-pub struct GameLayout {}
+pub struct GameLayout;
 
 #[derive(Clone, PartialEq, Properties)]
 pub struct GameLayoutProps {

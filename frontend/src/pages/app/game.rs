@@ -16,9 +16,9 @@ use crate::{
 };
 
 pub struct Game {
-    pub stats: GameStats,
-    pub status: Status,
-    pub _listener: LocationHandle,
+    stats: GameStats,
+    status: Status,
+    _listener: LocationHandle,
 }
 
 #[derive(Clone, PartialEq, Properties)]

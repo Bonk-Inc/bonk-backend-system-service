@@ -32,6 +32,7 @@ pub struct MainLayout {
     games: Vec<Game>,
     _listener: LocationHandle
 }
+
 pub enum Msg {
     RequestGames,
     AddNewGame,

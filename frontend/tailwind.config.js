@@ -15,7 +15,7 @@ module.exports = {
         'inner-b-solid': 'inset 0 -4px 0 0 transparent',
       },
       cursor: {
-        'inhert': 'inherit'
+        'inherit': 'inherit'
       },
       minHeight: {
         '48px': '48px'
