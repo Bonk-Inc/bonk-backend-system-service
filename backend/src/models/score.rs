@@ -43,9 +43,9 @@ impl Model<Score, Uuid, ScoreDTO> for Score {
             .get_result::<Score>(conn)
     }
 
-    fn delete(score_id: Uuid, conn: &mut Connection) -> QueryResult<usize> {
+    fn delete_many(score_ids: Vec<Uuid>, conn: &mut Connection) -> QueryResult<usize> {
         diesel::delete(score)
-            .filter(id.eq(score_id))
+            .filter(id.eq_any(score_ids))
             .execute(conn)
     }
 }
