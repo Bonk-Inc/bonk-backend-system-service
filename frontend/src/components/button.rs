@@ -12,6 +12,8 @@ pub struct ButtonProps {
     pub children: Children,
     #[prop_or(ButtonVariant::Text)]
     pub variant: ButtonVariant,
+    #[prop_or(ButtonSize::Normal)]
+    pub size: ButtonSize,
     #[prop_or_default]
     pub class: String,
     #[prop_or_default]
@@ -26,6 +28,14 @@ pub enum ButtonVariant {
     Contained
 }
 
+#[derive(Clone, PartialEq)]
+pub enum ButtonSize {
+    Small,
+    Normal,
+    Large
+}
+
+
 impl Component for Button {
     type Message = ();
     type Properties = ButtonProps;
@@ -39,8 +49,10 @@ impl Component for Button {
         let class = ctx.props().class.clone();
         let mut base_classes = vec!["text-center", "font-medium", "rounded", "block", "min-w-[64px]", "transition-colors"];
 
-        if !ctx.props().dense {
-            base_classes.append(&mut vec!["py-2", "px-4"]);
+        match ctx.props().size {
+            ButtonSize::Small => base_classes.append(&mut vec!["py-1", "px-3"]),
+            ButtonSize::Normal => base_classes.append(&mut vec!["py-2", "px-4"]),
+            ButtonSize::Large => base_classes.append(&mut vec!["py-2", "px-6"])
         }
 
         match ctx.props().variant {
