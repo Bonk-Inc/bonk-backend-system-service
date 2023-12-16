@@ -48,6 +48,10 @@ pub async fn fetch(url: &str, method: &str, access_token: Option<String>, body: 
     }
 
     // Convert a JS Promise into a Rust Future
+    if resp.status() == 204 {
+        return Ok(JsValue::null());
+    }
+
     let json = JsFuture::from(resp.json()?).await?;
 
     Ok(json)

@@ -1,13 +1,13 @@
 use std::{collections::HashSet, mem};
 
 use babs::{models::Score, respone::ResponseBody};
-use yew::{html, Component, Context, Html, Properties, classes};
+use yew::{html, Component, Context, Html, Properties, classes, Callback};
 
 use crate::{
     components::{
         table::Table, table_body::TableBody, table_cell::TableCell,
         table_container::TableContainer, table_head::TableHead,
-        table_row::TableRow, checkbox::Checkbox, spinner::Spinner,
+        table_row::TableRow, checkbox::Checkbox, spinner::Spinner, icon::Icon, button::{Button, ButtonVariant},
     },
     layouts::game_layout::GameLayout,
     service::fetch::Fetch,
@@ -36,6 +36,8 @@ pub enum Msg {
     SelectAllScores,
     UpdateScore(Score),
     UpdateResponse(Score),
+    DeleteScores,
+    DeleteScoresResponse,
     Failed,
 }
 
@@ -57,6 +59,7 @@ impl Component for Scores {
         match msg {
             Msg::MakeReq => {
                 let game_id = ctx.props().game_id.clone();
+                self.status = Status::Fetching;
 
                 ctx.link().send_future(async move {
                     let url = format!(
@@ -73,7 +76,7 @@ impl Component for Scores {
                 })
             }
             Msg::Response(scores) => {
-                self.scores = scores.clone();
+                self.scores = scores;
                 self.status = Status::Finished;
             },
             Msg::SelectScore(score) => {
@@ -117,6 +120,33 @@ impl Component for Scores {
 
                 let _ = mem::replace(&mut self.scores[old_position], new_score.clone());
             },
+            Msg::DeleteScores => {
+                let ids = self.selected_scores
+                    .iter()
+                    .map(|id| id.clone())
+                    .collect::<Vec<String>>()
+                    .join(",");
+
+                ctx.link().send_future(async move {
+                    let url = format!("http://localhost:8080/api/score/({})", ids);
+                    let scores = Fetch::delete(&url, Some(true)).await;
+
+                    if scores.is_err() {
+                        return Msg::Failed;
+                    }
+
+                    Msg::DeleteScoresResponse
+                })
+            },
+            Msg::DeleteScoresResponse => {
+                self.scores = self.scores
+                    .iter()
+                    .filter(|s| self.selected_scores.iter().any(|id| *id == s.id.to_string()))
+                    .map(|s: &Score| s.clone())
+                    .collect::<Vec<Score>>();
+
+                self.selected_scores.clear();
+            },
             Msg::Failed => todo!(),
         }
 
@@ -130,6 +160,26 @@ impl Component for Scores {
 
         html! {
             <GameLayout id={game_id}>
+                <div class="py-4 flex justify-between">
+                    {if self.selected_scores.len() > 0 {
+                        html! {
+                            <Button onclick={ctx.link().callback(|_| Msg::DeleteScores)} class="text-red-400">
+                                <Icon name="delete"/>
+                            </Button>
+                        }
+                    } else { 
+                        html! {
+                            <div></div>
+                        } 
+                    }}
+                    <Button 
+                        class="bg-blue-400 inline-flex items-center" 
+                        onclick={Callback::noop()} 
+                        variant={ButtonVariant::Contained}
+                    >
+                        <Icon name="add" class="mr-2"/> {"Add Score"}
+                    </Button>
+                </div>
                 <TableContainer>
                     {match self.status {
                         Status::Fetching => html! {
@@ -160,6 +210,14 @@ impl Component for Scores {
                                         </TableCell>
                                         <TableCell>
                                             {"Hidden"}
+                                        </TableCell>
+                                        <TableCell checkbox={true}>
+                                            <Button 
+                                                class="flex justify-end w-full"
+                                                onclick={ctx.link().callback(|_| Msg::MakeReq)}
+                                            >
+                                                <Icon name="refresh"/>
+                                            </Button>
                                         </TableCell>
                                     </TableRow>
                                 </TableHead>
@@ -210,6 +268,15 @@ impl Scores {
                             Msg::UpdateScore(edited_score)
                         })}
                     />
+                </TableCell>
+                <TableCell>
+                    <Button
+                        dense={true}
+                        class="flex justify-end w-full"
+                        onclick={Callback::noop()}
+                    >
+                        <Icon name="edit"/>
+                    </Button>
                 </TableCell>
             </TableRow>
         }

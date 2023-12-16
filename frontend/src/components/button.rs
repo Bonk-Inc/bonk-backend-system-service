@@ -14,6 +14,8 @@ pub struct ButtonProps {
     pub variant: ButtonVariant,
     #[prop_or_default]
     pub class: String,
+    #[prop_or_default]
+    pub dense: bool,
     pub onclick: Callback<MouseEvent>
 }
 
@@ -35,8 +37,12 @@ impl Component for Button {
     fn view(&self, ctx: &Context<Self>) -> Html {
         let onclick = ctx.props().onclick.clone();
         let class = ctx.props().class.clone();
-        let mut base_classes = vec!["text-center", "font-medium", "rounded", "block", "py-2", "px-4", "min-w-[64px]", "transition-colors"];
-        
+        let mut base_classes = vec!["text-center", "font-medium", "rounded", "block", "min-w-[64px]", "transition-colors"];
+
+        if !ctx.props().dense {
+            base_classes.append(&mut vec!["py-2", "px-4"]);
+        }
+
         match ctx.props().variant {
             ButtonVariant::Outlined => base_classes.append(&mut vec!["border", "border-solid"]),
             ButtonVariant::Contained => base_classes.append(&mut vec!["text-zinc-800"]),
