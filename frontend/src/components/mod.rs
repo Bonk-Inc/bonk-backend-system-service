@@ -13,6 +13,7 @@ pub mod list_item_button;
 pub mod list_item_icon;
 pub mod list_item;
 pub mod paper;
+pub mod select;
 pub mod spinner;
 pub mod stats_card;
 pub mod tab;
