@@ -65,6 +65,7 @@ impl Component for Button {
             <button 
                 onclick={Callback::from(move |e| { onclick.emit(e); })}
                 class={classes!(base_classes, class)}
+                type={"button"}
             >
                 {ctx.props().children.clone()}
             </button>

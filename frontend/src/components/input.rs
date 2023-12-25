@@ -24,6 +24,8 @@ pub struct InputProps {
     pub error: bool,
     #[prop_or_default]
     pub class: String,
+    #[prop_or_default]
+    pub value: String
 }
 
 impl Component for Input {
@@ -47,6 +49,7 @@ impl Component for Input {
                 class={classes!("relative", "bg-transparent", "leading-6", "box-border", "cursor-text", "inline-flex", "items-center", "border", "px-4", "py-2", "focus:outline-none", "shadow-inner-solid", "border-solid", "rounded", text_color, width, classes)}
                 required={ctx.props().required}
                 type={ctx.props().html_type.clone()}
+                value={ctx.props().value.clone()}
                 placeholder={ctx.props().placeholder.clone()}
                 onchange={Callback::from(move |e| { onchange.emit(e); })}
             />

@@ -20,7 +20,6 @@ pub struct Authenticate {
 }
 
 pub enum Msg {
-    AlreadyAuthenticated,
     Authenticated,
     Login,
     SetAuthCode(String),
@@ -62,7 +61,7 @@ impl Component for Authenticate {
                                 let _ = session_storage.unwrap().set_item("access_token", &response.data.refresh_token);
                                 let _ = local_storage.unwrap().set_item("refresh_token", &response.data.refresh_token);
         
-                                Msg::AlreadyAuthenticated
+                                Msg::Authenticated
                             },
                             Err(_) => Msg::SetError("Error authenticating".to_string()),
                         }
@@ -120,10 +119,6 @@ impl Component for Authenticate {
                 let navigator = ctx.link().navigator().unwrap();
                 navigator.push(&AppRoute::Home);
             }
-            Msg::AlreadyAuthenticated => {
-                let navigator = ctx.link().navigator().unwrap();
-                navigator.push(&AppRoute::Home);
-            },
         }
 
         true

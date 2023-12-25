@@ -31,6 +31,8 @@ pub struct TextFieldProps {
     pub error: bool,
     #[prop_or_default]
     pub class: String,
+    #[prop_or_default]
+    pub value: String
 }
 
 impl Component for TextField {
@@ -58,6 +60,7 @@ impl Component for TextField {
                     onchange={ctx.props().onchange.clone()}
                     required={required}
                     error={error}
+                    value={ctx.props().value.clone()}
                     html_type={ctx.props().html_type.clone()}
                     placeholder={ctx.props().placeholder.clone()}
                     full_width={full_width}

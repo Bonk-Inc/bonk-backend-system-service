@@ -2,6 +2,7 @@ use std::{collections::HashSet, mem};
 
 use babs::{models::Score, respone::ResponseBody};
 use yew::{html, Component, Context, Html, Properties, classes, Callback};
+use yew_router::scope_ext::RouterScopeExt;
 
 use crate::{
     components::{
@@ -10,7 +11,7 @@ use crate::{
         table_row::TableRow, checkbox::Checkbox, spinner::Spinner, icon::Icon, button::{Button, ButtonVariant},
     },
     layouts::game_layout::GameLayout,
-    service::fetch::Fetch,
+    service::fetch::Fetch, app::AppRoute,
 };
 
 pub struct Scores {
@@ -38,6 +39,7 @@ pub enum Msg {
     UpdateResponse(Score),
     DeleteScores,
     DeleteScoresResponse,
+    NavigateToForm(Option<String>),
     Failed,
 }
 
@@ -147,6 +149,15 @@ impl Component for Scores {
 
                 self.selected_scores.clear();
             },
+            Msg::NavigateToForm(score_id) => {
+                let navigator = ctx.link().navigator().unwrap();
+
+                if score_id.is_none() {
+                    navigator.push(&AppRoute::ScoreForm);
+                }
+
+                return false;
+            }
             Msg::Failed => todo!(),
         }
 
@@ -174,7 +185,7 @@ impl Component for Scores {
                     }}
                     <Button 
                         class="bg-blue-400 inline-flex items-center" 
-                        onclick={Callback::noop()} 
+                        onclick={ctx.link().callback(|_| Msg::NavigateToForm(None))} 
                         variant={ButtonVariant::Contained}
                     >
                         <Icon name="add" class="mr-2"/> {"Add Score"}

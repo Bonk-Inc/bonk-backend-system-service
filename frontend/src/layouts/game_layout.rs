@@ -30,7 +30,7 @@ impl Component for GameLayout {
         let id = ctx.props().id.clone();
 
         match msg {
-            Msg::Test => {todo!()},
+            Msg::Test => {},
             Msg::NavigateToGame => {
                 navigator.push(&AppRoute::Game { id });
             },
@@ -62,7 +62,7 @@ impl Component for GameLayout {
                             onclick={ctx.link().callback(|_| Msg::NavigateToScores)}
                             selected={matches!(location, AppRoute::Scores { .. })} 
                         />
-                        <Tab icon="map" label="Levels" onclick={ctx.link().callback(|_| Msg::Test)} />
+                        //<Tab icon="map" label="Levels" onclick={ctx.link().callback(|_| Msg::Test)} />
                     </Tabs>
                 </Toolbar>
                 <div class={classes!("p-4")}>
