@@ -5,8 +5,8 @@ use babs::{
     respone::ResponseBody,
 };
 use uuid::Uuid;
-use wasm_bindgen::{JsCast, JsValue};
-use web_sys::{Event, HtmlInputElement, console::log_1, HtmlSelectElement};
+use wasm_bindgen::JsCast;
+use web_sys::{Event, HtmlInputElement, HtmlSelectElement, window, UrlSearchParams};
 use yew::{classes, html, Component, Context, Html, Properties};
 use yew_router::scope_ext::RouterScopeExt;
 
@@ -23,6 +23,7 @@ use crate::{
 
 pub struct ScoreForm {
     score: Score,
+    game_id: Uuid,
     games: Vec<Game>,
 }
 
@@ -34,11 +35,11 @@ pub struct ScoresFormProps {
 
 pub enum Msg {
     FetchScore(String),
-    FetchGames,
+    //FetchGames,
     SaveScore,
     ChangeHidden,
     Cancelled,
-    Response(Vec<Game>),
+    //Response(Vec<Game>),
     Error(String),
     ScoreSaved,
     ChangeUsername(String),
@@ -51,7 +52,11 @@ impl Component for ScoreForm {
     type Properties = ScoresFormProps;
 
     fn create(ctx: &Context<Self>) -> Self {
-        ctx.link().send_message(Msg::FetchGames);
+        let search_string = window().unwrap().location().search().unwrap_or_default();
+        let search_params = UrlSearchParams::new_with_str(&search_string).unwrap();
+        let game_id = search_params.get("game").unwrap_or_default();
+
+        //ctx.link().send_message(Msg::FetchGames);
 
         if let Some(score_id) = &ctx.props().score_id {
             ctx.link().send_message(Msg::FetchScore(score_id.clone()))
@@ -59,30 +64,33 @@ impl Component for ScoreForm {
 
         ScoreForm {
             score: Score::default(),
+            game_id: Uuid::from_str(&game_id).unwrap_or_default(),
             games: vec![],
         }
     }
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
-            Msg::FetchGames => ctx.link().send_future(async {
-                match Fetch::get("http://localhost:8080/api/game", Some(true)).await {
-                    Ok(body) => {
-                        if let Ok(response) =
-                            serde_wasm_bindgen::from_value::<ResponseBody<Vec<Game>>>(body)
-                        {
-                            return Msg::Response(response.data);
-                        }
+            // Msg::FetchGames => ctx.link().send_future(async {
+            //     match Fetch::get("http://localhost:8080/api/game", Some(true)).await {
+            //         Ok(body) => {
+            //             if let Ok(response) =
+            //                 serde_wasm_bindgen::from_value::<ResponseBody<Vec<Game>>>(body)
+            //             {
+            //                 return Msg::Response(response.data);
+            //             }
 
-                        Msg::Error("Failed to fetch games".to_string())
-                    }
-                    Err(_) => Msg::Error("Failed to fetch games".to_string()),
-                }
-            }),
+            //             Msg::Error("Failed to fetch games".to_string())
+            //         }
+            //         Err(_) => Msg::Error("Failed to fetch games".to_string()),
+            //     }
+            // }),
             Msg::FetchScore(_) => todo!(),
             Msg::SaveScore => {
-                let body = serde_json::to_string(&self.score).unwrap();
+                self.score.game_id = self.game_id;
+
                 let score_id = ctx.props().score_id.clone();
+                let body = serde_json::to_string(&self.score).unwrap();
 
                 ctx.link().send_future(async move {
                     if let Some(id) = &score_id {
@@ -100,11 +108,10 @@ impl Component for ScoreForm {
                     }
                 })
             }
-            Msg::Response(games) => self.games = games,
+            //Msg::Response(games) => self.games = games,
             Msg::ChangeUsername(username) => self.score.username = username,
             Msg::ChangeHidden => self.score.is_hidden = !self.score.is_hidden,
             Msg::ChangeGame(game) => {
-                log_1(&JsValue::from_str(&game));
                 self.score.game_id = Uuid::from_str(&game).unwrap();
             }
             Msg::ChangeScore(score) => {
@@ -118,7 +125,7 @@ impl Component for ScoreForm {
             }
             Msg::ScoreSaved | Msg::Cancelled => {
                 let navigator = ctx.link().navigator().unwrap();
-                navigator.push(&AppRoute::Home);
+                navigator.push(&AppRoute::Scores { game_id: self.game_id.to_string() })
             },
             Msg::Error(_) => todo!(),
         }
@@ -136,22 +143,22 @@ impl Component for ScoreForm {
                         {"Score details"}
                     </h1>
                     <form class={classes!("flex", "flex-wrap")}>
-                        <Select
-                            id={"score-game"}
-                            name={"score-game"}
-                            class="mb-2"
-                            full_width={true}
-                            label={"Game"}
-                            required={true}
-                            onchange={ctx.link().callback(|e: Event| {
-                                let target = e.target().unwrap();
-                                let input = target.dyn_ref::<HtmlSelectElement>().unwrap();
+                        // <Select
+                        //     id={"score-level"}
+                        //     name={"score-level"}
+                        //     class="mb-2"
+                        //     full_width={true}
+                        //     label={"Game"}
+                        //     required={true}
+                        //     onchange={ctx.link().callback(|e: Event| {
+                        //         let target = e.target().unwrap();
+                        //         let input = target.dyn_ref::<HtmlSelectElement>().unwrap();
 
-                                Msg::ChangeGame(input.value())
-                            })}
-                        >
-                            { for self.games.iter().map(|g| html!(<option value={g.id.to_string()} >{g.name.clone()}</option>)) }
-                        </Select>
+                        //         Msg::ChangeGame(input.value())
+                        //     })}
+                        // >
+                        //     { for self.games.iter().map(|g| html!(<option value={g.id.to_string()} >{g.name.clone()}</option>)) }
+                        // </Select>
                         <TextField
                             id={"score-username"}
                             class="mb-4 !w-2/3 pr-3"

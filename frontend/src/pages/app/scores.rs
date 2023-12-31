@@ -1,4 +1,4 @@
-use std::{collections::HashSet, mem};
+use std::{collections::{HashSet, HashMap}, mem};
 
 use babs::{models::Score, respone::ResponseBody};
 use yew::{html, Component, Context, Html, Properties, classes, Callback};
@@ -143,7 +143,7 @@ impl Component for Scores {
             Msg::DeleteScoresResponse => {
                 self.scores = self.scores
                     .iter()
-                    .filter(|s| self.selected_scores.iter().any(|id| *id == s.id.to_string()))
+                    .filter(|s| self.selected_scores.iter().any(|id| *id != s.id.to_string()))
                     .map(|s: &Score| s.clone())
                     .collect::<Vec<Score>>();
 
@@ -151,9 +151,10 @@ impl Component for Scores {
             },
             Msg::NavigateToForm(score_id) => {
                 let navigator = ctx.link().navigator().unwrap();
+                let game_id = ctx.props().game_id.clone();
 
                 if score_id.is_none() {
-                    navigator.push(&AppRoute::ScoreForm);
+                    let _ = navigator.push_with_query(&AppRoute::ScoreForm, &HashMap::from([("game", game_id)]));
                 }
 
                 return false;

@@ -54,7 +54,7 @@ pub fn find_by_game(
 pub fn insert(new_score: ScoreDTO, pool: &web::Data<Pool>) -> Result<Score, ServiceError> {
     match Score::insert(new_score, &mut pool.get().unwrap()) {
         Ok(score) => Ok(score),
-        Err(_) => Err(ServiceError::NotFound {
+        Err(_) => Err(ServiceError::InternalServerError {
             error_message: "Error saving new score".to_string(),
         }),
     }
