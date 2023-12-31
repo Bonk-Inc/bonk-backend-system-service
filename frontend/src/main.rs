@@ -8,6 +8,7 @@ use crate::{
 
 pub mod app;
 pub mod components;
+pub mod env;
 pub mod layouts;
 pub mod models;
 pub mod pages;

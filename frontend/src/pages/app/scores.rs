@@ -11,7 +11,7 @@ use crate::{
         table_row::TableRow, checkbox::Checkbox, spinner::Spinner, icon::Icon, button::{Button, ButtonVariant},
     },
     layouts::game_layout::GameLayout,
-    service::fetch::Fetch, app::AppRoute,
+    service::fetch::Fetch, app::AppRoute, env,
 };
 
 pub struct Scores {
@@ -64,10 +64,8 @@ impl Component for Scores {
                 self.status = Status::Fetching;
 
                 ctx.link().send_future(async move {
-                    let url = format!(
-                        "http://localhost:8080/api/score/game/{}?hidden=true",
-                        game_id
-                    );
+                    let url = format!("{}/api/score/game/{}?hidden=true", env::APP_API_URL, game_id);
+                    
                     let scores = Fetch::get(&url, Some(true)).await;
                     if scores.is_err() {
                         return Msg::Failed;
@@ -103,7 +101,7 @@ impl Component for Scores {
             },
             Msg::UpdateScore(new_score) => {
                 ctx.link().send_future(async move {
-                    let url = format!("http://localhost:8080/api/score/{}", new_score.id);
+                    let url = format!("{}/api/score/{}", env::APP_API_URL, new_score.id);
                     let body = serde_json::to_string(&new_score).unwrap();
 
                     let response = Fetch::put(&url, &body, Some(true)).await;
@@ -130,7 +128,7 @@ impl Component for Scores {
                     .join(",");
 
                 ctx.link().send_future(async move {
-                    let url = format!("http://localhost:8080/api/score/({})", ids);
+                    let url = format!("{}/api/score/({})", env::APP_API_URL, ids);
                     let scores = Fetch::delete(&url, Some(true)).await;
 
                     if scores.is_err() {

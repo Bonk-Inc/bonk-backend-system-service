@@ -22,6 +22,7 @@ use crate::components::{
     spinner::Spinner,
     toolbar::Toolbar
 };
+use crate::env;
 use crate::models::game::GameDTO;
 use crate::service::fetch::Fetch;
 
@@ -86,7 +87,7 @@ impl Component for MainLayout {
                 self.state = State::FetchingGames;
 
                 ctx.link().send_future(async {       
-                    match Fetch::get("http://localhost:8080/api/game", Some(true)).await {
+                    match Fetch::get(&format!("{}/api/game", env::APP_API_URL), Some(true)).await {
                         Ok(body) => {
                             if let Ok(response) = serde_wasm_bindgen::from_value::<ResponseBody<Vec<Game>>>(body) {
                                 return Msg::Resp(response.data);
@@ -115,7 +116,7 @@ impl Component for MainLayout {
                 let body = serde_json::to_string(&game).unwrap();
 
                 ctx.link().send_future(async move {
-                    match Fetch::post("http://localhost:8080/api/game", &body, Some(true)).await {
+                    match Fetch::post(&format!("{}/api/game", env::APP_API_URL), &body, Some(true)).await {
                         Ok(_) => Msg::GameSaved,
                         Err(_) => Msg::Error("Failed to save game".to_string()),
                     }

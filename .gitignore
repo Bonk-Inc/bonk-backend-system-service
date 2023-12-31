@@ -479,3 +479,4 @@ FodyWeavers.xsd
 .env
 jwk.json
 **/dist/
+frontend/src/env.rs

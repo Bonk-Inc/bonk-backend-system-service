@@ -343,6 +343,7 @@ name = "babs_frontend"
 version = "0.1.0"
 dependencies = [
  "babs",
+ "dotenvy",
  "getrandom",
  "reqwasm",
  "serde",

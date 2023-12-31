@@ -63,6 +63,11 @@ WORKDIR /bonk-inc-backend
 
 COPY ./ .
 
+# create .env file
+RUN cd ./frontend/ && cat <<EOT >> .env
+APP_API_URL="https://babs.bonk.group"
+EOT
+
 RUN cd ./frontend/ && trunk build --release
 
 #####################################################################
@@ -84,7 +89,7 @@ COPY --from=backend-build /bonk-inc-backend/target/x86_64-unknown-linux-gnu/rele
 COPY --from=frontend-build /bonk-inc-backend/dist/ ./dist/
 
 # Set file permissions
-RUN chmod +rw * 
+RUN chmod +rw *
 RUN chown -R bonk-inc-backend:bonk-inc-backend *
 
 # Use an unprivileged user.

@@ -12,7 +12,7 @@ use crate::{
         spinner::Spinner,
         button::{Button, ButtonVariant},
         paper::{Paper, PaperElevation}
-    }, 
+    }, env, 
 };
 
 pub struct Authenticate {
@@ -51,7 +51,7 @@ impl Component for Authenticate {
 
                 if let Some(token) = refresh_token {
                     ctx.link().send_future(async move {
-                        let url = format!("http://localhost:8080/auth/refresh?token={}", token);
+                        let url = format!("{}/auth/refresh?token={}", env::APP_API_URL, token);
                         match Fetch::get(&url, None).await {
                             Ok(message) => {
                                 let response: ResponseBody<TokenResponse> = serde_wasm_bindgen::from_value(message).unwrap();
@@ -74,7 +74,7 @@ impl Component for Authenticate {
             }
 
             ctx.link().send_future(async move {
-                let url = format!("http://localhost:8080/auth/login?code={}&state={}", code.unwrap(), state.unwrap());
+                let url = format!("{}/auth/login?code={}&state={}", env::APP_API_URL, code.unwrap(), state.unwrap());
                 match Fetch::get(&url, None).await {
                     Ok(message) => {
                         let response: ResponseBody<TokenResponse> = serde_wasm_bindgen::from_value(message).unwrap();
@@ -100,7 +100,7 @@ impl Component for Authenticate {
         match msg {
             Msg::Login => {
                 ctx.link().send_future(async {
-                    match Fetch::get("http://localhost:8080/auth/authorize", None).await {
+                    match Fetch::get(&format!("{}/auth/authorize", env::APP_API_URL), None).await {
                         Ok(message) => {
                             let response: ResponseBody<String> = serde_wasm_bindgen::from_value(message).unwrap();
                             Msg::SetAuthCode(response.data)

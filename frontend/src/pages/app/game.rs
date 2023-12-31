@@ -12,7 +12,7 @@ use crate::{
         spinner::Spinner, 
         stats_card::StatsCard
     }, 
-    layouts::game_layout::GameLayout,
+    layouts::game_layout::GameLayout, env,
 };
 
 pub struct Game {
@@ -74,7 +74,7 @@ impl Component for Game {
                 self.status = Status::Fetching;
 
                 ctx.link().send_future(async move {
-                    let url = format!("http://localhost:8080/api/stats/game/{}", id);
+                    let url = format!("{}/api/stats/game/{}", env::APP_API_URL, id);
                     let game_stats = Fetch::get(&url, Some(true)).await;
                     if game_stats.is_err() {
                         return Msg::Failed;

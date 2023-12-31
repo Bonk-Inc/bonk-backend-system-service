@@ -30,3 +30,6 @@ features = [
     "Window",
     "console",
 ]
+
+[build-dependencies]
+dotenvy = "0.15.7"

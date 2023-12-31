@@ -7,7 +7,7 @@ use crate::{
     components::{
         stats_card::StatsCard,
         spinner::Spinner
-    }
+    }, env
 };
 
 pub struct Home {
@@ -42,7 +42,7 @@ impl Component for Home {
             Msg::MakeReq => {
                 ctx.link().send_future(async {
                     let info_message = Fetch::get("https://sso.bonk.group/application/o/userinfo/", Some(true)).await;
-                    let stats = Fetch::get("http://localhost:8080/api/stats/all", Some(true)).await;
+                    let stats = Fetch::get(&format!("{}/api/stats/all", env::APP_API_URL), Some(true)).await;
                     
                     if info_message.is_err() || stats.is_err() {
                         return Msg::Failed;

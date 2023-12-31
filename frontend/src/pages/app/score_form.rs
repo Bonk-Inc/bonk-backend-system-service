@@ -18,7 +18,7 @@ use crate::{
         select::Select,
         text_field::TextField, spinner::Spinner,
     },
-    service::fetch::Fetch, app::AppRoute,
+    service::fetch::Fetch, app::AppRoute, env,
 };
 
 pub struct ScoreForm {
@@ -97,7 +97,7 @@ impl Component for ScoreForm {
             // }),
             Msg::FetchScore(score_id) => {
                 ctx.link().send_future(async move {
-                    let url = format!("http://localhost:8080/api/score/{}", score_id);
+                    let url = format!("{}/api/score/{}", env::APP_API_URL, score_id);
                     let scores = Fetch::get(&url, Some(true)).await;
                     if scores.is_err() {
                         return Msg::Error("Error fetching Score".to_string());
@@ -119,7 +119,7 @@ impl Component for ScoreForm {
 
                 ctx.link().send_future(async move {
                     if let Some(id) = &score_id {
-                        let url = format!("http://localhost:8080/api/score/{}", id);
+                        let url = format!("{}/api/score/{}", env::APP_API_URL, id);
 
                         return match Fetch::put(&url, &body, Some(true)).await {
                             Ok(_) => Msg::ScoreSaved,
@@ -127,7 +127,7 @@ impl Component for ScoreForm {
                         };
                     }
 
-                    match Fetch::post("http://localhost:8080/api/score/", &body, Some(true)).await {
+                    match Fetch::post(&format!("{}/api/score/", env::APP_API_URL), &body, Some(true)).await {
                         Ok(_) => Msg::ScoreSaved,
                         Err(e) => Msg::Error(e.as_string().unwrap())
                     }

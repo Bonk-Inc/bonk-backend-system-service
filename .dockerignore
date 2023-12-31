@@ -3,6 +3,5 @@
 dist/
 target/
 
-.env
 .gitignore
 README.md
