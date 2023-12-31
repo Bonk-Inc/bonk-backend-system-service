@@ -1,7 +1,7 @@
 use std::{collections::{HashSet, HashMap}, mem};
 
 use babs::{models::Score, respone::ResponseBody};
-use yew::{html, Component, Context, Html, Properties, classes, Callback};
+use yew::{html, Component, Context, Html, Properties, classes};
 use yew_router::scope_ext::RouterScopeExt;
 
 use crate::{

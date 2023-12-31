@@ -16,7 +16,7 @@ use crate::{
         checkbox::Checkbox,
         form_control::FormControl,
         select::Select,
-        text_field::TextField,
+        text_field::TextField, spinner::Spinner,
     },
     service::fetch::Fetch, app::AppRoute,
 };
@@ -24,6 +24,7 @@ use crate::{
 pub struct ScoreForm {
     score: Score,
     game_id: Uuid,
+    status: Status,
     games: Vec<Game>,
 }
 
@@ -48,6 +49,11 @@ pub enum Msg {
     ChangeGame(String),
 }
 
+pub enum Status {
+    Loaded,
+    Fetching
+}
+
 impl Component for ScoreForm {
     type Message = Msg;
     type Properties = ScoresFormProps;
@@ -56,15 +62,18 @@ impl Component for ScoreForm {
         let search_string = window().unwrap().location().search().unwrap_or_default();
         let search_params = UrlSearchParams::new_with_str(&search_string).unwrap();
         let game_id = search_params.get("game").unwrap_or_default();
+        let mut status = Status::Loaded;
 
         //ctx.link().send_message(Msg::FetchGames);
 
         if let Some(score_id) = &ctx.props().score_id {
+            status = Status::Fetching;
             ctx.link().send_message(Msg::FetchScore(score_id.clone()))
         }
 
         ScoreForm {
             score: Score::default(),
+            status,
             game_id: Uuid::from_str(&game_id).unwrap_or_default(),
             games: vec![],
         }
@@ -94,11 +103,14 @@ impl Component for ScoreForm {
                         return Msg::Error("Error fetching Score".to_string());
                     }
 
-                    let response: ResponseBody<Score> = serde_wasm_bindgen::from_value(scores.unwrap()).unwrap();
+                    let response: ResponseBody<Score> = serde_wasm_bindgen::from_value(scores.unwrap()).unwrap();                    
                     Msg::SetScore(response.data)
                 });
             },
-            Msg::SetScore(score) => self.score = score,
+            Msg::SetScore(score) => {
+                self.status = Status::Loaded;
+                self.score = score;
+            },
             Msg::SaveScore => {
                 self.score.game_id = self.game_id;
 
@@ -153,87 +165,98 @@ impl Component for ScoreForm {
         html! {
             <div class={classes!("w-full", "flex", "justify-center", "bg-zinc-600")} style="height: calc(100vh - 56px);">
                 <div class={classes!("p-4", "w-1/2", "bg-zinc-800")}>
-                    <h1 class={classes!("font-medium", "text-lg", "mb-4", "mt-2")}>
-                        {"Score details"}
-                    </h1>
-                    <form class={classes!("flex", "flex-wrap")}>
-                        // <Select
-                        //     id={"score-level"}
-                        //     name={"score-level"}
-                        //     class="mb-2"
-                        //     full_width={true}
-                        //     label={"Game"}
-                        //     required={true}
-                        //     onchange={ctx.link().callback(|e: Event| {
-                        //         let target = e.target().unwrap();
-                        //         let input = target.dyn_ref::<HtmlSelectElement>().unwrap();
-
-                        //         Msg::ChangeGame(input.value())
-                        //     })}
-                        // >
-                        //     { for self.games.iter().map(|g| html!(<option value={g.id.to_string()} >{g.name.clone()}</option>)) }
-                        // </Select>
-                        <TextField
-                            id={"score-username"}
-                            class="mb-4 !w-2/3 pr-3"
-                            name={"score-name"}
-                            label={"Username"}
-                            value={score.username}
-                            required={true}
-                            onchange={ctx.link().callback(|e: Event| {
-                                let target = e.target().unwrap();
-                                let input = target.dyn_ref::<HtmlInputElement>().unwrap();
-
-                                Msg::ChangeUsername(input.value())
-                            })}
-                        />
-                        <TextField
-                            id={"score-highscore"}
-                            class="mb-4 !w-1/3 pl-3"
-                            name={"score-highscore"}
-                            label={"Score"}
-                            value={score.highscore.to_string()}
-                            required={true}
-                            onchange={ctx.link().callback(|e: Event| {
-                                let target = e.target().unwrap();
-                                let input = target.dyn_ref::<HtmlInputElement>().unwrap();
-
-                                Msg::ChangeScore(input.value())
-                            })}
-                        />
-                        <FormControl full_width={true}>
-                            <label class={classes!("inline-flex", "items-center", "cursor-pointer")}>
-                                <Checkbox
-                                    id="score-hidden"
-                                    class="!justify-start px-0 mr-3"
-                                    checked={score.is_hidden}
-                                    onchange={ctx.link().callback(|_| Msg::ChangeHidden)}
-                                />
-                                {"Hidden"}
-                            </label>
-                        </FormControl>
-                        <hr class={classes!("w-full", "mt-8", "mb-5", "border-zinc-500")} />
-                        <div class="w-full flex justify-end">
-                            <div class="flex">
-                                <Button
-                                    class="mr-2 text-blue-400 border-zinc-500"
-                                    variant={ButtonVariant::Outlined}
-                                    size={ButtonSize::Large}
-                                    onclick={ctx.link().callback(|_| Msg::Cancelled)}
-                                >
-                                    {"Cancel"}
-                                </Button>
-                                <Button
-                                    class="bg-blue-400"
-                                    variant={ButtonVariant::Contained}
-                                    size={ButtonSize::Large}
-                                    onclick={ctx.link().callback(|_| Msg::SaveScore)}
-                                >
-                                    {"Create"}
-                                </Button>
+                    {match &self.status {
+                        Status::Fetching => html! {
+                            <div class={classes!("flex", "justify-center", "items-center", "h-full")}>
+                                <Spinner class="w-20 h-20" />
                             </div>
-                        </div>
-                    </form>
+                        },
+                        Status::Loaded => html! {
+                            <>
+                                <h1 class={classes!("font-medium", "text-lg", "mb-4", "mt-2")}>
+                                    {"Score details"}
+                                </h1>
+                                <form class={classes!("flex", "flex-wrap")}>
+                                    // <Select
+                                    //     id={"score-level"}
+                                    //     name={"score-level"}
+                                    //     class="mb-2"
+                                    //     full_width={true}
+                                    //     label={"Game"}
+                                    //     required={true}
+                                    //     onchange={ctx.link().callback(|e: Event| {
+                                    //         let target = e.target().unwrap();
+                                    //         let input = target.dyn_ref::<HtmlSelectElement>().unwrap();
+
+                                    //         Msg::ChangeGame(input.value())
+                                    //     })}
+                                    // >
+                                    //     { for self.games.iter().map(|g| html!(<option value={g.id.to_string()} >{g.name.clone()}</option>)) }
+                                    // </Select>
+                                    <TextField
+                                        id={"score-username"}
+                                        class="mb-4 !w-2/3 pr-3"
+                                        name={"score-name"}
+                                        label={"Username"}
+                                        value={score.username}
+                                        required={true}
+                                        onchange={ctx.link().callback(|e: Event| {
+                                            let target = e.target().unwrap();
+                                            let input = target.dyn_ref::<HtmlInputElement>().unwrap();
+
+                                            Msg::ChangeUsername(input.value())
+                                        })}
+                                    />
+                                    <TextField
+                                        id={"score-highscore"}
+                                        class="mb-4 !w-1/3 pl-3"
+                                        name={"score-highscore"}
+                                        label={"Score"}
+                                        value={score.highscore.to_string()}
+                                        required={true}
+                                        onchange={ctx.link().callback(|e: Event| {
+                                            let target = e.target().unwrap();
+                                            let input = target.dyn_ref::<HtmlInputElement>().unwrap();
+
+                                            Msg::ChangeScore(input.value())
+                                        })}
+                                    />
+                                    <FormControl full_width={true}>
+                                        <label class={classes!("inline-flex", "items-center", "cursor-pointer")}>
+                                            <Checkbox
+                                                id="score-hidden"
+                                                class="!justify-start px-0 mr-3"
+                                                checked={score.is_hidden}
+                                                onchange={ctx.link().callback(|_| Msg::ChangeHidden)}
+                                            />
+                                            {"Hidden"}
+                                        </label>
+                                    </FormControl>
+                                    <hr class={classes!("w-full", "mt-8", "mb-5", "border-zinc-500")} />
+                                    <div class="w-full flex justify-end">
+                                        <div class="flex">
+                                            <Button
+                                                class="mr-2 text-blue-400 border-zinc-500"
+                                                variant={ButtonVariant::Outlined}
+                                                size={ButtonSize::Large}
+                                                onclick={ctx.link().callback(|_| Msg::Cancelled)}
+                                            >
+                                                {"Cancel"}
+                                            </Button>
+                                            <Button
+                                                class="bg-blue-400"
+                                                variant={ButtonVariant::Contained}
+                                                size={ButtonSize::Large}
+                                                onclick={ctx.link().callback(|_| Msg::SaveScore)}
+                                            >
+                                                {"Create"}
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </>
+                        },
+                    }}
                 </div>
             </div>
         }
