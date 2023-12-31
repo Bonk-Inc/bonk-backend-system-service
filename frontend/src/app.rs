@@ -17,7 +17,9 @@ pub enum AppRoute {
     #[at("/app/game/:game_id/score")]
     Scores { game_id: String },
     #[at("/app/score/add")]
-    ScoreForm,
+    ScoreAdd,
+    #[at("/app/score/:score_id")]
+    ScoreEdit { score_id: String },
 }
 
 fn switch(routes: AppRoute) -> Html {
@@ -25,8 +27,8 @@ fn switch(routes: AppRoute) -> Html {
         AppRoute::Home => html!(<Home />),
         AppRoute::Game { id } => html!(<Game id={id} />),
         AppRoute::Scores { game_id } => html!(<Scores game_id={game_id} />),
-        AppRoute::ScoreForm => html!(<ScoreForm />),
-        //AppRoute::ScoreForm { score_id } => html!(<ScoreForm score_id={score_id} />)
+        AppRoute::ScoreAdd => html!(<ScoreForm />),
+        AppRoute::ScoreEdit { score_id } => html!(<ScoreForm score_id={score_id} />)
     }
 }
 

@@ -42,6 +42,7 @@ pub enum Msg {
     //Response(Vec<Game>),
     Error(String),
     ScoreSaved,
+    SetScore(Score),
     ChangeUsername(String),
     ChangeScore(String),
     ChangeGame(String),
@@ -85,7 +86,19 @@ impl Component for ScoreForm {
             //         Err(_) => Msg::Error("Failed to fetch games".to_string()),
             //     }
             // }),
-            Msg::FetchScore(_) => todo!(),
+            Msg::FetchScore(score_id) => {
+                ctx.link().send_future(async move {
+                    let url = format!("http://localhost:8080/api/score/{}", score_id);
+                    let scores = Fetch::get(&url, Some(true)).await;
+                    if scores.is_err() {
+                        return Msg::Error("Error fetching Score".to_string());
+                    }
+
+                    let response: ResponseBody<Score> = serde_wasm_bindgen::from_value(scores.unwrap()).unwrap();
+                    Msg::SetScore(response.data)
+                });
+            },
+            Msg::SetScore(score) => self.score = score,
             Msg::SaveScore => {
                 self.score.game_id = self.game_id;
 
@@ -109,6 +122,7 @@ impl Component for ScoreForm {
                 })
             }
             //Msg::Response(games) => self.games = games,
+            
             Msg::ChangeUsername(username) => self.score.username = username,
             Msg::ChangeHidden => self.score.is_hidden = !self.score.is_hidden,
             Msg::ChangeGame(game) => {

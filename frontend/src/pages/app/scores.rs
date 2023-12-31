@@ -154,7 +154,12 @@ impl Component for Scores {
                 let game_id = ctx.props().game_id.clone();
 
                 if score_id.is_none() {
-                    let _ = navigator.push_with_query(&AppRoute::ScoreForm, &HashMap::from([("game", game_id)]));
+                    let _ = navigator.push_with_query(&AppRoute::ScoreAdd, &HashMap::from([("game", game_id)]));
+                } else {
+                    let _ = navigator.push_with_query(
+                        &AppRoute::ScoreEdit { score_id: score_id.expect("Score Id") },
+                        &HashMap::from([("game", game_id)])
+                    );
                 }
 
                 return false;
@@ -248,6 +253,7 @@ impl Component for Scores {
 impl Scores {
     fn render_score_row(&self, ctx: &Context<Self>, score: &Score) -> Html {
         let score_id = score.id.to_string();
+        let update_id = score.id.to_string();
         let old_score = score.to_owned();
         let set_at = if let Some(updated_at) = score.updated_at {
             updated_at
@@ -285,7 +291,7 @@ impl Scores {
                     <Button
                         dense={true}
                         class="flex justify-end w-full"
-                        onclick={Callback::noop()}
+                        onclick={ctx.link().callback(move |_| Msg::NavigateToForm(Some(update_id.clone())))}
                     >
                         <Icon name="edit"/>
                     </Button>
