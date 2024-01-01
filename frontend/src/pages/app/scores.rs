@@ -8,7 +8,7 @@ use crate::{
     components::{
         table::Table, table_body::TableBody, table_cell::TableCell,
         table_container::TableContainer, table_head::TableHead,
-        table_row::TableRow, checkbox::Checkbox, spinner::Spinner, icon::Icon, button::{Button, ButtonVariant},
+        table_row::TableRow, checkbox::Checkbox, spinner::Spinner, icon::Icon, button::{Button, ButtonVariant}, alert::{Alert, Severity},
     },
     layouts::game_layout::GameLayout,
     service::fetch::Fetch, app::AppRoute, env,
@@ -28,6 +28,7 @@ pub struct ScoresProps {
 pub enum Status {
     Fetching,
     Finished,
+    Failed(String)
 }
 
 pub enum Msg {
@@ -40,7 +41,7 @@ pub enum Msg {
     DeleteScores,
     DeleteScoresResponse,
     NavigateToForm(Option<String>),
-    Failed,
+    Failed(String),
 }
 
 impl Component for Scores {
@@ -68,7 +69,7 @@ impl Component for Scores {
                     
                     let scores = Fetch::get(&url, Some(true)).await;
                     if scores.is_err() {
-                        return Msg::Failed;
+                        return Msg::Failed("Failed fetching scores".to_string());
                     }
 
                     let stats_data: ResponseBody<Vec<Score>> = serde_wasm_bindgen::from_value(scores.unwrap()).unwrap();
@@ -106,7 +107,7 @@ impl Component for Scores {
 
                     let response = Fetch::put(&url, &body, Some(true)).await;
                     if response.is_err() {
-                        return Msg::Failed;
+                        return Msg::Failed("An error occured during updating score".to_string());
                     }
 
                     let score: ResponseBody<Score> = serde_wasm_bindgen::from_value(response.unwrap()).unwrap();
@@ -132,7 +133,7 @@ impl Component for Scores {
                     let scores = Fetch::delete(&url, Some(true)).await;
 
                     if scores.is_err() {
-                        return Msg::Failed;
+                        return Msg::Failed("An error occured when deleting score".to_string());
                     }
 
                     Msg::DeleteScoresResponse
@@ -162,7 +163,7 @@ impl Component for Scores {
 
                 return false;
             }
-            Msg::Failed => todo!(),
+            Msg::Failed(error) => self.status = Status::Failed(error),
         }
 
         true
@@ -202,44 +203,51 @@ impl Component for Scores {
                                 <Spinner class="w-20 h-20" />
                             </div>
                         },
-                        Status::Finished => html! {
-                            <Table>
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell checkbox={true}>
-                                            <Checkbox 
-                                                id={"select-all"}
-                                                indeterminate={selected_score_len > 0 && selected_score_len != score_len}
-                                                checked={selected_score_len > 0 && selected_score_len == score_len}
-                                                onchange={ctx.link().callback(|_| Msg::SelectAllScores)}
-                                            />
-                                        </TableCell>
-                                        <TableCell>
-                                            {"User"}
-                                        </TableCell>
-                                        <TableCell>
-                                            {"Score"}
-                                        </TableCell>
-                                        <TableCell>
-                                            {"Set at"}
-                                        </TableCell>
-                                        <TableCell>
-                                            {"Hidden"}
-                                        </TableCell>
-                                        <TableCell checkbox={true}>
-                                            <Button 
-                                                class="flex justify-end w-full"
-                                                onclick={ctx.link().callback(|_| Msg::MakeReq)}
-                                            >
-                                                <Icon name="refresh"/>
-                                            </Button>
-                                        </TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    { for self.scores.iter().map(|score| self.render_score_row(ctx, score)) }
-                                </TableBody>
-                            </Table>
+                        _ => html! {
+                            <>
+                                if let Status::Failed(error) = &self.status {
+                                    <div class={classes!("absolute", "w-80", "z-50", "top-20", "left-[40%]")}>
+                                        <Alert severity={Severity::Error}>{error.clone()}</Alert>
+                                    </div>
+                                }
+                                <Table>
+                                    <TableHead>
+                                        <TableRow>
+                                            <TableCell checkbox={true}>
+                                                <Checkbox 
+                                                    id={"select-all"}
+                                                    indeterminate={selected_score_len > 0 && selected_score_len != score_len}
+                                                    checked={selected_score_len > 0 && selected_score_len == score_len}
+                                                    onchange={ctx.link().callback(|_| Msg::SelectAllScores)}
+                                                />
+                                            </TableCell>
+                                            <TableCell>
+                                                {"User"}
+                                            </TableCell>
+                                            <TableCell>
+                                                {"Score"}
+                                            </TableCell>
+                                            <TableCell>
+                                                {"Set at"}
+                                            </TableCell>
+                                            <TableCell>
+                                                {"Hidden"}
+                                            </TableCell>
+                                            <TableCell checkbox={true}>
+                                                <Button 
+                                                    class="flex justify-end w-full"
+                                                    onclick={ctx.link().callback(|_| Msg::MakeReq)}
+                                                >
+                                                    <Icon name="refresh"/>
+                                                </Button>
+                                            </TableCell>
+                                        </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                        { for self.scores.iter().map(|score| self.render_score_row(ctx, score)) }
+                                    </TableBody>
+                                </Table>
+                            </>
                         }
                     }}
                 </TableContainer>

@@ -16,7 +16,7 @@ use crate::{
         checkbox::Checkbox,
         form_control::FormControl,
         select::Select,
-        text_field::TextField, spinner::Spinner,
+        text_field::TextField, spinner::Spinner, alert::{Alert, Severity},
     },
     service::fetch::Fetch, app::AppRoute, env,
 };
@@ -51,7 +51,8 @@ pub enum Msg {
 
 pub enum Status {
     Loaded,
-    Fetching
+    Fetching,
+    Failed(String)
 }
 
 impl Component for ScoreForm {
@@ -123,13 +124,13 @@ impl Component for ScoreForm {
 
                         return match Fetch::put(&url, &body, Some(true)).await {
                             Ok(_) => Msg::ScoreSaved,
-                            Err(e) => Msg::Error(e.as_string().unwrap())
+                            Err(e) => Msg::Error("An error occured during updating score".to_string())
                         };
                     }
 
                     match Fetch::post(&format!("{}/api/score/", env::APP_API_URL), &body, Some(true)).await {
                         Ok(_) => Msg::ScoreSaved,
-                        Err(e) => Msg::Error(e.as_string().unwrap())
+                        Err(e) => Msg::Error("An error occured during saving score".to_string())
                     }
                 })
             }
@@ -153,7 +154,7 @@ impl Component for ScoreForm {
                 let navigator = ctx.link().navigator().unwrap();
                 navigator.push(&AppRoute::Scores { game_id: self.game_id.to_string() })
             },
-            Msg::Error(_) => todo!(),
+            Msg::Error(error) => self.status = Status::Failed(error),
         }
 
         true
@@ -171,11 +172,14 @@ impl Component for ScoreForm {
                                 <Spinner class="w-20 h-20" />
                             </div>
                         },
-                        Status::Loaded => html! {
+                        _ => html! {
                             <>
                                 <h1 class={classes!("font-medium", "text-lg", "mb-4", "mt-2")}>
                                     {"Score details"}
                                 </h1>
+                                if let Status::Failed(error) = &self.status {
+                                    <Alert severity={Severity::Error}>{error.clone()}</Alert>
+                                }
                                 <form class={classes!("flex", "flex-wrap")}>
                                     // <Select
                                     //     id={"score-level"}

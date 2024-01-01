@@ -10,7 +10,7 @@ use crate::{
     service::fetch::Fetch, 
     components::{
         spinner::Spinner, 
-        stats_card::StatsCard
+        stats_card::StatsCard, alert::{Alert, Severity}
     }, 
     layouts::game_layout::GameLayout, env,
 };
@@ -30,12 +30,13 @@ pub enum Msg {
     MakeReq(String),
     Response(GameStats),
     Nothing,
-    Failed,
+    Error(String),
 }
 
 pub enum Status {
     Fetching,
     Finished,
+    Failed(String)
 }
 
 impl Component for Game {
@@ -77,7 +78,7 @@ impl Component for Game {
                     let url = format!("{}/api/stats/game/{}", env::APP_API_URL, id);
                     let game_stats = Fetch::get(&url, Some(true)).await;
                     if game_stats.is_err() {
-                        return Msg::Failed;
+                        return Msg::Error("Error fetching game stats".to_string());
                     }
 
                     let stats_data: ResponseBody<GameStats> =
@@ -89,7 +90,7 @@ impl Component for Game {
                 self.stats = data;
                 self.status = Status::Finished
             }
-            Msg::Failed => self.status = Status::Finished,
+            Msg::Error(message) => self.status = Status::Failed(message),
             Msg::Nothing => {},
         }
 
@@ -109,9 +110,17 @@ impl Component for Game {
                             </div>
                         }
                     },
-                    Status::Finished => {
+                    _ => {
                         html! {
                             <div class={classes!("flex", "flex-wrap", "w-full")}>
+                                {if let Status::Failed(message) = &self.status {
+                                    html! {
+                                        <div class={classes!("absolute", "w-80", "z-50", "top-20", "left-[40%]")}>
+                                            <Alert severity={Severity::Error}>{message.clone()}</Alert>
+                                        </div>
+                                    }
+                                } else { html!() }}
+                                
                                 <StatsCard name="Levels" value={0} icon="map" class="ml-0" />
                                 <StatsCard name="Scores" value={self.stats.scores} icon="scoreboard" class="ml-0" />
                             </div>
