@@ -477,6 +477,6 @@ FodyWeavers.xsd
 *.sln.iml
 
 .env
-jwk.json
+data/
 **/dist/
 frontend/src/env.rs

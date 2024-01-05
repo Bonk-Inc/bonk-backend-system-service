@@ -1,6 +1,6 @@
 use std::{
     error::Error,
-    fs::OpenOptions,
+    fs::{OpenOptions, create_dir},
     io::{Write, ErrorKind, self}, 
     time::Duration,
     env,
@@ -31,7 +31,7 @@ pub mod middleware;
 pub mod models;
 pub mod service;
 
-pub const JWK_FILE_PATH: &str = "jwk.json";
+pub const JWK_FILE_PATH: &str = "data/jwk.json";
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -95,6 +95,7 @@ async fn fetch_and_save_jwk() -> Result<(), Box<dyn Error>> {
         return Err(Box::new(io::Error::new(ErrorKind::Other, "Could not fetch JWSK token")));
     }
 
+    let _ = create_dir("data");
     let file_options = OpenOptions::new()
         .write(true)
         .create(true)
