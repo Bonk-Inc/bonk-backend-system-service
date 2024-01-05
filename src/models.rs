@@ -16,7 +16,7 @@ pub struct Game {
 
 #[cfg_attr(feature = "backend", derive(Queryable, Selectable))]
 #[cfg_attr(feature = "backend", diesel(table_name = crate::schema::score))]
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Clone, Deserialize, Default)]
 pub struct Score {
     pub id: Uuid,
     pub username: String,
@@ -26,4 +26,15 @@ pub struct Score {
     pub game_id: Uuid,
     pub created_at: NaiveDateTime,
     pub updated_at: Option<NaiveDateTime>
+}
+
+#[derive(Serialize, Deserialize, Default)]
+pub struct GlobalStats {
+    pub games: i64,
+    pub scores: i64
+}
+
+#[derive(Serialize, Deserialize, Default)]
+pub struct GameStats {
+    pub scores: i64
 }

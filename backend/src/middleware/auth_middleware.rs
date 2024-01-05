@@ -1,17 +1,17 @@
+use std::env;
+
 use actix_web::{
     body::EitherBody,
     dev::{forward_ready, Service, ServiceRequest, ServiceResponse, Transform},
     Error, HttpResponse,
 };
+use babs::respone::ResponseBody;
 use futures_util::future::{ok, LocalBoxFuture, Ready};
 use jsonwebtoken::{Algorithm, DecodingKey, Validation};
 use log::{error, info};
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    models::respone::ResponseBody,
-    service::oauth2_service
-};
+use crate::service::oauth2_service;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct Claims {
@@ -56,6 +56,7 @@ where
     forward_ready!(service);
 
     fn call(&self, req: ServiceRequest) -> Self::Future {
+        let audience = env::var("OAUTH_CLIENT_ID").expect("OAUTH_CLIENT_ID must be set");
         let headers = req.headers().clone();
         let jwk_token = oauth2_service::get_jwk_tokens();
         let auth_token = headers.get("Authorization");
@@ -70,7 +71,9 @@ where
         }
 
         let token = auth_token.unwrap().to_str().unwrap().replace("Bearer ", "");
-        let validation = Validation::new(Algorithm::RS256);
+        let mut validation = Validation::new(Algorithm::RS256);
+        validation.set_audience(&[audience]);
+
         let decoding_key = match jwk_token.unwrap() {
             Some(token) => match DecodingKey::from_jwk(&token) {
                 Ok(key) => key,
@@ -100,10 +103,8 @@ where
         match jsonwebtoken::decode::<Claims>(token.as_str(), &decoding_key, &validation) {
             Ok(_) => info!("User authenticated"),
             Err(err) => {
-                info!(
-                    "User authentication failed, invalid token. Reason '{:?}'",
-                    err.kind()
-                );
+                info!("User authentication failed, invalid token. Reason '{:?}'", err.kind());
+
                 let (request, _) = req.into_parts();
                 let response = HttpResponse::Unauthorized()
                     .json(ResponseBody::new("Invalid token", ""))

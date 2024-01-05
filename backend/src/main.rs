@@ -1,6 +1,6 @@
 use std::{
     error::Error,
-    fs::OpenOptions,
+    fs::{OpenOptions, create_dir},
     io::{Write, ErrorKind, self}, 
     time::Duration,
     env,
@@ -31,7 +31,7 @@ pub mod middleware;
 pub mod models;
 pub mod service;
 
-pub const JWK_FILE_PATH: &str = "jwk.json";
+pub const JWK_FILE_PATH: &str = "data/jwk.json";
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -69,14 +69,14 @@ async fn main() -> std::io::Result<()> {
             .wrap(setup_cors())
             .service(controller::auth_scope())
             .service(controller::api_scope())
-            //.service(Files::new("/", "./dist/").index_file("index.html"))
-            // .default_service(|req: ServiceRequest| {
-            //     let (http_req, _payload) = req.into_parts();
-            //     async {
-            //         let response = NamedFile::open("./dist/index.html")?.into_response(&http_req);
-            //         Ok(ServiceResponse::new(http_req, response))
-            //     }
-            // })
+            .service(Files::new("/", "./dist/").index_file("index.html"))
+            .default_service(|req: ServiceRequest| {
+                let (http_req, _payload) = req.into_parts();
+                async {
+                    let response = NamedFile::open("./dist/index.html")?.into_response(&http_req);
+                    Ok(ServiceResponse::new(http_req, response))
+                }
+            })
     })
     .bind(&app_url)?
     .run()
@@ -95,6 +95,7 @@ async fn fetch_and_save_jwk() -> Result<(), Box<dyn Error>> {
         return Err(Box::new(io::Error::new(ErrorKind::Other, "Could not fetch JWSK token")));
     }
 
+    let _ = create_dir("data");
     let file_options = OpenOptions::new()
         .write(true)
         .create(true)
@@ -103,6 +104,8 @@ async fn fetch_and_save_jwk() -> Result<(), Box<dyn Error>> {
     if file_options.is_ok() {
         info!("Write new JWK token to file");
         let _ = file_options.unwrap().write_all(tokens.unwrap().as_bytes());
+    } else {
+        error!("Cannot write JWK token to file, reason {}", file_options.err().unwrap())
     }
 
    Ok(()) 

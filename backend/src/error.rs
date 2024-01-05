@@ -2,14 +2,13 @@ use actix_web::{
     http::{header::ContentType, StatusCode},
     HttpResponse, ResponseError,
 };
+use babs::respone::ResponseBody;
 use derive_more::{Display, Error};
-
-use crate::models::respone::ResponseBody;
 
 #[derive(Debug, Display, Error)]
 pub enum ServiceError {
     #[display(fmt = "{error_message}")]
-    Unautherized { error_message: String },
+    Unauthorized { error_message: String },
 
     #[display(fmt = "{error_message}")]
     InternalServerError { error_message: String },
@@ -24,7 +23,7 @@ pub enum ServiceError {
 impl ResponseError for ServiceError {
     fn status_code(&self) -> StatusCode {
         match *self {
-            ServiceError::Unautherized { .. } => StatusCode::UNAUTHORIZED,
+            ServiceError::Unauthorized { .. } => StatusCode::UNAUTHORIZED,
             ServiceError::InternalServerError { .. } => StatusCode::INTERNAL_SERVER_ERROR,
             ServiceError::BadRequest { .. } => StatusCode::BAD_REQUEST,
             ServiceError::NotFound { .. } => StatusCode::NOT_FOUND,

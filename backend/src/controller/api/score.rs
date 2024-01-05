@@ -1,11 +1,12 @@
 use actix_web::{web, HttpResponse, get, post, put, delete};
+use babs::respone::ResponseBody;
 use serde::Deserialize;
 use uuid::Uuid;
 
 use crate::{
     config::db::Pool,
     error::ServiceError,
-    models::{score::ScoreDTO, respone::ResponseBody},
+    models::score::ScoreDTO,
     service::score_service, 
 };
 
@@ -70,10 +71,10 @@ pub async fn update(
     }
 }
 
-#[delete("/{id}/")]
+#[delete("/({id})/")]
 pub async fn destroy(
     pool: web::Data<Pool>,
-    path: web::Path<Uuid>
+    path: web::Path<String>
 ) -> actix_web::Result<HttpResponse, ServiceError> {
     match score_service::delete(path.into_inner(), &pool) {
         Ok(_) => Ok(HttpResponse::NoContent().body("")),

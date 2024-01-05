@@ -1,8 +1,10 @@
 name: Build and Deploy project
 
-on:
-  push:
-    branches: ["master"]
+# on:
+#   push:
+#     branches: ["master"]
+
+on: [push]
 
 env:
   REGISTRY: ghcr.io
@@ -20,7 +22,7 @@ jobs:
 #       - name: 'Checkout Github Action'
 #         uses: actions/checkout@v3
       
-#       - name: Create .env file
+#       - name: Create backend .env file
 #         run: |
 #             cat <<EOT >> .env
 #             APP_HOST=${{ vars.APP_HOST }}
@@ -69,6 +71,12 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+
+      - name: Create frontend .env file
+        run: |
+            cd frontend/ & cat <<EOT >> .env
+            APP_API_URL=${{ vars.APP_API_URL }}
+            EOT
 
       - name: Deploy to Dokku
         uses: dokku/github-action@master

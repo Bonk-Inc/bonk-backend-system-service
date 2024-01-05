@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use actix_web::web;
 use uuid::Uuid;
 
@@ -6,7 +8,7 @@ use crate::{
     error::ServiceError,
     models::{
         score::{Score, ScoreDTO, self},
-        Delete, FindAll, FindById, Insert, Update
+        Model
     }
 };
 
@@ -52,7 +54,7 @@ pub fn find_by_game(
 pub fn insert(new_score: ScoreDTO, pool: &web::Data<Pool>) -> Result<Score, ServiceError> {
     match Score::insert(new_score, &mut pool.get().unwrap()) {
         Ok(score) => Ok(score),
-        Err(_) => Err(ServiceError::NotFound {
+        Err(_) => Err(ServiceError::InternalServerError {
             error_message: "Error saving new score".to_string(),
         }),
     }
@@ -77,14 +79,12 @@ pub fn update(
     }
 }
 
-pub fn delete(id: Uuid, pool: &web::Data<Pool>) -> Result<usize, ServiceError> {
-    if !score_exisits(id, pool) {
-        return Err(ServiceError::NotFound {
-            error_message: format!("Score with id '{}' not found", id.to_string()),
-        });
-    }
+pub fn delete(ids: String, pool: &web::Data<Pool>) -> Result<usize, ServiceError> {
+    let score_ids = ids.split(',')
+        .filter_map(|s| Uuid::from_str(s).ok())
+        .collect::<Vec<Uuid>>();
 
-    match Score::delete(id, &mut pool.get().unwrap()) {
+    match Score::delete_many(score_ids, &mut pool.get().unwrap()) {
         Ok(result) => Ok(result),
         Err(_) => Err(ServiceError::InternalServerError {
             error_message: "Error while deleting score".to_string(),
