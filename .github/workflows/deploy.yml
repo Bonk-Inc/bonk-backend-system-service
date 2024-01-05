@@ -72,6 +72,12 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Create frontend .env file
+        run: |
+            cd frontend/ & cat <<EOT >> .env
+            APP_API_URL=${{ vars.APP_API_URL }}
+            EOT
+
       - name: Deploy to Dokku
         uses: dokku/github-action@master
         with:
