@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y libssl-dev libpq-dev pkg-config
 
 # create appuser
 ENV USER=bonk-inc-backend
-ENV UID=10001
+ENV UID=32767
 
 RUN adduser \
     --disabled-password \
@@ -48,7 +48,7 @@ RUN cargo install --locked trunk
 
 # create appuser
 ENV USER=bonk-inc-backend
-ENV UID=10001
+ENV UID=32767
 
 RUN adduser \
     --disabled-password \
