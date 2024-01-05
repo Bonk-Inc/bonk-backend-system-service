@@ -1,8 +1,10 @@
 name: Build and Deploy project
 
-on:
-  push:
-    branches: ["master"]
+# on:
+#   push:
+#     branches: ["master"]
+
+on: [push]
 
 env:
   REGISTRY: ghcr.io
