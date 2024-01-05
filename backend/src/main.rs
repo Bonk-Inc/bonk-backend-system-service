@@ -103,6 +103,8 @@ async fn fetch_and_save_jwk() -> Result<(), Box<dyn Error>> {
     if file_options.is_ok() {
         info!("Write new JWK token to file");
         let _ = file_options.unwrap().write_all(tokens.unwrap().as_bytes());
+    } else {
+        error!("Cannot write JWK token to file, reason {}", file_options.err().unwrap())
     }
 
    Ok(()) 
