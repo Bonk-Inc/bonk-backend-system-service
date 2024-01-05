@@ -3,7 +3,7 @@ use wasm_bindgen::{JsValue, JsCast};
 use wasm_bindgen_futures::JsFuture;
 use web_sys::{RequestInit, RequestMode, RequestRedirect, Request, Response, window};
 
-use crate::models::oauth::TokenResponse;
+use crate::{models::oauth::TokenResponse, env};
 
 pub enum Method {
     GET,
@@ -64,7 +64,7 @@ pub async fn get_access_token() -> Option<String> {
         return None;
     }
     
-    let url = format!("http://localhost:8080/auth/refresh?token={}", refresh_token.unwrap());
+    let url = format!("{}/auth/refresh?token={}", env::APP_API_URL, refresh_token.unwrap());
     match fetch(&url, "GET", None, None).await {
         Ok(message) => {
             let response: ResponseBody<TokenResponse> = serde_wasm_bindgen::from_value(message).unwrap();
