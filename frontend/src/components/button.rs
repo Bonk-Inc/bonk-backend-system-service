@@ -61,6 +61,10 @@ impl Component for Button {
             _ => ()
         }
 
+        if ctx.props().dense {
+            base_classes.append(&mut vec!["!py-0"])
+        }
+
         html! {
             <button 
                 onclick={Callback::from(move |e| { onclick.emit(e); })}
