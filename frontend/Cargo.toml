@@ -3,25 +3,25 @@ name = "babs_frontend"
 version = "0.1.0"
 authors = ["Traxx186"]
 edition = "2021"
-rust-version = "1.74"
+rust-version = "1.76"
 readme = "README.md"
 
 [dependencies]
 babs = { version = "0.1.0", path = ".." }
-getrandom = { version = "0.2.11", features = ["js"] }
+getrandom = { version = "0.2.12", features = ["js"] }
 reqwasm = "0.5.0"
-serde = { version = "1.0.192", features = ["derive"] }
-serde_json = "1.0.108"
-serde-wasm-bindgen = "0.6.1"
-uuid = { version = "1.6.1", features = ["serde", "v4"] }
-wasm-bindgen = "0.2.88"
+serde = { version = "1.0.196", features = ["derive"] }
+serde_json = "1.0.113"
+serde-wasm-bindgen = "0.6.3"
+uuid = { version = "1.7.0", features = ["serde", "v4"] }
+wasm-bindgen = "0.2.91"
 wasm-logger = "0.2.0"
-wasm-bindgen-futures = "0.4.38"
+wasm-bindgen-futures = "0.4.41"
 yew = { version = "0.21.0", features = ["csr"] }
 yew-router = "0.18.0"
 
 [dependencies.web-sys]
-version = "0.3.66"
+version = "0.3.68"
 features = [
     "HtmlDocument",
     "HtmlInputElement",

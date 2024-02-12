@@ -1,7 +1,7 @@
 #####################################################################
 ## Build Backend
 ####################################################################
-FROM rust:1.74.0-slim-buster AS backend-build
+FROM rust:1.76.0-slim-buster AS backend-build
 
 RUN apt-get update && apt-get install -y libssl-dev libpq-dev pkg-config
 
@@ -28,7 +28,7 @@ RUN cargo build --target x86_64-unknown-linux-gnu --release -p babs_backend
 #####################################################################
 ## Build Front-end
 ####################################################################
-FROM rust:1.74.0-slim-buster AS frontend-build
+FROM rust:1.76.0-slim-buster AS frontend-build
 
 # install dependencies
 RUN apt-get update && apt-get install -y libssl-dev libpq-dev pkg-config curl
