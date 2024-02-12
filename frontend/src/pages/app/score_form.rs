@@ -191,7 +191,6 @@ impl Component for ScoreForm {
                                     //     onchange={ctx.link().callback(|e: Event| {
                                     //         let target = e.target().unwrap();
                                     //         let input = target.dyn_ref::<HtmlSelectElement>().unwrap();
-
                                     //         Msg::ChangeGame(input.value())
                                     //     })}
                                     // >

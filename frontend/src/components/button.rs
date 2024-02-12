@@ -18,6 +18,8 @@ pub struct ButtonProps {
     pub class: String,
     #[prop_or_default]
     pub dense: bool,
+    #[prop_or_default]
+    pub disabled: bool,
     pub onclick: Callback<MouseEvent>
 }
 
@@ -65,9 +67,14 @@ impl Component for Button {
             base_classes.append(&mut vec!["!py-0"])
         }
 
+        if ctx.props().disabled {
+            base_classes.append(&mut vec!["!text-stone-500"])
+        }
+
         html! {
             <button 
                 onclick={Callback::from(move |e| { onclick.emit(e); })}
+                disabled={ctx.props().disabled}
                 class={classes!(base_classes, class)}
                 type={"button"}
             >

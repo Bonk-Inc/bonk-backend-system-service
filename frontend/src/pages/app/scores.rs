@@ -1,14 +1,21 @@
-use std::{collections::{HashSet, HashMap}, mem};
+use std::{cmp, collections::{HashMap, HashSet}, mem};
 
 use babs::{models::Score, respone::ResponseBody};
-use yew::{html, Component, Context, Html, Properties, classes};
+use yew::{
+    prelude::*,
+    Component,
+    Context,
+    Html
+};
 use yew_router::scope_ext::RouterScopeExt;
+use wasm_bindgen::{JsCast, JsValue};
+use web_sys::{console::log_1, HtmlSelectElement};
 
 use crate::{
     components::{
         table::Table, table_body::TableBody, table_cell::TableCell,
         table_container::TableContainer, table_head::TableHead,
-        table_row::TableRow, checkbox::Checkbox, spinner::Spinner, icon::Icon, button::{Button, ButtonVariant}, alert::{Alert, Severity},
+        table_row::TableRow, checkbox::Checkbox, spinner::Spinner, icon::Icon, button::{Button, ButtonVariant}, alert::{Alert, Severity}, table_footer::TableFooter, table_pagination::TablePagination,
     },
     layouts::game_layout::GameLayout,
     service::fetch::Fetch, app::AppRoute, env,
@@ -17,7 +24,9 @@ use crate::{
 pub struct Scores {
     scores: Vec<Score>,
     status: Status,
-    selected_scores: HashSet<String>
+    selected_scores: HashSet<String>,
+    row_per_page: usize,
+    page: usize,
 }
 
 #[derive(Clone, PartialEq, Properties)]
@@ -41,6 +50,8 @@ pub enum Msg {
     DeleteScores,
     DeleteScoresResponse,
     NavigateToForm(Option<String>),
+    RowsPerPageChange(usize),
+    PageChange(usize),
     Failed(String),
 }
 
@@ -54,7 +65,9 @@ impl Component for Scores {
         Scores { 
             scores: Vec::new(),
             selected_scores: HashSet::new(),
-            status: Status::Fetching
+            status: Status::Fetching,
+            row_per_page: 10,
+            page: 0
         }
     }
 
@@ -163,6 +176,11 @@ impl Component for Scores {
 
                 return false;
             }
+            Msg::RowsPerPageChange(rows) => self.row_per_page = rows,
+            Msg::PageChange(page) => {
+                self.page = page;
+                log_1(&JsValue::from(page))
+            }
             Msg::Failed(error) => self.status = Status::Failed(error),
         }
 
@@ -173,13 +191,17 @@ impl Component for Scores {
         let game_id = ctx.props().game_id.clone();
         let selected_score_len = self.selected_scores.len();
         let score_len = self.scores.len();
+        let page = self.page;
+        let row_per_page = self.row_per_page;
+
+        let scores = &self.scores[page * row_per_page .. cmp::min(page * row_per_page + row_per_page, self.scores.len())];
 
         html! {
             <GameLayout id={game_id}>
                 <div class="py-4 flex justify-between">
                     {if self.selected_scores.len() > 0 {
                         html! {
-                            <Button onclick={ctx.link().callback(|_| Msg::DeleteScores)} class="text-red-400">
+                            <Button dense={true} onclick={ctx.link().callback(|_| Msg::DeleteScores)} class="text-red-400">
                                 <Icon name="delete"/>
                             </Button>
                         }
@@ -244,8 +266,25 @@ impl Component for Scores {
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>
-                                        { for self.scores.iter().map(|score| self.render_score_row(ctx, score)) }
+                                        { for scores.iter().map(|score| self.render_score_row(ctx, score)) }
                                     </TableBody>
+                                    <TableFooter>
+                                        <TableRow>
+                                            <TablePagination
+                                                col_span={6}
+                                                rows_per_page={row_per_page}
+                                                count={self.scores.len()}
+                                                page={page}
+                                                on_page_change={ctx.link().callback(|page| Msg::PageChange(page))}
+                                                on_rows_per_page_change={ctx.link().callback(|e: Event| {
+                                                    let target = e.target().unwrap();
+                                                    let input = target.dyn_ref::<HtmlSelectElement>().unwrap();
+
+                                                    Msg::RowsPerPageChange(input.value().parse::<usize>().unwrap())
+                                                })}
+                                            />
+                                        </TableRow>
+                                    </TableFooter>
                                 </Table>
                             </>
                         }

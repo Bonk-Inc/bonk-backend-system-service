@@ -20,6 +20,8 @@ pub struct TableCellProps {
     pub class: String,
     #[prop_or_default]
     pub checkbox: bool,
+    #[prop_or(1)]
+    pub col_span: usize
 }
 
 #[derive(Clone, PartialEq)]
@@ -45,6 +47,7 @@ impl Component for TableCell {
     fn view(&self, ctx: &Context<Self>) -> Html {
         let mut shared_classes = vec!["table-cell", "border-b-1", "border-solid"];
         let class = ctx.props().class.clone();
+        let colspan = ctx.props().col_span;
         let variant = &self.table_context.variant;
 
         if ctx.props().checkbox {
@@ -68,7 +71,7 @@ impl Component for TableCell {
             }
         } else {
             html! {
-                <td class={classes!(shared_classes, class)}>
+                <td class={classes!(shared_classes, class)} colspan={colspan.to_string()}>
                     {ctx.props().children.clone()}
                 </td>
             }
