@@ -11,6 +11,17 @@ diesel::table! {
 }
 
 diesel::table! {
+    level (id) {
+        id -> Uuid,
+        #[max_length = 50]
+        name -> Varchar,
+        game_id -> Uuid,
+        created_at -> Timestamp,
+        updated_at -> Nullable<Timestamp>,
+    }
+}
+
+diesel::table! {
     score (id) {
         id -> Uuid,
         #[max_length = 50]
@@ -21,19 +32,7 @@ diesel::table! {
         game_id -> Uuid,
         created_at -> Timestamp,
         updated_at -> Nullable<Timestamp>,
-    }
-}
-
-diesel::table! {
-    user (user_id) {
-        user_id -> Uuid,
-        #[max_length = 50]
-        username -> Varchar,
-        #[max_length = 128]
-        password -> Varchar,
-        #[max_length = 128]
-        email -> Varchar,
-        created_at -> Timestamp,
+        level_id -> Nullable<Uuid>,
     }
 }
 
@@ -41,6 +40,6 @@ diesel::joinable!(score -> game (game_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     game,
+    level,
     score,
-    user,
 );

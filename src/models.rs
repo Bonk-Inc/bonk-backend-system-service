@@ -15,6 +15,17 @@ pub struct Game {
 }
 
 #[cfg_attr(feature = "backend", derive(Queryable, Selectable))]
+#[cfg_attr(feature = "backend", diesel(table_name = crate::schema::level))]
+#[derive(Serialize, Clone, Deserialize, Default)]
+pub struct Level {
+    pub id: Uuid,
+    pub name: String,
+    pub game_id: Uuid,
+    pub created_at: NaiveDateTime,
+    pub updated_at: Option<NaiveDateTime>,
+}
+
+#[cfg_attr(feature = "backend", derive(Queryable, Selectable))]
 #[cfg_attr(feature = "backend", diesel(table_name = crate::schema::score))]
 #[derive(Serialize, Clone, Deserialize, Default)]
 pub struct Score {
@@ -23,7 +34,7 @@ pub struct Score {
     #[serde(rename = "score")]
     pub highscore: i32,
     pub is_hidden: bool,
-    pub game_id: Uuid,
+    pub level_id: Uuid,
     pub created_at: NaiveDateTime,
     pub updated_at: Option<NaiveDateTime>
 }

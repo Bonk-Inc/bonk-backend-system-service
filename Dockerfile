@@ -34,7 +34,7 @@ FROM rust:1.76.0-slim-buster AS frontend-build
 RUN apt-get update && apt-get install -y libssl-dev libpq-dev pkg-config curl
 
 # install node for npx command
-ENV NODE_VERSION=20.10.0
+ENV NODE_VERSION=20.11.0
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
 ENV NVM_DIR=/root/.nvm
 RUN . "$NVM_DIR/nvm.sh" && nvm install ${NODE_VERSION}
