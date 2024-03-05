@@ -74,5 +74,5 @@ pub fn delete(id: Uuid, pool: &web::Data<Pool>) -> Result<usize, ServiceError> {
 pub fn game_exisits(id: Uuid, pool: &web::Data<Pool>) -> bool {
     let game = Game::find_by_id(id, &mut pool.get().unwrap());
 
-    return game.is_ok();
+    game.is_ok()
 }
