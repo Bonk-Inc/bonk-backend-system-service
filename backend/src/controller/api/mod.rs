@@ -18,6 +18,7 @@ pub fn level_scope() -> Scope {
     web::scope("/level")
         .service(level::index)
         .service(level::store)
+        .service(level::update)
 }
 
 pub fn score_scope() -> Scope {

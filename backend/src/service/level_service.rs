@@ -1,13 +1,27 @@
 use actix_web::web;
 use babs::models::Level;
+use uuid::Uuid;
 
-use crate::{config::db::Pool, error::ServiceError, models::{level::LevelDTO, Model}};
+use crate::{
+    config::db::Pool,
+    error::ServiceError,
+    models::{level::LevelDTO, Model},
+};
 
 pub fn find_all(pool: &web::Data<Pool>) -> Result<Vec<Level>, ServiceError> {
     match Level::find_all(&mut pool.get().unwrap()) {
         Ok(levels) => Ok(levels),
         Err(_) => Err(ServiceError::InternalServerError {
             error_message: "Cannot fetch levels".to_string(),
+        }),
+    }
+}
+
+pub fn find_by_id(id: Uuid, pool: &web::Data<Pool>) -> Result<Level, ServiceError> {
+    match Level::find_by_id(id, &mut pool.get().unwrap()) {
+        Ok(level) => Ok(level),
+        Err(_) => Err(ServiceError::NotFound {
+            error_message: format!("Level with id '{}' not found", id.to_string()),
         }),
     }
 }
@@ -19,4 +33,27 @@ pub fn insert(new_level: LevelDTO, pool: &web::Data<Pool>) -> Result<Level, Serv
             error_message: "Cannot add a new level in database".to_string(),
         }),
     }
+}
+
+pub fn update(
+    id: Uuid,
+    updated_level: LevelDTO,
+    pool: &web::Data<Pool>,
+) -> Result<Level, ServiceError> {
+    if !level_exists(id, pool) {
+        return Err(ServiceError::NotFound {
+            error_message: format!("Level with id '{}' not found", id.to_string()),
+        });
+    }
+
+    match Level::update(id, updated_level, &mut pool.get().unwrap()) {
+        Ok(level) => Ok(level),
+        Err(_) => Err(ServiceError::InternalServerError { 
+            error_message: "Could not update game".to_string()
+        })
+    }
+}
+
+pub fn level_exists(id: Uuid, pool: &web::Data<Pool>) -> bool {
+    Level::find_by_id(id, &mut pool.get().unwrap()).is_ok()
 }
