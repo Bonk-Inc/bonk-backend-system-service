@@ -21,7 +21,7 @@ pub fn api_scope() -> Scope {
         )
         .service(
             api::level_scope()
-                .wrap(Compat::new(Authentication))
+                //.wrap(Compat::new(Authentication))
         )
         .service(
             api::stats_scope()
