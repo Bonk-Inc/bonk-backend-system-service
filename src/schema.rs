@@ -29,7 +29,7 @@ diesel::table! {
         #[sql_name = "score"]
         highscore -> Int4,
         is_hidden -> Bool,
-        game_id -> Uuid,
+        game_id -> Nullable<Uuid>,
         created_at -> Timestamp,
         updated_at -> Nullable<Timestamp>,
         level_id -> Nullable<Uuid>,

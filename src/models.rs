@@ -34,9 +34,10 @@ pub struct Score {
     #[serde(rename = "score")]
     pub highscore: i32,
     pub is_hidden: bool,
-    pub level_id: Uuid,
+    pub game_id: Option<Uuid>,
     pub created_at: NaiveDateTime,
-    pub updated_at: Option<NaiveDateTime>
+    pub updated_at: Option<NaiveDateTime>,
+    pub level_id: Option<Uuid>
 }
 
 #[derive(Serialize, Deserialize, Default)]

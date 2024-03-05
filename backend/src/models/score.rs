@@ -18,7 +18,7 @@ pub struct ScoreDTO {
     #[serde(rename = "score")]
     pub highscore: i32,
     pub is_hidden: bool,
-    pub game_id: Uuid
+    pub level_id: Uuid
 }
 
 impl Model<Score, Uuid, ScoreDTO> for Score {
@@ -52,7 +52,7 @@ impl Model<Score, Uuid, ScoreDTO> for Score {
 
 pub fn find_by_game(game: Uuid, include_hidden: bool, conn: &mut Connection) -> QueryResult<Vec<Score>> {
     let mut query = score::table.into_boxed(); 
-    query = query.filter(game_id.eq(game));
+    query = query.filter(level_id.eq(game));
 
     if !include_hidden {
         query = query.filter(is_hidden.eq(false));
@@ -66,7 +66,7 @@ pub fn count_score(game_uuid: Option<Uuid>, conn: &mut Connection) -> QueryResul
     let mut query = score::table.into_boxed();
     
     if let Some(value) = game_uuid {
-        query = query.filter(game_id.eq(value));
+        query = query.filter(level_id.eq(value));
     }
 
     query.select(count_star())
