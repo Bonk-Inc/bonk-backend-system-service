@@ -5,7 +5,7 @@ ALTER TABLE "score"
     ALTER COLUMN "game_id" DROP NOT NULL;
 
 ALTER TABLE "score"
-    ADD CONSTRAINT "fk_game_level"
+    ADD CONSTRAINT "fk_level_score"
         FOREIGN KEY ("level_id")
             REFERENCES "level" ("id")
             ON DELETE CASCADE

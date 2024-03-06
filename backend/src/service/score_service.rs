@@ -12,7 +12,7 @@ use crate::{
     }
 };
 
-use super::game_service;
+use super::{game_service, level_service};
 
 pub fn find_all(pool: &web::Data<Pool>) -> Result<Vec<Score>, ServiceError> {
     match Score::find_all(&mut pool.get().unwrap()) {
@@ -44,6 +44,25 @@ pub fn find_by_game(
     }
 
     match score::find_by_game(game_id, include_hidden, &mut pool.get().unwrap()) {
+        Ok(score) => Ok(score),
+        Err(_) => Err(ServiceError::InternalServerError {
+            error_message: "An error occured when trying to fetch scores".to_string(),
+        }),
+    }
+}
+
+pub fn find_by_level(
+    level_id: Uuid,
+    include_hidden: bool,
+    pool: &web::Data<Pool>,
+) -> Result<Vec<Score>, ServiceError> {
+    if !level_service::level_exists(level_id, pool) {
+        return Err(ServiceError::NotFound {
+            error_message: format!("Level with id '{}' not found", level_id.to_string()),
+        });
+    }
+
+    match score::find_by_level(level_id, include_hidden, &mut pool.get().unwrap()) {
         Ok(score) => Ok(score),
         Err(_) => Err(ServiceError::InternalServerError {
             error_message: "An error occured when trying to fetch scores".to_string(),
