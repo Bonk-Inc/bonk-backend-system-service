@@ -49,8 +49,23 @@ pub fn update(
     match Level::update(id, updated_level, &mut pool.get().unwrap()) {
         Ok(level) => Ok(level),
         Err(_) => Err(ServiceError::InternalServerError { 
-            error_message: "Could not update game".to_string()
+            error_message: "Could not update level".to_string()
         })
+    }
+}
+
+pub fn delete(id: Uuid, pool: &web::Data<Pool>) -> Result<usize, ServiceError> {
+    if !level_exists(id, pool) {
+        return Err(ServiceError::NotFound {
+            error_message: format!("Level with id '{}' not found", id.to_string()),
+        });
+    }
+
+    match Level::delete(id, &mut pool.get().unwrap()) {
+        Ok(results) => Ok(results),
+        Err(_) => Err(ServiceError::InternalServerError { 
+            error_message: "Could not delete level".to_string()
+        }),
     }
 }
 

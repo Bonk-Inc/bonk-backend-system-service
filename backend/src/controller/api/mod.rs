@@ -19,6 +19,7 @@ pub fn level_scope() -> Scope {
         .service(level::index)
         .service(level::store)
         .service(level::update)
+        .service(level::delete)
 }
 
 pub fn score_scope() -> Scope {

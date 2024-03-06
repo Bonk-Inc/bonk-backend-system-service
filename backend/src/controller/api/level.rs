@@ -1,4 +1,4 @@
-use actix_web::{get, post, put, web, HttpResponse};
+use actix_web::{delete, get, post, put, web, HttpResponse};
 use babs::respone::ResponseBody;
 use uuid::Uuid;
 
@@ -34,5 +34,16 @@ pub async fn update(
     match level_service::update(path.into_inner(), data.into_inner(), &pool) {
         Ok(level) => Ok(HttpResponse::Ok().json(ResponseBody::new("Level updated", level))),
         Err(error) => Err(error),
+    }
+}
+
+#[delete("/{id}/")]
+pub async fn delete(
+    pool: web::Data<Pool>,
+    path: web::Path<Uuid>,
+) -> actix_web::Result<HttpResponse, ServiceError> {
+    match level_service::delete(path.into_inner(), &pool) {
+        Ok(_) => Ok(HttpResponse::NoContent().body("")),
+        Err(err) => Err(err),
     }
 }
