@@ -3,13 +3,27 @@ use babs::respone::ResponseBody;
 use uuid::Uuid;
 
 use crate::{
-    config::db::Pool, error::ServiceError, models::level::LevelDTO, service::level_service,
+    config::db::Pool,
+    error::ServiceError, 
+    models::level::LevelDTO, 
+    service::level_service,
 };
 
 #[get("/")]
 pub async fn index(pool: web::Data<Pool>) -> actix_web::Result<HttpResponse, ServiceError> {
     match level_service::find_all(&pool) {
-        Ok(scores) => Ok(HttpResponse::Ok().json(ResponseBody::new("Levels fetched", scores))),
+        Ok(levels) => Ok(HttpResponse::Ok().json(ResponseBody::new("Levels fetched", levels))),
+        Err(err) => Err(err),
+    }
+}
+
+#[get("/game/{id}/")]
+pub async fn game_levels(    
+    pool: web::Data<Pool>,
+    path: web::Path<Uuid>,
+) -> actix_web::Result<HttpResponse, ServiceError> {
+    match level_service::find_by_game(path.into_inner(), &pool) {
+        Ok(levels) => Ok(HttpResponse::Ok().json(ResponseBody::new("Levels fetched", levels))),
         Err(err) => Err(err),
     }
 }

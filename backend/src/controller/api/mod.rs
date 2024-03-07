@@ -17,6 +17,7 @@ pub fn game_scope() -> Scope {
 pub fn level_scope() -> Scope {
     web::scope("/level")
         .service(level::index)
+        .service(level::game_levels)
         .service(level::store)
         .service(level::update)
         .service(level::delete)

@@ -5,8 +5,10 @@ use uuid::Uuid;
 use crate::{
     config::db::Pool,
     error::ServiceError,
-    models::{level::LevelDTO, Model},
+    models::{level::{self, LevelDTO}, Model},
 };
+
+use super::game_service;
 
 pub fn find_all(pool: &web::Data<Pool>) -> Result<Vec<Level>, ServiceError> {
     match Level::find_all(&mut pool.get().unwrap()) {
@@ -22,6 +24,21 @@ pub fn find_by_id(id: Uuid, pool: &web::Data<Pool>) -> Result<Level, ServiceErro
         Ok(level) => Ok(level),
         Err(_) => Err(ServiceError::NotFound {
             error_message: format!("Level with id '{}' not found", id.to_string()),
+        }),
+    }
+}
+
+pub fn find_by_game(game_id: Uuid, pool: &web::Data<Pool>) -> Result<Vec<Level>, ServiceError> {
+    if !game_service::game_exisits(game_id, pool) {
+        return Err(ServiceError::NotFound {
+            error_message: format!("Game with id '{}' not found", game_id.to_string()),
+        });
+    }
+
+    match level::find_by_game(game_id, &mut pool.get().unwrap()) {
+        Ok(levels) => Ok(levels),
+        Err(_) =>  Err(ServiceError::InternalServerError {
+            error_message: "Cannot add a new level in database".to_string(),
         }),
     }
 }
