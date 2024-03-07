@@ -41,7 +41,10 @@ impl Model<Score, Uuid, ScoreDTO> for Score {
     ) -> QueryResult<Score> {
         diesel::update(score)
             .filter(id.eq(score_id))
-            .set(updated_score)
+            .set((
+                updated_score,
+                game_id.eq(None::<Uuid>)
+            ))
             .get_result::<Score>(conn)
     }
 
@@ -58,8 +61,9 @@ pub fn find_by_game(
     conn: &mut Connection,
 ) -> QueryResult<Vec<Score>> {
     let mut query = score::table.into_boxed()
-        .inner_join(level::table)
-        .filter(level::game_id.eq(game));
+        .left_join(level::table)
+        .filter(level::game_id.eq(game))
+        .or_filter(game_id.eq(game));
 
     if !include_hidden {
         query = query.filter(is_hidden.eq(false));
@@ -84,10 +88,11 @@ pub fn find_by_level(
 }
 
 pub fn count_score(game_uuid: Option<Uuid>, conn: &mut Connection) -> QueryResult<i64> {
-    let mut query = score::table.into_boxed();
+    let mut query = score::table.into_boxed()
+        .left_join(level::table);
 
     if let Some(value) = game_uuid {
-        query = query.filter(level_id.eq(value));
+        query = query.filter(level::game_id.eq(value));
     }
 
     query.select(count_star()).first(conn)

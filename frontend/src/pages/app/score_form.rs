@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
 use babs::{
-    models::{Game, Score},
+    models::{Level, Score},
     respone::ResponseBody,
 };
 use uuid::Uuid;
@@ -25,7 +25,7 @@ pub struct ScoreForm {
     score: Score,
     game_id: Uuid,
     status: Status,
-    games: Vec<Game>,
+    levels: Vec<Level>,
 }
 
 #[derive(Clone, PartialEq, Properties)]
@@ -36,17 +36,17 @@ pub struct ScoresFormProps {
 
 pub enum Msg {
     FetchScore(String),
-    //FetchGames,
+    FetchLevels(String),
     SaveScore,
     ChangeHidden,
     Cancelled,
-    //Response(Vec<Game>),
+    Response(Vec<Level>),
     Error(String),
     ScoreSaved,
     SetScore(Score),
     ChangeUsername(String),
     ChangeScore(String),
-    ChangeGame(String),
+    ChangeLevel(String),
 }
 
 pub enum Status {
@@ -65,7 +65,7 @@ impl Component for ScoreForm {
         let game_id = search_params.get("game").unwrap_or_default();
         let mut status = Status::Loaded;
 
-        //ctx.link().send_message(Msg::FetchGames);
+        ctx.link().send_message(Msg::FetchLevels(game_id.clone()));
 
         if let Some(score_id) = &ctx.props().score_id {
             status = Status::Fetching;
@@ -76,26 +76,25 @@ impl Component for ScoreForm {
             score: Score::default(),
             status,
             game_id: Uuid::from_str(&game_id).unwrap_or_default(),
-            games: vec![],
+            levels: vec![],
         }
     }
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
-            // Msg::FetchGames => ctx.link().send_future(async {
-            //     match Fetch::get("http://localhost:8080/api/game", Some(true)).await {
-            //         Ok(body) => {
-            //             if let Ok(response) =
-            //                 serde_wasm_bindgen::from_value::<ResponseBody<Vec<Game>>>(body)
-            //             {
-            //                 return Msg::Response(response.data);
-            //             }
+            Msg::FetchLevels(game_id) => ctx.link().send_future(async move {
+                match Fetch::get(&format!("{}/api/level/game/{}", env::APP_API_URL, game_id), Some(true)).await {
+                    Ok(body) => {
+                        let response = serde_wasm_bindgen::from_value::<ResponseBody<Vec<Level>>>(body);
+                        if let Ok(response_body) = response{
+                            return Msg::Response(response_body.data);
+                        }
 
-            //             Msg::Error("Failed to fetch games".to_string())
-            //         }
-            //         Err(_) => Msg::Error("Failed to fetch games".to_string()),
-            //     }
-            // }),
+                        Msg::Error("Failed to fetch games".to_string())
+                    }
+                    Err(_) => Msg::Error("Failed to fetch games".to_string()),
+                }
+            }),
             Msg::FetchScore(score_id) => {
                 ctx.link().send_future(async move {
                     let url = format!("{}/api/score/{}", env::APP_API_URL, score_id);
@@ -113,8 +112,6 @@ impl Component for ScoreForm {
                 self.score = score;
             },
             Msg::SaveScore => {
-                self.score.game_id = self.game_id;
-
                 let score_id = ctx.props().score_id.clone();
                 let body = serde_json::to_string(&self.score).unwrap();
 
@@ -124,23 +121,20 @@ impl Component for ScoreForm {
 
                         return match Fetch::put(&url, &body, Some(true)).await {
                             Ok(_) => Msg::ScoreSaved,
-                            Err(e) => Msg::Error("An error occured during updating score".to_string())
+                            Err(_) => Msg::Error("An error occured during updating score".to_string())
                         };
                     }
 
                     match Fetch::post(&format!("{}/api/score/", env::APP_API_URL), &body, Some(true)).await {
                         Ok(_) => Msg::ScoreSaved,
-                        Err(e) => Msg::Error("An error occured during saving score".to_string())
+                        Err(_) => Msg::Error("An error occured during saving score".to_string())
                     }
                 })
             }
-            //Msg::Response(games) => self.games = games,
-            
+            Msg::Response(levels) => self.levels = levels,
             Msg::ChangeUsername(username) => self.score.username = username,
             Msg::ChangeHidden => self.score.is_hidden = !self.score.is_hidden,
-            Msg::ChangeGame(game) => {
-                self.score.game_id = Uuid::from_str(&game).unwrap();
-            }
+            Msg::ChangeLevel(level) => self.score.level_id = Some(Uuid::from_str(&level).unwrap()),
             Msg::ChangeScore(score) => {
                 let num_score = score.parse::<i32>();
                 if num_score.is_err() {
@@ -181,21 +175,29 @@ impl Component for ScoreForm {
                                     <Alert severity={Severity::Error}>{error.clone()}</Alert>
                                 }
                                 <form class={classes!("flex", "flex-wrap")}>
-                                    // <Select
-                                    //     id={"score-level"}
-                                    //     name={"score-level"}
-                                    //     class="mb-2"
-                                    //     full_width={true}
-                                    //     label={"Game"}
-                                    //     required={true}
-                                    //     onchange={ctx.link().callback(|e: Event| {
-                                    //         let target = e.target().unwrap();
-                                    //         let input = target.dyn_ref::<HtmlSelectElement>().unwrap();
-                                    //         Msg::ChangeGame(input.value())
-                                    //     })}
-                                    // >
-                                    //     { for self.games.iter().map(|g| html!(<option value={g.id.to_string()} >{g.name.clone()}</option>)) }
-                                    // </Select>
+                                    <Select
+                                        id={"score-level"}
+                                        name={"score-level"}
+                                        class="mb-2"
+                                        full_width={true}
+                                        label={"Level"}
+                                        required={true}
+                                        onchange={ctx.link().callback(|e: Event| {
+                                            let target = e.target().unwrap();
+                                            let input = target.dyn_ref::<HtmlSelectElement>().unwrap();
+                                            Msg::ChangeLevel(input.value())
+                                        })}
+                                    >
+                                        <option selected={self.score.level_id.is_none()}>{"---Selecteer een Level---"}</option>
+                                        { for self.levels.iter().map(|level| html! {
+                                            <option 
+                                                value={level.id.to_string()} 
+                                                selected={self.score.level_id.is_some() && level.id == self.score.level_id.unwrap()}
+                                            >
+                                                {level.name.clone()}
+                                            </option>
+                                        }) }
+                                    </Select>
                                     <TextField
                                         id={"score-username"}
                                         class="mb-4 !w-2/3 pr-3"
@@ -232,7 +234,7 @@ impl Component for ScoreForm {
                                                 checked={score.is_hidden}
                                                 onchange={ctx.link().callback(|_| Msg::ChangeHidden)}
                                             />
-                                            {"Hidden"}
+                                            {"Verbogen"}
                                         </label>
                                     </FormControl>
                                     <hr class={classes!("w-full", "mt-8", "mb-5", "border-zinc-500")} />
@@ -244,7 +246,7 @@ impl Component for ScoreForm {
                                                 size={ButtonSize::Large}
                                                 onclick={ctx.link().callback(|_| Msg::Cancelled)}
                                             >
-                                                {"Cancel"}
+                                                {"Annuleren"}
                                             </Button>
                                             <Button
                                                 class="bg-blue-400"
@@ -252,7 +254,11 @@ impl Component for ScoreForm {
                                                 size={ButtonSize::Large}
                                                 onclick={ctx.link().callback(|_| Msg::SaveScore)}
                                             >
-                                                {"Create"}
+                                                if self.score.id != Uuid::default() {
+                                                    {"Update"}
+                                                } else {
+                                                    {"Aanmaken"}
+                                                }
                                             </Button>
                                         </div>
                                     </div>

@@ -9,7 +9,7 @@ use yew::{
 };
 use yew_router::scope_ext::RouterScopeExt;
 use wasm_bindgen::{JsCast, JsValue};
-use web_sys::{console::log_1, HtmlSelectElement};
+use web_sys::HtmlSelectElement;
 
 use crate::{
     components::{
@@ -177,10 +177,7 @@ impl Component for Scores {
                 return false;
             }
             Msg::RowsPerPageChange(rows) => self.row_per_page = rows,
-            Msg::PageChange(page) => {
-                self.page = page;
-                log_1(&JsValue::from(page))
-            }
+            Msg::PageChange(page) => self.page = page,
             Msg::Failed(error) => self.status = Status::Failed(error),
         }
 
@@ -215,7 +212,7 @@ impl Component for Scores {
                         onclick={ctx.link().callback(|_| Msg::NavigateToForm(None))} 
                         variant={ButtonVariant::Contained}
                     >
-                        <Icon name="add" class="mr-2"/> {"Add Score"}
+                        <Icon name="add" class="mr-2"/> {"Score toevoegen"}
                     </Button>
                 </div>
                 <TableContainer>
@@ -244,16 +241,16 @@ impl Component for Scores {
                                                 />
                                             </TableCell>
                                             <TableCell>
-                                                {"User"}
+                                                {"Username"}
                                             </TableCell>
                                             <TableCell>
                                                 {"Score"}
                                             </TableCell>
                                             <TableCell>
-                                                {"Set at"}
+                                                {"Gezet op"}
                                             </TableCell>
                                             <TableCell>
-                                                {"Hidden"}
+                                                {"Verborgen"}
                                             </TableCell>
                                             <TableCell checkbox={true}>
                                                 <Button 

@@ -62,7 +62,7 @@ impl Component for TablePagination {
                         html! {
                             <>
                                 <p class={classes!("shrink-0")}>
-                                    {"Rows per page:"}
+                                    {"Rijen per pagina:"}
                                 </p>
                                 <div class={classes!("relative", "box-border", "inline-flex", "items-center", "mr-8", "ml-4", )}>
                                     <select 
