@@ -1,7 +1,10 @@
 use yew::{classes, html, Children, Component, Context, Html, Properties};
 use yew_router::scope_ext::RouterScopeExt;
 
-use crate::{components::{toolbar::Toolbar, tabs::Tabs, tab::Tab}, app::AppRoute};
+use crate::{
+    app::AppRoute,
+    components::{tab::Tab, tabs::Tabs, toolbar::Toolbar},
+};
 
 pub struct GameLayout;
 
@@ -12,7 +15,7 @@ pub struct GameLayoutProps {
 }
 
 pub enum Msg {
-    Test,
+    NavigateToLevels,
     NavigateToGame,
     NavigateToScores,
 }
@@ -30,13 +33,9 @@ impl Component for GameLayout {
         let id = ctx.props().id.clone();
 
         match msg {
-            Msg::Test => {},
-            Msg::NavigateToGame => {
-                navigator.push(&AppRoute::Game { id });
-            },
-            Msg::NavigateToScores => {
-                navigator.push(&AppRoute::Scores { game_id: id });
-            }
+            Msg::NavigateToGame => navigator.push(&AppRoute::Game { id }),
+            Msg::NavigateToLevels => navigator.push(&AppRoute::Levels { game_id: id }),
+            Msg::NavigateToScores => navigator.push(&AppRoute::Scores { game_id: id }),
         }
 
         true
@@ -44,25 +43,33 @@ impl Component for GameLayout {
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         let id = ctx.props().id.clone();
-        let location = ctx.link().route::<AppRoute>().unwrap_or(AppRoute::Game { id });
+        let location = ctx
+            .link()
+            .route::<AppRoute>()
+            .unwrap_or(AppRoute::Game { id });
 
         html! {
             <div class={classes!("h-full")}>
                 <Toolbar class="!p-0 border-b border-zinc-500 border-solid !min-h-48px">
                     <Tabs>
-                        <Tab 
-                            icon="home" 
-                            label="Home" 
-                            onclick={ctx.link().callback(|_| Msg::NavigateToGame)} 
-                            selected={matches!(location, AppRoute::Game { .. })} 
+                        <Tab
+                            icon="home"
+                            label="Home"
+                            onclick={ctx.link().callback(|_| Msg::NavigateToGame)}
+                            selected={matches!(location, AppRoute::Game { .. })}
                         />
-                        <Tab 
-                            icon="scoreboard" 
-                            label="Scores" 
+                        <Tab
+                            icon="map"
+                            label="Levels"
+                            onclick={ctx.link().callback(|_| Msg::NavigateToLevels)}
+                            selected={matches!(location, AppRoute::Levels { .. })}
+                        />
+                        <Tab
+                            icon="scoreboard"
+                            label="Scores"
                             onclick={ctx.link().callback(|_| Msg::NavigateToScores)}
-                            selected={matches!(location, AppRoute::Scores { .. })} 
+                            selected={matches!(location, AppRoute::Scores { .. })}
                         />
-                        //<Tab icon="map" label="Levels" onclick={ctx.link().callback(|_| Msg::Test)} />
                     </Tabs>
                 </Toolbar>
                 <div class={classes!("p-4")}>
