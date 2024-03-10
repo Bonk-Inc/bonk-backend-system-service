@@ -90,7 +90,7 @@ impl Component for TablePagination {
                         <Button
                             class="!pl-0"
                             dense={true}
-                            disabled={page == count.div_ceil(rows_per_page) - 1}
+                            disabled={page == count.div_ceil(rows_per_page).saturating_sub(1)}
                             onclick={Callback::from(move |_| { on_page_change_next.emit(page + 1) })}
                         >
                             <Icon name={"chevron_right"} />
