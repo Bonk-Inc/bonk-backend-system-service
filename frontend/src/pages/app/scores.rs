@@ -4,7 +4,7 @@ use std::{
     mem,
 };
 
-use babs::{models::Score, respone::ResponseBody};
+use babs::{models::{Level, Score}, respone::ResponseBody};
 use wasm_bindgen::JsCast;
 use web_sys::HtmlSelectElement;
 use yew::{prelude::*, Component, Context, Html};
@@ -13,19 +13,7 @@ use yew_router::scope_ext::RouterScopeExt;
 use crate::{
     app::AppRoute,
     components::{
-        alert::{Alert, Severity},
-        button::{Button, ButtonVariant},
-        checkbox::Checkbox,
-        icon::Icon,
-        spinner::Spinner,
-        table::Table,
-        table_body::TableBody,
-        table_cell::TableCell,
-        table_container::TableContainer,
-        table_footer::TableFooter,
-        table_head::TableHead,
-        table_pagination::TablePagination,
-        table_row::TableRow,
+        alert::{Alert, Severity}, button::{Button, ButtonVariant}, checkbox::Checkbox, icon::Icon, select::Select, spinner::Spinner, table::Table, table_body::TableBody, table_cell::TableCell, table_container::TableContainer, table_footer::TableFooter, table_head::TableHead, table_pagination::TablePagination, table_row::TableRow
     },
     env,
     layouts::game_layout::GameLayout,
@@ -34,6 +22,7 @@ use crate::{
 
 pub struct Scores {
     scores: Vec<Score>,
+    levels: Vec<Level>,
     status: Status,
     selected_scores: HashSet<String>,
     row_per_page: usize,
@@ -53,13 +42,14 @@ pub enum Status {
 
 pub enum Msg {
     MakeReq,
-    Response(Vec<Score>),
+    Response(Vec<Score>, Vec<Level>),
     SelectScore(String),
     SelectAllScores,
     UpdateScore(Score),
     UpdateResponse(Score),
     DeleteScores,
     DeleteScoresResponse,
+    LevelFilterChange(String),
     NavigateToForm(Option<String>),
     RowsPerPageChange(usize),
     PageChange(usize),
@@ -75,6 +65,7 @@ impl Component for Scores {
 
         Scores {
             scores: Vec::new(),
+            levels: Vec::new(),
             selected_scores: HashSet::new(),
             status: Status::Fetching,
             row_per_page: 10,
@@ -89,24 +80,38 @@ impl Component for Scores {
                 self.status = Status::Fetching;
 
                 ctx.link().send_future(async move {
-                    let url = format!(
+                    let scores_url = format!(
                         "{}/api/score/game/{}?hidden=true",
                         env::APP_API_URL,
                         game_id
                     );
 
-                    let scores = Fetch::get(&url, Some(true)).await;
+                    let levels_url = format!(
+                        "{}/api/level/game/{}",
+                        env::APP_API_URL,
+                        game_id
+                    );
+
+                    let levels = Fetch::get(&levels_url, Some(true)).await;
+                    if levels.is_err() {
+                        return Msg::Failed("Failed fetching levels".to_string());
+                    }
+
+                    let scores = Fetch::get(&scores_url, Some(true)).await;
                     if scores.is_err() {
                         return Msg::Failed("Failed fetching scores".to_string());
                     }
 
                     let score_data: ResponseBody<Vec<Score>> =
                         serde_wasm_bindgen::from_value(scores.unwrap()).unwrap();
-                    Msg::Response(score_data.data)
+                    let level_data: ResponseBody<Vec<Level>> =
+                        serde_wasm_bindgen::from_value(levels.unwrap()).unwrap();
+                    Msg::Response(score_data.data, level_data.data)
                 })
             }
-            Msg::Response(scores) => {
+            Msg::Response(scores, levels) => {
                 self.scores = scores;
+                self.levels = levels;
                 self.status = Status::Finished;
             }
             Msg::SelectScore(score) => {
@@ -207,6 +212,7 @@ impl Component for Scores {
             Msg::RowsPerPageChange(rows) => self.row_per_page = rows,
             Msg::PageChange(page) => self.page = page,
             Msg::Failed(error) => self.status = Status::Failed(error),
+            Msg::LevelFilterChange(level_id) => {},
         }
 
         true
@@ -224,7 +230,7 @@ impl Component for Scores {
 
         html! {
             <GameLayout id={game_id}>
-                <div class="py-4 flex justify-between">
+                <div class="py-4 flex justify-between items-center">
                     {if self.selected_scores.len() > 0 {
                         html! {
                             <Button dense={true} onclick={ctx.link().callback(|_| Msg::DeleteScores)} class="text-red-400">
@@ -233,7 +239,22 @@ impl Component for Scores {
                         }
                     } else {
                         html! {
-                            <div></div>
+                            <form>
+                                <Select 
+                                    id="filter-level"
+                                    label="Level: "
+                                    name="filter-level"
+                                    class="border-none !flex-row items-baseline !pl-2"
+                                    onchange={ctx.link().callback(|_| Msg::LevelFilterChange("".to_string()) )}
+                                >
+                                    <option selected={true}>{"Alle"}</option>
+                                    { for self.levels.iter().map(|level| html! {
+                                        <option value={level.id.to_string()}>
+                                            {level.name.clone()}
+                                        </option>
+                                    }) }
+                                </Select>
+                            </form>
                         }
                     }}
                     <Button
