@@ -118,7 +118,7 @@ impl Component for MainLayout {
                 ctx.link().send_future(async move {
                     match Fetch::post(&format!("{}/api/game", env::APP_API_URL), &body, Some(true)).await {
                         Ok(_) => Msg::GameSaved,
-                        Err(_) => Msg::Error("Failed to save game".to_string()),
+                        Err(_) => Msg::Error("Failed to create new game".to_string()),
                     }
                 })
             },
