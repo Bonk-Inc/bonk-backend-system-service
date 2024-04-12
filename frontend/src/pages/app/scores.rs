@@ -4,7 +4,10 @@ use std::{
     mem,
 };
 
-use babs::{models::{Level, Score}, respone::ResponseBody};
+use babs::{
+    models::{Level, Score},
+    respone::ResponseBody,
+};
 use wasm_bindgen::JsCast;
 use web_sys::HtmlSelectElement;
 use yew::{prelude::*, Component, Context, Html};
@@ -13,7 +16,20 @@ use yew_router::scope_ext::RouterScopeExt;
 use crate::{
     app::AppRoute,
     components::{
-        alert::{Alert, Severity}, button::{Button, ButtonVariant}, checkbox::Checkbox, icon::Icon, select::Select, spinner::Spinner, table::Table, table_body::TableBody, table_cell::TableCell, table_container::TableContainer, table_footer::TableFooter, table_head::TableHead, table_pagination::TablePagination, table_row::TableRow
+        alert::{Alert, Severity},
+        button::{Button, ButtonVariant},
+        checkbox::Checkbox,
+        icon::Icon,
+        select::Select,
+        spinner::Spinner,
+        table::Table,
+        table_body::TableBody,
+        table_cell::TableCell,
+        table_container::TableContainer,
+        table_footer::TableFooter,
+        table_head::TableHead,
+        table_pagination::TablePagination,
+        table_row::TableRow,
     },
     env,
     layouts::game_layout::GameLayout,
@@ -27,6 +43,7 @@ pub struct Scores {
     selected_scores: HashSet<String>,
     row_per_page: usize,
     page: usize,
+    filter_level: String
 }
 
 #[derive(Clone, PartialEq, Properties)]
@@ -70,6 +87,7 @@ impl Component for Scores {
             status: Status::Fetching,
             row_per_page: 10,
             page: 0,
+            filter_level: String::default()
         }
     }
 
@@ -77,21 +95,25 @@ impl Component for Scores {
         match msg {
             Msg::MakeReq => {
                 let game_id = ctx.props().game_id.clone();
+                let level_id = self.filter_level.clone();
                 self.status = Status::Fetching;
 
                 ctx.link().send_future(async move {
-                    let scores_url = format!(
-                        "{}/api/score/game/{}?hidden=true",
-                        env::APP_API_URL,
-                        game_id
-                    );
+                    let scores_url = if level_id.len() > 0 {
+                        format!(
+                            "{}/api/score/level/{}?hidden=true",
+                            env::APP_API_URL,
+                            level_id
+                        )
+                    } else {
+                        format!(
+                            "{}/api/score/game/{}?hidden=true",
+                            env::APP_API_URL,
+                            game_id
+                        )
+                    };
 
-                    let levels_url = format!(
-                        "{}/api/level/game/{}",
-                        env::APP_API_URL,
-                        game_id
-                    );
-
+                    let levels_url = format!("{}/api/level/game/{}", env::APP_API_URL, game_id);
                     let levels = Fetch::get(&levels_url, Some(true)).await;
                     if levels.is_err() {
                         return Msg::Failed("Failed fetching levels".to_string());
@@ -212,7 +234,10 @@ impl Component for Scores {
             Msg::RowsPerPageChange(rows) => self.row_per_page = rows,
             Msg::PageChange(page) => self.page = page,
             Msg::Failed(error) => self.status = Status::Failed(error),
-            Msg::LevelFilterChange(level_id) => {},
+            Msg::LevelFilterChange(level_id) => {
+                self.filter_level = level_id;
+                ctx.link().send_message(Msg::MakeReq)
+            }
         }
 
         true
@@ -240,14 +265,18 @@ impl Component for Scores {
                     } else {
                         html! {
                             <form>
-                                <Select 
+                                <Select
                                     id="filter-level"
                                     label="Level: "
                                     name="filter-level"
                                     class="border-none !flex-row items-baseline !pl-2"
-                                    onchange={ctx.link().callback(|_| Msg::LevelFilterChange("".to_string()) )}
+                                    onchange={ctx.link().callback(|e: Event| {
+                                        let target = e.target().unwrap();
+                                        let input = target.dyn_ref::<HtmlSelectElement>().unwrap();
+                                        Msg::LevelFilterChange(input.value())
+                                    })}
                                 >
-                                    <option selected={true}>{"Alle"}</option>
+                                    <option selected={true} value={""}>{"Alle"}</option>
                                     { for self.levels.iter().map(|level| html! {
                                         <option value={level.id.to_string()}>
                                             {level.name.clone()}
