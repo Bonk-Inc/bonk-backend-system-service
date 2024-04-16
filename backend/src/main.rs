@@ -95,7 +95,11 @@ async fn fetch_and_save_jwk() -> Result<(), Box<dyn Error>> {
         return Err(Box::new(io::Error::new(ErrorKind::Other, "Could not fetch JWSK token")));
     }
 
-    let _ = create_dir("data");
+    if create_dir("data").is_err() {
+        error!("Cannot create data forlder");
+        return Err(Box::new(io::Error::new(ErrorKind::Other, "Cannot create data forlder")));
+    }
+
     let file_options = OpenOptions::new()
         .write(true)
         .create(true)
