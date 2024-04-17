@@ -88,6 +88,9 @@ WORKDIR /bonk-inc-backend
 COPY --from=backend-build /bonk-inc-backend/target/x86_64-unknown-linux-gnu/release/bonk-inc-backend ./
 COPY --from=frontend-build /bonk-inc-backend/dist/ ./dist/
 
+# Create data folder
+RUN mkdir data
+
 # Set file permissions
 RUN chmod +rw *
 RUN chown -R bonk-inc-backend:bonk-inc-backend *

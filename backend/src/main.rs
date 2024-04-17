@@ -97,7 +97,7 @@ async fn fetch_and_save_jwk() -> Result<(), Box<dyn Error>> {
 
     if create_dir("data").is_err() {
         error!("Cannot create data forlder");
-        r//eturn Err(Box::new(io::Error::new(ErrorKind::Other, "Cannot create data forlder")));
+        //eturn Err(Box::new(io::Error::new(ErrorKind::Other, "Cannot create data forlder")));
     }
 
     let file_options = OpenOptions::new()
