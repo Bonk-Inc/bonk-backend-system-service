@@ -1,15 +1,13 @@
+use babs::schema::level;
 pub use babs::{
     models::Score,
-    schema::{score, score::dsl::*}
+    schema::{score, score::dsl::*},
 };
-use diesel::{prelude::*, AsChangeset, Insertable, dsl::count_star};
+use diesel::{dsl::count_star, prelude::*, AsChangeset, Insertable};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::{
-    config::db::Connection,
-    models::Model,
-};
+use crate::{config::db::Connection, models::Model};
 
 #[derive(Insertable, AsChangeset, Serialize, Deserialize)]
 #[diesel(table_name = babs::schema::score)]
@@ -18,7 +16,7 @@ pub struct ScoreDTO {
     #[serde(rename = "score")]
     pub highscore: i32,
     pub is_hidden: bool,
-    pub game_id: Uuid
+    pub level_id: Uuid,
 }
 
 impl Model<Score, Uuid, ScoreDTO> for Score {
@@ -36,10 +34,17 @@ impl Model<Score, Uuid, ScoreDTO> for Score {
             .get_result::<Score>(conn)
     }
 
-    fn update(score_id: Uuid, updated_score: ScoreDTO, conn: &mut Connection) -> QueryResult<Score> {
+    fn update(
+        score_id: Uuid,
+        updated_score: ScoreDTO,
+        conn: &mut Connection,
+    ) -> QueryResult<Score> {
         diesel::update(score)
             .filter(id.eq(score_id))
-            .set(updated_score)
+            .set((
+                updated_score,
+                game_id.eq(None::<Uuid>)
+            ))
             .get_result::<Score>(conn)
     }
 
@@ -50,25 +55,45 @@ impl Model<Score, Uuid, ScoreDTO> for Score {
     }
 }
 
-pub fn find_by_game(game: Uuid, include_hidden: bool, conn: &mut Connection) -> QueryResult<Vec<Score>> {
-    let mut query = score::table.into_boxed(); 
-    query = query.filter(game_id.eq(game));
+pub fn find_by_game(
+    game: Uuid,
+    include_hidden: bool,
+    conn: &mut Connection,
+) -> QueryResult<Vec<Score>> {
+    let mut query = score::table.into_boxed()
+        .left_join(level::table)
+        .filter(level::game_id.eq(game))
+        .or_filter(game_id.eq(game));
 
     if !include_hidden {
         query = query.filter(is_hidden.eq(false));
     }
-        
-    query.select(Score::as_select())
-        .load(conn)
+
+    query.select(Score::as_select()).load(conn)
+}
+
+pub fn find_by_level(
+    level: Uuid,
+    include_hidden: bool,
+    conn: &mut Connection,
+) -> QueryResult<Vec<Score>> {
+    let mut query = score::table.into_boxed()
+        .filter(level_id.eq(level));
+
+    if !include_hidden {
+        query = query.filter(is_hidden.eq(false));
+    }
+
+    query.select(Score::as_select()).load(conn)
 }
 
 pub fn count_score(game_uuid: Option<Uuid>, conn: &mut Connection) -> QueryResult<i64> {
-    let mut query = score::table.into_boxed();
-    
+    let mut query = score::table.into_boxed()
+        .left_join(level::table);
+
     if let Some(value) = game_uuid {
-        query = query.filter(game_id.eq(value));
+        query = query.filter(level::game_id.eq(value));
     }
 
-    query.select(count_star())
-        .first(conn)
+    query.select(count_star()).first(conn)
 }

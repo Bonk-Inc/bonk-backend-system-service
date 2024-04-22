@@ -1,9 +1,9 @@
-use yew::{Component, html, Html, Context};
+use yew::{html, Component, Context, Html};
 use yew_router::{Routable, Switch};
 
 use crate::{
-    layouts::main_layout::MainLayout, 
-    pages::app::{home::Home, game::Game, scores::Scores, score_form::ScoreForm}
+    layouts::main_layout::MainLayout,
+    pages::app::{game::Game, home::Home, levels::Levels, score_form::ScoreForm, scores::Scores},
 };
 
 pub struct AppBase;
@@ -14,6 +14,8 @@ pub enum AppRoute {
     Home,
     #[at("/app/game/:id")]
     Game { id: String },
+    #[at("/app/game/:game_id/level")]
+    Levels { game_id: String },
     #[at("/app/game/:game_id/score")]
     Scores { game_id: String },
     #[at("/app/score/add")]
@@ -26,9 +28,10 @@ fn switch(routes: AppRoute) -> Html {
     match routes {
         AppRoute::Home => html!(<Home />),
         AppRoute::Game { id } => html!(<Game id={id} />),
+        AppRoute::Levels { game_id } => html!(<Levels game_id={game_id} />),
         AppRoute::Scores { game_id } => html!(<Scores game_id={game_id} />),
         AppRoute::ScoreAdd => html!(<ScoreForm />),
-        AppRoute::ScoreEdit { score_id } => html!(<ScoreForm score_id={score_id} />)
+        AppRoute::ScoreEdit { score_id } => html!(<ScoreForm score_id={score_id} />),
     }
 }
 
@@ -37,7 +40,7 @@ impl Component for AppBase {
     type Properties = ();
 
     fn create(_ctx: &Context<Self>) -> Self {
-        AppBase { }
+        AppBase {}
     }
 
     fn view(&self, _ctx: &Context<Self>) -> Html {

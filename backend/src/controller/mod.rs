@@ -20,6 +20,10 @@ pub fn api_scope() -> Scope {
                 .wrap(Compat::new(Authentication))
         )
         .service(
+            api::level_scope()
+                .wrap(Compat::new(Authentication))
+        )
+        .service(
             api::stats_scope()
                 .wrap(Compat::new(Authentication))
         )

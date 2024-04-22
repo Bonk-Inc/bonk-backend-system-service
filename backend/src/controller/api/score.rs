@@ -48,6 +48,20 @@ pub async fn game_scores(
     }
 }
 
+#[get("/level/{id}/")]
+pub async fn level_scores(
+    pool: web::Data<Pool>,
+    path: web::Path<Uuid>,
+    query: web::Query<QueryParams>
+) -> actix_web::Result<HttpResponse, ServiceError> {
+    let query_params = query.into_inner();
+
+    match score_service::find_by_level(path.into_inner(), query_params.hidden, &pool) {
+        Ok(scores) => Ok(HttpResponse::Ok().json(ResponseBody::new("Scores fetched", scores))),
+        Err(err) => Err(err)
+    }
+}
+
 #[post("/")]
 pub async fn store(
     pool: web::Data<Pool>,

@@ -6,79 +6,49 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_NAME: bonk-inc/babs
 
 jobs:
-#   build:
-#     name: Build & push image to registry
-#     runs-on: ubuntu-latest
-#     permissions: 
-#       contents: read
-#       packages: write
-      
-#     steps:
-#       - name: 'Checkout Github Action'
-#         uses: actions/checkout@v3
-      
-#       - name: Create backend .env file
-#         run: |
-#             cat <<EOT >> .env
-#             APP_HOST=${{ vars.APP_HOST }}
-#             APP_PORT=${{ vars.APP_PORT }}
-
-#             DATABASE_URL=${{ secrets.DATABASE_URL }}
-
-#             OAUTH_AUTH_URL=${{ vars.OAUTH_AUTH_URL }}
-#             OAUTH_CLIENT_ID=${{ secrets.OAUTH_CLIENT_ID }}
-#             OAUTH_CLIENT_SECRET=${{ secrets.OAUTH_CLIENT_SECRET }}
-#             OAUTH_TOKEN_URL=${{ vars.OAUTH_TOKEN_URL }}
-#             OAUTH_REDIRECT_HOST=${{ vars.OAUTH_REDIRECT_HOST }}
-#             OAUTH_JWSK_URL=${{ vars.OAUTH_JWSK_URL }}
-#             EOT
-
-#       - name: Log into registry ${{ env.REGISTRY }}
-#         uses: docker/login-action@v2
-#         with:
-#           registry: ${{ env.REGISTRY }}
-#           username: ${{ github.actor }}
-#           password: ${{ secrets.GITHUB_TOKEN }}
-          
-#       - name: Docker metadata
-#         id: meta
-#         uses: docker/metadata-action@v4
-#         with:
-#           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-
-#       - name: Build and push Docker image
-#         id: build-and-push
-#         uses: docker/build-push-action@v4
-#         with:
-#           push: ${{ github.event_name != 'pull_request' }}
-#           tags: ${{ steps.meta.outputs.tags }}
-#           labels: ${{ steps.meta.outputs.labels }}
-
-  deploy:
+  build:
+    name: Build & push image to registry
     runs-on: ubuntu-latest
-    # needs: build
-    permissions:
+    permissions: 
       contents: read
-      packages: read
+      packages: write
       
     steps:
-      - name: Checkout repository
+      - name: 'Checkout Github Action'
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
+      
       - name: Create frontend .env file
         run: |
-            cd frontend/ & cat <<EOT >> .env
-            APP_API_URL=${{ vars.APP_API_URL }}
-            EOT
+          cd frontend/ & cat <<EOT >> .env
+          APP_API_URL=${{ vars.APP_API_URL }}
+          EOT
 
-      - name: Deploy to Dokku
-        uses: dokku/github-action@master
+      - name: Log into registry ${{ env.REGISTRY }}
+        uses: docker/login-action@v2
         with:
-          git_push_flags: '--force'
-          git_remote_url: ${{ secrets.DOKKU_HOST }}
-          ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        id: build-and-push
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Deploy to Coolify
+        run: | 
+          curl --request GET '${{ secrets.COOLIFY_WEBHOOK }}' --header 'Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}'

@@ -1,6 +1,7 @@
 use actix_web::{Scope, web};
 
 pub mod game;
+pub mod level;
 pub mod score;
 pub mod stats;
 
@@ -13,12 +14,22 @@ pub fn game_scope() -> Scope {
         .service(game::destroy)
 }
 
+pub fn level_scope() -> Scope {
+    web::scope("/level")
+        .service(level::index)
+        .service(level::game_levels)
+        .service(level::store)
+        .service(level::update)
+        .service(level::delete)
+}
+
 pub fn score_scope() -> Scope {
     web::scope("/score")
         .service(score::index)
         .service(score::show)
         .service(score::store)
         .service(score::game_scores)
+        .service(score::level_scores)
         .service(score::update)
         .service(score::destroy)
 }
