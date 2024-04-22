@@ -1,6 +1,6 @@
 use std::{
     error::Error,
-    fs::{OpenOptions, create_dir},
+    fs::OpenOptions,
     io::{Write, ErrorKind, self}, 
     time::Duration,
     env,
@@ -93,11 +93,6 @@ async fn fetch_and_save_jwk() -> Result<(), Box<dyn Error>> {
     if tokens.is_err() {
         error!("Could not fetch token from {}", jwsk_url);
         return Err(Box::new(io::Error::new(ErrorKind::Other, "Could not fetch JWSK token")));
-    }
-
-    if create_dir("data").is_err() {
-        error!("Cannot create data forlder");
-        //eturn Err(Box::new(io::Error::new(ErrorKind::Other, "Cannot create data forlder")));
     }
 
     let file_options = OpenOptions::new()
