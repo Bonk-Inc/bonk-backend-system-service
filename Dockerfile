@@ -1,34 +1,24 @@
 #####################################################################
 ## Build Backend
 ####################################################################
-FROM rust:1.76.0-slim-buster AS backend-build
+FROM rust:1.79.0-slim-buster AS backend-build
 
+# install extra dependencies for cryptography.
 RUN apt-get update && apt-get install -y libssl-dev libpq-dev pkg-config
 
-# create appuser
-ENV USER=bonk-inc-backend
-ENV UID=32767
-
-RUN adduser \
-    --disabled-password \
-    --gecos "" \
-    --home "/nonexistent" \
-    --shell "/sbin/nologin" \
-    --no-create-home \
-    --uid "${UID}" \
-    "${USER}"
-
+# set the working directory.
 WORKDIR /bonk-inc-backend
 
+# copy project files to the working directory.
 COPY ./ .
 
-RUN ls -a
+# build the backend to a executable.
 RUN cargo build --target x86_64-unknown-linux-gnu --release -p babs_backend
 
 #####################################################################
 ## Build Front-end
 ####################################################################
-FROM rust:1.76.0-slim-buster AS frontend-build
+FROM rust:1.79.0-slim-buster AS frontend-build
 
 # install dependencies
 RUN apt-get update && apt-get install -y libssl-dev libpq-dev pkg-config curl
@@ -46,21 +36,10 @@ ENV PATH="$NVM_DIR/versions/node/v${NODE_VERSION}/bin/:${PATH}"
 RUN rustup target add wasm32-unknown-unknown
 RUN cargo install --locked trunk
 
-# create appuser
-ENV USER=bonk-inc-backend
-ENV UID=32767
-
-RUN adduser \
-    --disabled-password \
-    --gecos "" \
-    --home "/nonexistent" \
-    --shell "/sbin/nologin" \
-    --no-create-home \
-    --uid "${UID}" \
-    "${USER}"
-
+# set the working directory.
 WORKDIR /bonk-inc-backend
 
+# copy project files to the working directory.
 COPY ./ .
 
 # create .env file
@@ -68,6 +47,7 @@ RUN cd ./frontend/ && cat <<EOT >> .env
 APP_API_URL="https://babs.bonk.group"
 EOT
 
+# build the front-end to a WASM file and extra javascript.
 RUN cd ./frontend/ && trunk build --release
 
 #####################################################################
@@ -75,6 +55,7 @@ RUN cd ./frontend/ && trunk build --release
 ####################################################################
 FROM debian:bullseye-slim
 
+# install extra dependencies for cryptography.
 RUN apt-get update && apt-get install -y libpq5 ca-certificates
 RUN update-ca-certificates
 
@@ -87,6 +68,19 @@ WORKDIR /bonk-inc-backend
 # Copy our build
 COPY --from=backend-build /bonk-inc-backend/target/x86_64-unknown-linux-gnu/release/bonk-inc-backend ./
 COPY --from=frontend-build /bonk-inc-backend/dist/ ./dist/
+
+# create appuser
+ENV USER=bonk-inc-backend
+ENV UID=32767
+
+RUN adduser \
+    --disabled-password \
+    --gecos "" \
+    --home "/nonexistent" \
+    --shell "/sbin/nologin" \
+    --no-create-home \
+    --uid "${UID}" \
+    "${USER}"
 
 # Create data folder
 RUN mkdir data
