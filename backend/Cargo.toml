@@ -12,21 +12,21 @@ path = "src/main.rs"
 
 [dependencies]
 actix-cors = "0.7.0"
-actix-files = "0.6.5"
-actix-web = "4.5.1"
+actix-files = "0.6.6"
+actix-web = "4.8.0"
 babs = { version = "0.1.0", path = "..", features = ["backend"] }
-chrono = { version = "0.4.37", features = ["serde"] }
-derive_more = "0.99.17"
-diesel = { version = "2.1.5", features = ["postgres", "chrono", "uuid", "r2d2"] }
-diesel_migrations = "2.1.0"
+chrono = { version = "0.4.38", features = ["serde"] }
+derive_more = "0.99.18"
+diesel = { version = "2.2.2", features = ["postgres", "chrono", "uuid", "r2d2"] }
+diesel_migrations = "2.2.0"
 dotenvy = "0.15.7"
 env_logger = "0.11.3"
 futures-util = "0.3.30"
 jsonwebtoken = "9.3.0"
-log = "0.4.21"
+log = "0.4.22"
 oauth2 = "4.4.2"
-reqwest = { version = "0.12.3", features = ["json"] }
-serde = { version = "1.0.197", features = ["derive"] }
-serde_json = "1.0.115"
-uuid = { version = "1.8.0", features = ["serde", "v4"] }
-validator = { version = "0.18.0", features = ["derive"] }
+reqwest = { version = "0.12.5", features = ["json"] }
+serde = { version = "1.0.204", features = ["derive"] }
+serde_json = "1.0.120"
+uuid = { version = "1.10.0", features = ["serde", "v4"] }
+validator = { version = "0.18.1", features = ["derive"] }
