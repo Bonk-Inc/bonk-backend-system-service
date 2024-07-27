@@ -3,7 +3,7 @@ use yew_router::scope_ext::RouterScopeExt;
 
 use crate::{
     app::AppRoute,
-    components::{tab::Tab, tabs::Tabs, toolbar::Toolbar},
+    components::{tab::Tab, tabs::Tabs, toolbar::Toolbar}
 };
 
 pub struct GameLayout;
@@ -18,6 +18,7 @@ pub enum Msg {
     NavigateToLevels,
     NavigateToGame,
     NavigateToScores,
+    NavigateToSettings,
 }
 
 impl Component for GameLayout {
@@ -36,6 +37,7 @@ impl Component for GameLayout {
             Msg::NavigateToGame => navigator.push(&AppRoute::Game { id }),
             Msg::NavigateToLevels => navigator.push(&AppRoute::Levels { game_id: id }),
             Msg::NavigateToScores => navigator.push(&AppRoute::Scores { game_id: id }),
+            Msg::NavigateToSettings => navigator.push(&AppRoute::Settings { game_id: id })
         }
 
         true
@@ -69,6 +71,12 @@ impl Component for GameLayout {
                             label="Scores"
                             onclick={ctx.link().callback(|_| Msg::NavigateToScores)}
                             selected={matches!(location, AppRoute::Scores { .. })}
+                        />
+                        <Tab 
+                            icon="settings"
+                            label="Instellingen"
+                            onclick={ctx.link().callback(|_| Msg::NavigateToSettings)}
+                            selected={matches!(location, AppRoute::Settings { .. })}
                         />
                     </Tabs>
                 </Toolbar>

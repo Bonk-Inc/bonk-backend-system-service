@@ -17,6 +17,8 @@ pub struct ButtonProps {
     #[prop_or_default]
     pub class: String,
     #[prop_or_default]
+    pub title: String,
+    #[prop_or_default]
     pub dense: bool,
     #[prop_or_default]
     pub disabled: bool,
@@ -74,6 +76,7 @@ impl Component for Button {
         html! {
             <button 
                 onclick={Callback::from(move |e| { onclick.emit(e); })}
+                title={ctx.props().title.clone()}
                 disabled={ctx.props().disabled}
                 class={classes!(base_classes, class)}
                 type={"button"}
