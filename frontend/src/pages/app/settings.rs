@@ -1,16 +1,23 @@
 use babs::{models::Game, respone::ResponseBody};
+use wasm_bindgen::JsValue;
+use web_sys::{console::log_1, window};
 use yew::{classes, html, Component, Context, Html, Properties};
 
 use crate::{
+    components::{
+        alert::{Alert, Severity},
+        button::{Button, ButtonVariant},
+        icon::Icon,
+        spinner::Spinner,
+    },
     env,
-    components::{alert::{Alert, Severity},spinner::Spinner},
-    layouts::game_layout::GameLayout, 
-    service::fetch::Fetch
+    layouts::game_layout::GameLayout,
+    service::fetch::Fetch,
 };
 
 pub struct Settings {
     game: Game,
-    status: Status
+    status: Status,
 }
 
 #[derive(Clone, PartialEq, Properties)]
@@ -21,13 +28,15 @@ pub struct SettingsProps {
 pub enum Msg {
     MakeReq(String),
     Response(Game),
-    Error(String)
+    CopyGameId(String),
+    DeleteGame(String),
+    Error(String),
 }
 
 pub enum Status {
     Fetching,
     Finished,
-    Failed(String)
+    Failed(String),
 }
 
 impl Component for Settings {
@@ -40,7 +49,7 @@ impl Component for Settings {
 
         Settings {
             game: Game::default(),
-            status: Status::Finished
+            status: Status::Finished,
         }
     }
 
@@ -62,11 +71,16 @@ impl Component for Settings {
 
                     Msg::Response(game_data.data)
                 });
-            },
+            }
             Msg::Response(game) => {
                 self.game = game;
                 self.status = Status::Finished;
-            },
+            }
+            Msg::CopyGameId(game_id) => {
+                let _navigator = window().unwrap().navigator();
+                log_1(&JsValue::from_str(&game_id));
+            }
+            Msg::DeleteGame(game_id) => {}
             Msg::Error(message) => self.status = Status::Failed(message),
         }
 
@@ -75,9 +89,11 @@ impl Component for Settings {
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         let game_id = ctx.props().game_id.clone();
+        let copy_id = self.game.id.to_string();
+        let delete_id = self.game.id.to_string();
 
         html! {
-            <GameLayout id={game_id}>
+            <GameLayout id={game_id.clone()}>
                 {match &self.status {
                     Status::Fetching => {
                         html! {
@@ -90,15 +106,43 @@ impl Component for Settings {
                         html! {
                             <>
                                 {if let Status::Failed(message) = &self.status {
-                                        html! {
-                                            <div class={classes!("absolute", "w-80", "z-50", "top-20", "left-[40%]")}>
-                                                <Alert severity={Severity::Error}>{message.clone()}</Alert>
-                                            </div>
-                                        }
+                                    html! {
+                                        <div class={classes!("absolute", "w-80", "z-50", "top-20", "left-[40%]")}>
+                                            <Alert severity={Severity::Error}>{message.clone()}</Alert>
+                                        </div>
+                                    }
                                 } else { html!() }}
                                 <h1 class={classes!("mt-4", "text-2xl", "font-medium", "mb-4")}>
                                     {"Instellingen"}
                                 </h1>
+                                <div class={classes!("flex", "flex-wrap", "w-full")}>
+                                   <div class={classes!("flex", "flex-wrap", "w-1/3")}>
+                                        <p class={classes!("font-bold", "text-base", "w-full")}>
+                                            {"Game id:"}
+                                        </p>
+                                        <div class={classes!("flex", "w-full", "justify-between")}>
+                                            <p class={classes!("pt-1", "font-normal", "text-base")}>
+                                                {game_id.clone()}
+                                            </p>
+                                            <Button
+                                                dense={true}
+                                                title="Kopieer Level Id"
+                                                onclick={ctx.link().callback(move |_| Msg::CopyGameId(copy_id.clone()))}
+                                            >
+                                                <Icon name="content_copy" />
+                                            </Button>
+                                        </div>
+                                   </div>
+                                </div>
+                                <div class={classes!("flex", "w-full", "justify-end", "mt-16")}>
+                                    <Button
+                                        variant={ButtonVariant::Contained}
+                                        class="flex items-center !text-white bg-red-600"
+                                        onclick={ctx.link().callback(move |_| Msg::DeleteGame(delete_id.clone()))}
+                                    >
+                                        <Icon name="delete" class="mr-2" /> {"Verwijderen"}
+                                    </Button>
+                                </div>
                             </>
                         }
                     }

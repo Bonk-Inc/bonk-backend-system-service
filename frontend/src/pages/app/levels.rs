@@ -2,7 +2,6 @@ use babs::{models::Level, respone::ResponseBody};
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{console::log_1, window, Event, HtmlInputElement};
 use yew::{classes, html, Component, Context, Html, Properties};
-use yew_router::navigator;
 
 use crate::{
     components::{
@@ -154,7 +153,7 @@ impl Component for Levels {
             Msg::CloseAddPopup => self.create_level_open = false,
             Msg::Failed(error) => self.status = Status::Failed(error),
             Msg::CopyLevelId(level_id) => {
-                let navigator = window().unwrap().navigator();
+                let _navigator = window().unwrap().navigator();
                 log_1(&JsValue::from_str(&level_id));
             }
         }
