@@ -1,6 +1,6 @@
 use babs::{models::Level, respone::ResponseBody};
-use wasm_bindgen::JsCast;
-use web_sys::{Event, HtmlInputElement};
+use wasm_bindgen::{JsCast, JsValue};
+use web_sys::{console::log_1, window, Event, HtmlInputElement};
 use yew::{classes, html, Component, Context, Html, Properties};
 
 use crate::{
@@ -51,6 +51,7 @@ pub enum Msg {
     OpenAddPopup,
     CloseAddPopup,
     SaveLevel,
+    CopyLevelId(String),
     LevelSaved,
     LevelNameChange(Event),
     Failed(String),
@@ -151,6 +152,10 @@ impl Component for Levels {
             Msg::OpenAddPopup => self.create_level_open = true,
             Msg::CloseAddPopup => self.create_level_open = false,
             Msg::Failed(error) => self.status = Status::Failed(error),
+            Msg::CopyLevelId(level_id) => {
+                let _navigator = window().unwrap().navigator();
+                log_1(&JsValue::from_str(&level_id));
+            }
         }
 
         true
@@ -254,7 +259,8 @@ impl Component for Levels {
 impl Levels {
     fn render_level_row(&self, ctx: &Context<Self>, level: &Level) -> Html {
         let name = level.name.clone();
-        let level_id = level.id.to_string();
+        let delete_level_id = level.id.to_string();
+        let copy_level_id = level.id.to_string();
 
         html! {
             <TableRow>
@@ -262,13 +268,22 @@ impl Levels {
                     {name}
                 </TableCell>
                 <TableCell>
-                    <Button
-                        dense={true}
-                        class="flex justify-end w-full"
-                        onclick={ctx.link().callback(move |_| Msg::DeleteLevel(level_id.clone()))}
-                    >
-                        <Icon name="delete"/>
-                    </Button>
+                    <div class={classes!("w-full", "flex", "justify-end", "items-center")}>
+                        <Button
+                            dense={true}
+                            title="Kopieer Level Id"
+                            onclick={ctx.link().callback(move |_| Msg::CopyLevelId(copy_level_id.clone()))}
+                        >
+                            <Icon name="content_copy"/>
+                        </Button>
+                        <Button
+                            dense={true}
+                            title="Verwijder Level"
+                            onclick={ctx.link().callback(move |_| Msg::DeleteLevel(delete_level_id.clone()))}
+                        >
+                            <Icon name="delete"/>
+                        </Button>
+                    </div>
                 </TableCell>
             </TableRow>
         }

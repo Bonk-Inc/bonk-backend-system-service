@@ -3,7 +3,10 @@ use yew_router::{Routable, Switch};
 
 use crate::{
     layouts::main_layout::MainLayout,
-    pages::app::{game::Game, home::Home, levels::Levels, score_form::ScoreForm, scores::Scores},
+    pages::app::{
+        game::Game, home::Home, levels::Levels, score_form::ScoreForm, scores::Scores,
+        settings::Settings,
+    },
 };
 
 pub struct AppBase;
@@ -18,6 +21,8 @@ pub enum AppRoute {
     Levels { game_id: String },
     #[at("/app/game/:game_id/score")]
     Scores { game_id: String },
+    #[at("/app/game/:game_id/settings")]
+    Settings { game_id: String },
     #[at("/app/score/add")]
     ScoreAdd,
     #[at("/app/score/:score_id")]
@@ -30,6 +35,7 @@ fn switch(routes: AppRoute) -> Html {
         AppRoute::Game { id } => html!(<Game id={id} />),
         AppRoute::Levels { game_id } => html!(<Levels game_id={game_id} />),
         AppRoute::Scores { game_id } => html!(<Scores game_id={game_id} />),
+        AppRoute::Settings { game_id } => html!(<Settings game_id={game_id} />),
         AppRoute::ScoreAdd => html!(<ScoreForm />),
         AppRoute::ScoreEdit { score_id } => html!(<ScoreForm score_id={score_id} />),
     }

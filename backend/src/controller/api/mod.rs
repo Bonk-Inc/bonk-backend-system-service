@@ -1,4 +1,4 @@
-use actix_web::{Scope, web};
+use actix_web::{get, web, HttpResponse, Responder, Scope};
 
 pub mod game;
 pub mod level;
@@ -38,4 +38,9 @@ pub fn stats_scope() -> Scope {
     web::scope("/stats")
         .service(stats::all)
         .service(stats::game_stats)
+}
+
+#[get("/healthcheck/")]
+pub async fn healthcheck() -> impl Responder {
+    HttpResponse::Ok().body("Ok")
 }

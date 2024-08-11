@@ -14,6 +14,7 @@ pub fn auth_scope() -> Scope {
 
 pub fn api_scope() -> Scope {
     web::scope("/api")
+        .service(api::healthcheck)
         .service(api::score_scope())
         .service(
             api::game_scope()

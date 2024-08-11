@@ -9,7 +9,7 @@ use yew_router::{
 use crate::{
     service::fetch::Fetch, 
     components::{
-        spinner::Spinner, 
+        spinner::Spinner,
         stats_card::StatsCard, alert::{Alert, Severity}
     }, 
     layouts::game_layout::GameLayout, env,
@@ -75,19 +75,21 @@ impl Component for Game {
                 self.status = Status::Fetching;
 
                 ctx.link().send_future(async move {
-                    let url = format!("{}/api/stats/game/{}", env::APP_API_URL, id);
-                    let game_stats = Fetch::get(&url, Some(true)).await;
+                    let stats_url = format!("{}/api/stats/game/{}", env::APP_API_URL, id);
+                    
+                    let game_stats = Fetch::get(&stats_url, Some(true)).await;
                     if game_stats.is_err() {
                         return Msg::Error("Error fetching game stats".to_string());
                     }
 
                     let stats_data: ResponseBody<GameStats> =
                         serde_wasm_bindgen::from_value(game_stats.unwrap()).unwrap();
+
                     Msg::Response(stats_data.data)
-                })
+                });
             }
-            Msg::Response(data) => {
-                self.stats = data;
+            Msg::Response(game_stats) => {
+                self.stats = game_stats;
                 self.status = Status::Finished
             }
             Msg::Error(message) => self.status = Status::Failed(message),
@@ -112,18 +114,22 @@ impl Component for Game {
                     },
                     _ => {
                         html! {
-                            <div class={classes!("flex", "flex-wrap", "w-full")}>
+                            <>
                                 {if let Status::Failed(message) = &self.status {
-                                    html! {
-                                        <div class={classes!("absolute", "w-80", "z-50", "top-20", "left-[40%]")}>
-                                            <Alert severity={Severity::Error}>{message.clone()}</Alert>
-                                        </div>
-                                    }
+                                        html! {
+                                            <div class={classes!("absolute", "w-80", "z-50", "top-20", "left-[40%]")}>
+                                                <Alert severity={Severity::Error}>{message.clone()}</Alert>
+                                            </div>
+                                        }
                                 } else { html!() }}
-                                
-                                <StatsCard name="Levels" value={0} icon="map" class="ml-0" />
-                                <StatsCard name="Scores" value={self.stats.scores} icon="scoreboard" class="ml-0" />
-                            </div>
+                                <h2 class={classes!("mt-4", "text-xl", "font-medium", "mb-4")}>
+                                    {"Statistieken"}
+                                </h2>
+                                <div class={classes!("flex", "flex-wrap", "w-full")}>                                   
+                                    <StatsCard name="Levels" value={0} icon="map" class="ml-0" />
+                                    <StatsCard name="Scores" value={self.stats.scores} icon="scoreboard" class="ml-0" />
+                                </div>
+                            </>
                         }
                     },
                 }}

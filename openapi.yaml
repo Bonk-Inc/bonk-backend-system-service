@@ -1,0 +1,593 @@
+openapi: 3.0.3
+info:
+  title: Bonk Inc Backend
+  description: Test
+  version: 1.0.0
+servers:
+  - url: "https://babs.bonk.group/api/"
+tags:
+  - name: Api
+    description: Operations for general api calls
+  - name: Game
+    description: Operations for managing games
+  - name: Level
+    description: Operations for managing levels
+  - name: Score
+    description: Operations for managing scores
+paths:
+  /api/stats/all:
+    get:
+      tags:
+        - Api
+      summary: Get stats over the entire database
+      description: Resturns a object containing the statisics over the enire database
+      operationId: statsAll
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      games:
+                        type: number
+                        format: int32
+                      scores:
+                        type: number
+                        format: int32
+  /api/stats/game/{gameId}:
+    get:
+      tags:
+        - Api
+      summary: Get stats of a games
+      description: Resturns a object containing the statisics over the given game
+      operationId: statsGame
+      parameters:
+        - name: gameId
+          in: path
+          description: ID of the game to return
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      games:
+                        type: number
+                        format: int32
+                      scores:
+                        type: number
+                        format: int32
+  /game:
+    get:
+      tags:
+        - Game
+      summary: Returns all the registerd games
+      description: Resturns a list of all the registerd games in the database
+      operationId: fetchGames
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Game"
+    post:
+      tags:
+        - Game
+      summary: Add a game to the database
+      description: Add a game to the database
+      operationId: addGame
+      requestBody:
+        description: Create a new game in the database
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  format: string
+      responses:
+        "201":
+          description: Created new game
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    $ref: "#/components/schemas/Game"
+        "400":
+          description: Invalid input
+  /game/{gameId}:
+    get:
+      tags:
+        - Game
+      summary: Find game by ID
+      description: Returns a single game based on the id
+      operationId: fetchGame
+      parameters:
+        - name: gameId
+          in: path
+          description: ID of the game to return
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    format: string
+                  data:
+                    $ref: "#/components/schemas/Game"
+        "404":
+          description: No game found
+  /level:
+    get:
+      tags:
+        - Level
+      summary: Returns all the registerd games
+      description: Resturns a list of all the levels games in the database
+      operationId: fetchLevels
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Level"
+    post:
+      tags:
+        - Level
+      summary: Returns all the registerd games
+      description: Resturns a list of all the levels games in the database
+      operationId: addLevel
+      requestBody:
+        description: Create a new level in the database
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  format: string
+                game_id:
+                  type: string
+                  format: uuid
+      responses:
+        "201":
+          description: Created new level
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    $ref: "#/components/schemas/Level"
+        "400":
+          description: Invalid input
+  /level/{levelId}:
+    put:
+      tags:
+        - Level
+      summary: Update level
+      description: Updates the level with given ID
+      operationId: updateLevel
+      parameters:
+        - name: levelId
+          in: path
+          description: ID of the level to update
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: Update a level in the database
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  format: string
+                game_id:
+                  type: string
+                  format: uuid
+      responses:
+        "200":
+          description: Level updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    $ref: "#/components/schemas/Level"
+        "400":
+          description: Invalid input
+        "404":
+          description: No level found with the given ID
+    delete:
+      tags:
+        - Level
+      summary: Delete level
+      description: Deletes the leven with the given ID
+      operationId: deleteLevel
+      parameters:
+        - name: levelId
+          in: path
+          description: ID of the level to delete
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Level deleted
+        "404":
+          description: No level found with the given ID
+  /level/game/{gameId}:
+    get:
+      tags:
+        - Level
+      summary: Returns all levels of the games
+      description: Resturns a list of all the levels related to the given game
+      operationId: fetchLevelsByGame
+      parameters:
+        - name: gameId
+          in: path
+          description: ID of the game to filter
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Level"
+  /score:
+    get:
+      tags:
+        - Score
+      summary: Returns all the registerd scores
+      description: Resturns a list of all the registerd scores in the database
+      operationId: fetchScores
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Score"
+    post:
+      tags:
+        - Score
+      summary: Add a score to the database
+      description: Add a score to the database
+      operationId: addScore
+      requestBody:
+        description: Create a new score in the database
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                score:
+                  type: integer
+                  format: int32
+                is_hidden:
+                  type: boolean
+                level_id:
+                  type: string
+                  format: uuid
+      responses:
+        "201":
+          description: Created new score
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    $ref: "#/components/schemas/Score"
+        "400":
+          description: Invalid input
+  /score/{scoreId}:
+    get:
+      tags:
+        - Score
+      summary: Fetch score
+      description: Fetches the score with given ID
+      operationId: fetchScore
+      parameters:
+        - name: scoreId
+          in: path
+          description: ID of the score to fetch
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Score fetched
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    $ref: "#/components/schemas/Score"
+        "404":
+          description: No score found with the given ID
+    put:
+      tags:
+        - Score
+      summary: Update score
+      description: Updates the score with given ID
+      operationId: updateScore
+      parameters:
+        - name: scoreId
+          in: path
+          description: ID of the score to update
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: Update a score in the database
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                score:
+                  type: integer
+                  format: int32
+                is_hidden:
+                  type: boolean
+                level_id:
+                  type: string
+                  format: uuid
+      responses:
+        "200":
+          description: Level updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    $ref: "#/components/schemas/Score"
+        "400":
+          description: Invalid input
+        "404":
+          description: No score found with the given ID
+  /score/({scoreIds}):
+    delete:
+      tags:
+        - Score
+      summary: Delete scores
+      description: Delete the scores with given IDs
+      operationId: deleteScores
+      parameters:
+        - name: scoreIds
+          in: path
+          description: List (comma seperated) of IDs of the score to be deleted
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Scores deleted
+  /score/game/{gameId}:
+    get:
+      tags:
+        - Score
+      summary: Gets scores from the given game
+      description: Gets scores from the given game
+      operationId: getScoreByGame
+      parameters:
+        - in: path
+          name: gameId
+          description: ID of the level to filter
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: hidden
+          schema:
+            type: boolean
+          description: If hidden scores should be includen in he request
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Score"
+  /score/level/{levelId}:
+    get:
+      tags:
+        - Score
+      summary: Gets scores from the given level
+      description: Gets scores from the given level
+      operationId: getScoreByLevel
+      parameters:
+        - in: path
+          name: levelId
+          description: ID of the level to filter
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: hidden
+          schema:
+            type: boolean
+          description: If hidden scores should be includen in he request
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Score"
+
+components:
+  schemas:
+    Game:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    Level:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        game_id:
+          type: string
+          format: uuid
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    Score:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        username:
+          type: string
+        score:
+          type: number
+          format: int32
+        is_hidden:
+          type: boolean
+        game_id:
+          type: string
+          format: uuid
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        level_id:
+          type: string
+          format: date-time
+    ApiResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        type:
+          type: string
+        message:
+          type: string
