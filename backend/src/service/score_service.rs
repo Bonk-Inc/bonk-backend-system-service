@@ -7,9 +7,9 @@ use crate::{
     config::db::Pool,
     error::ServiceError,
     models::{
-        score::{Score, ScoreDTO, self},
-        Model
-    }
+        score::{self, Score, ScoreDTO},
+        Model,
+    },
 };
 
 use super::{game_service, level_service};
@@ -99,7 +99,8 @@ pub fn update(
 }
 
 pub fn delete(ids: String, pool: &web::Data<Pool>) -> Result<usize, ServiceError> {
-    let score_ids = ids.split(',')
+    let score_ids = ids
+        .split(',')
         .filter_map(|s| Uuid::from_str(s).ok())
         .collect::<Vec<Uuid>>();
 

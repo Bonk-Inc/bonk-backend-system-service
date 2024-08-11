@@ -1,11 +1,10 @@
 use actix_web::{delete, get, post, put, web, HttpResponse};
-use babs::respone::ResponseBody;
 use uuid::Uuid;
 
 use crate::{
     config::db::Pool,
-    error::ServiceError, 
-    models::level::LevelDTO, 
+    error::ServiceError,
+    models::{level::LevelDTO, respone::ResponseBody},
     service::level_service,
 };
 
@@ -18,7 +17,7 @@ pub async fn index(pool: web::Data<Pool>) -> actix_web::Result<HttpResponse, Ser
 }
 
 #[get("/game/{id}/")]
-pub async fn game_levels(    
+pub async fn game_levels(
     pool: web::Data<Pool>,
     path: web::Path<Uuid>,
 ) -> actix_web::Result<HttpResponse, ServiceError> {

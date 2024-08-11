@@ -1,34 +1,34 @@
 use std::{
+    env,
     error::Error,
     fs::OpenOptions,
-    io::{Write, ErrorKind, self}, 
+    io::{self, ErrorKind, Write},
+    process,
     time::Duration,
-    env,
-    process
 };
 
 use actix_cors::Cors;
 use actix_files::{Files, NamedFile};
 use actix_web::{
+    dev::{ServiceRequest, ServiceResponse},
     middleware::Logger,
-    rt::{time::interval, spawn},
-    App, 
-    HttpServer, 
-    web, dev::{ServiceRequest, ServiceResponse}
+    rt::{spawn, time::interval},
+    web, App, HttpServer,
 };
 use config::{
     db::{init_db_pool, run_migration},
-    oauth2::OAuth2Client
+    oauth2::OAuth2Client,
 };
 #[cfg(debug_assertions)]
 use dotenvy::dotenv;
-use log::{info, error};
+use log::{error, info};
 
 pub mod config;
 pub mod controller;
 pub mod error;
 pub mod middleware;
 pub mod models;
+pub mod schema;
 pub mod service;
 
 pub const JWK_FILE_PATH: &str = "data/jwk.json";
@@ -69,14 +69,14 @@ async fn main() -> std::io::Result<()> {
             .wrap(setup_cors())
             .service(controller::auth_scope())
             .service(controller::api_scope())
-            .service(Files::new("/", "./dist/").index_file("index.html"))
-            .default_service(|req: ServiceRequest| {
-                let (http_req, _payload) = req.into_parts();
-                async {
-                    let response = NamedFile::open("./dist/index.html")?.into_response(&http_req);
-                    Ok(ServiceResponse::new(http_req, response))
-                }
-            })
+        // .service(Files::new("/", "./dist/").index_file("index.html"))
+        // .default_service(|req: ServiceRequest| {
+        //     let (http_req, _payload) = req.into_parts();
+        //     async {
+        //         let response = NamedFile::open("./dist/index.html")?.into_response(&http_req);
+        //         Ok(ServiceResponse::new(http_req, response))
+        //     }
+        // })
     })
     .bind(&app_url)?
     .run()
@@ -85,14 +85,14 @@ async fn main() -> std::io::Result<()> {
 
 async fn fetch_and_save_jwk() -> Result<(), Box<dyn Error>> {
     let jwsk_url = env::var("OAUTH_JWSK_URL").expect("OAUTH_JWSK_URL must be set");
-    let tokens = reqwest::get(&jwsk_url)
-        .await?
-        .text()
-        .await;
+    let tokens = reqwest::get(&jwsk_url).await?.text().await;
 
     if tokens.is_err() {
         error!("Could not fetch token from {}", jwsk_url);
-        return Err(Box::new(io::Error::new(ErrorKind::Other, "Could not fetch JWSK token")));
+        return Err(Box::new(io::Error::new(
+            ErrorKind::Other,
+            "Could not fetch JWSK token",
+        )));
     }
 
     let file_options = OpenOptions::new()
@@ -104,10 +104,13 @@ async fn fetch_and_save_jwk() -> Result<(), Box<dyn Error>> {
         info!("Write new JWK token to file");
         let _ = file_options.unwrap().write_all(tokens.unwrap().as_bytes());
     } else {
-        error!("Cannot write JWK token to file, reason {}", file_options.err().unwrap())
+        error!(
+            "Cannot write JWK token to file, reason {}",
+            file_options.err().unwrap()
+        )
     }
 
-   Ok(()) 
+    Ok(())
 }
 
 async fn refresh_jwk() {
@@ -115,7 +118,7 @@ async fn refresh_jwk() {
 
     loop {
         delay.tick().await;
-    
+
         info!("Refreshing JWK token");
         let _ = fetch_and_save_jwk().await;
     }

@@ -1,5 +1,5 @@
 use std::{
-    error, 
+    error,
     fs::File,
     io::{prelude::*, BufReader},
 };
@@ -7,23 +7,15 @@ use std::{
 use actix_web::web;
 use jsonwebtoken::jwk::{Jwk, JwkSet};
 use oauth2::{
-    basic::BasicTokenType, CsrfToken,
-    reqwest::http_client, 
-    AuthorizationCode,
-    EmptyExtraTokenFields,
-    StandardTokenResponse, RefreshToken,
+    basic::BasicTokenType, reqwest::http_client, AuthorizationCode, CsrfToken,
+    EmptyExtraTokenFields, RefreshToken, StandardTokenResponse,
 };
 
-use crate::{
-    config::oauth2::OAuth2Client,
-    JWK_FILE_PATH
-};
+use crate::{config::oauth2::OAuth2Client, JWK_FILE_PATH};
 
 pub fn get_authorize_url(client: web::Data<OAuth2Client>) -> String {
     let oauth2: &OAuth2Client = client.get_ref();
-    let (authorize_url, _) = oauth2.client
-        .authorize_url(CsrfToken::new_random)
-        .url();
+    let (authorize_url, _) = oauth2.client.authorize_url(CsrfToken::new_random).url();
 
     authorize_url.to_string()
 }
@@ -36,7 +28,8 @@ pub async fn get_access_token(
     let authorization_code = AuthorizationCode::new(code);
 
     let token_res = web::block(move || {
-        oauth2.client
+        oauth2
+            .client
             .exchange_code(authorization_code)
             .request(http_client)
     })
@@ -50,7 +43,7 @@ pub async fn get_access_token(
     None
 }
 
-pub async fn refresh_token(    
+pub async fn refresh_token(
     refresh: String,
     client: web::Data<OAuth2Client>,
 ) -> Option<StandardTokenResponse<EmptyExtraTokenFields, BasicTokenType>> {
@@ -58,7 +51,8 @@ pub async fn refresh_token(
     let refresh_token = RefreshToken::new(refresh);
 
     let token_res = web::block(move || {
-        oauth2.client
+        oauth2
+            .client
             .exchange_refresh_token(&refresh_token)
             .request(http_client)
     })

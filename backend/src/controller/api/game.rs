@@ -1,11 +1,10 @@
 use actix_web::{delete, get, post, put, web, HttpResponse};
-use babs::respone::ResponseBody;
 use uuid::Uuid;
 
 use crate::{
     config::db::Pool,
     error::ServiceError,
-    models::game::GameDTO,
+    models::{game::GameDTO, respone::ResponseBody},
     service::game_service,
 };
 

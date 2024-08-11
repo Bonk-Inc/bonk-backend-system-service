@@ -1,19 +1,14 @@
 [package]
-name = "babs_backend"
+name = "babs-server"
 version = "0.2.0"
 authors = ["Traxx186"]
 edition = "2021"
 readme = "README.md"
 
-[[bin]]
-name = "bonk-inc-backend"
-path = "src/main.rs"
-
 [dependencies]
 actix-cors = "0.7.0"
 actix-files = "0.6.6"
 actix-web = "4.9.0"
-babs = { version = "0.2.0", path = "..", features = ["backend"] }
 chrono = { version = "0.4.38", features = ["serde"] }
 derive_more = { version = "1.0.0", features = ["display", "error"] }
 diesel = { version = "2.2.2", features = ["postgres", "chrono", "uuid", "r2d2"] }

@@ -1,18 +1,24 @@
-pub use babs::{
-    models::Game,
-    schema::game::dsl::*
-};
-use diesel::{prelude::*, AsChangeset, Insertable, QueryDsl, dsl::count_star};
+use chrono::NaiveDateTime;
+use diesel::{dsl::count_star, prelude::*, AsChangeset, Insertable, QueryDsl};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::{
     config::db::Connection,
     models::Model,
+    schema::{game, game::dsl::*},
 };
 
+#[derive(Queryable, Serialize, Deserialize, Default)]
+pub struct Game {
+    pub id: Uuid,
+    pub name: String,
+    pub created_at: NaiveDateTime,
+    pub updated_at: Option<NaiveDateTime>,
+}
+
 #[derive(Insertable, AsChangeset, Serialize, Deserialize)]
-#[diesel(table_name = babs::schema::game)]
+#[diesel(table_name = game)]
 pub struct GameDTO {
     pub name: String,
 }
@@ -44,7 +50,6 @@ impl Model<Game, Uuid, GameDTO> for Game {
     }
 }
 
-pub fn count_games(conn: &mut Connection) -> QueryResult<i64> {   
-    game.select(count_star())
-        .first(conn)
+pub fn count_games(conn: &mut Connection) -> QueryResult<i64> {
+    game.select(count_star()).first(conn)
 }
