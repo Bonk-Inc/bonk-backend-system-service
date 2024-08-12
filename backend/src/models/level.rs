@@ -1,6 +1,7 @@
 use chrono::NaiveDateTime;
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
 use uuid::Uuid;
 
 use crate::{
@@ -9,7 +10,7 @@ use crate::{
     schema::{level, level::dsl::*},
 };
 
-#[derive(Serialize, Clone, Deserialize, Default, Queryable, Selectable)]
+#[derive(Serialize, Clone, Deserialize, Default, Queryable, Selectable, ToSchema)]
 #[diesel(table_name = level)]
 #[diesel(belongs_to(Game))]
 pub struct Level {
@@ -20,7 +21,7 @@ pub struct Level {
     pub updated_at: Option<NaiveDateTime>,
 }
 
-#[derive(Insertable, AsChangeset, Serialize, Deserialize)]
+#[derive(Insertable, AsChangeset, Serialize, Deserialize, ToSchema)]
 #[diesel(table_name = level)]
 pub struct LevelDTO {
     pub name: String,

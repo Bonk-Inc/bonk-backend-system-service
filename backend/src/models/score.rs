@@ -1,6 +1,7 @@
 use chrono::NaiveDateTime;
 use diesel::{dsl::count_star, prelude::*, AsChangeset, Insertable};
 use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
 use uuid::Uuid;
 
 use crate::{
@@ -9,7 +10,7 @@ use crate::{
     schema::{level, score, score::dsl::*},
 };
 
-#[derive(Serialize, Clone, Deserialize, Default, Queryable, Selectable)]
+#[derive(Serialize, Clone, Deserialize, Default, Queryable, Selectable, ToSchema)]
 #[diesel(table_name = score)]
 #[diesel(belongs_to(Level))]
 pub struct Score {
@@ -24,7 +25,7 @@ pub struct Score {
     pub level_id: Option<Uuid>,
 }
 
-#[derive(Insertable, AsChangeset, Serialize, Deserialize)]
+#[derive(Insertable, AsChangeset, Serialize, Deserialize, ToSchema)]
 #[diesel(table_name = score)]
 pub struct ScoreDTO {
     pub username: String,

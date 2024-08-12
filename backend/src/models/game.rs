@@ -1,6 +1,7 @@
 use chrono::NaiveDateTime;
 use diesel::{dsl::count_star, prelude::*, AsChangeset, Insertable, QueryDsl};
 use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
 use uuid::Uuid;
 
 use crate::{
@@ -9,7 +10,7 @@ use crate::{
     schema::{game, game::dsl::*},
 };
 
-#[derive(Queryable, Serialize, Deserialize, Default)]
+#[derive(Queryable, Serialize, Deserialize, Default, ToSchema)]
 pub struct Game {
     pub id: Uuid,
     pub name: String,
@@ -17,7 +18,7 @@ pub struct Game {
     pub updated_at: Option<NaiveDateTime>,
 }
 
-#[derive(Insertable, AsChangeset, Serialize, Deserialize)]
+#[derive(Insertable, AsChangeset, Serialize, Deserialize, ToSchema)]
 #[diesel(table_name = game)]
 pub struct GameDTO {
     pub name: String,
