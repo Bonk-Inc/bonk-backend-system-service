@@ -19,11 +19,19 @@ use config::{
     db::{init_db_pool, run_migration},
     oauth2::OAuth2Client,
 };
-use controller::api::score::{self, ScoreResponseBody, ScoresResponseBody};
+use controller::api::{
+    game::{self, GameResponseBody, GamesResponseBody},
+    level::{self, LevelResponseBody, LevelsResponseBody},
+    score::{self, ScoreResponseBody, ScoresResponseBody},
+};
 #[cfg(debug_assertions)]
 use dotenvy::dotenv;
 use log::{error, info};
-use models::score::{Score, ScoreDTO};
+use models::{
+    game::{Game, GameDTO},
+    level::{Level, LevelDTO},
+    score::{Score, ScoreDTO},
+};
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
@@ -45,13 +53,23 @@ pub const JWK_FILE_PATH: &str = "data/jwk.json";
     ),
     servers((url = "https://babs.bonk.group/api")),
     paths(
+        game::index, game::show, game::store, game::update, game::destroy,
+        level::index, level::game_levels, level::store, level::update, level::destroy,
         score::index, score::show, score::game_scores, score::level_scores,
-        score::store, score::update, score::destroy
+        score::store, score::update, score::destroy,
     ),
     tags(
-        (name = "score", description = "Score management endpoints.")
+        (name = "Game", description = "Game management endpoints."),
+        (name = "Level", description = " "),
+        (name = "Score", description = "Score management endpoints.")
     ),
-    components(schemas(Score, ScoreDTO, ScoresResponseBody, ScoreResponseBody))
+    components(
+        schemas(
+            Game, GameDTO, GameResponseBody, GamesResponseBody, 
+            Level, LevelDTO, LevelResponseBody, LevelsResponseBody,
+            Score, ScoreDTO, ScoreResponseBody, ScoresResponseBody
+        )
+    )
 )]
 struct ApiDoc;
 
@@ -59,9 +77,9 @@ struct ApiDoc;
 async fn main() -> std::io::Result<()> {
     #[cfg(debug_assertions)]
     dotenv().expect(".env file not found");
-    
+
     env_logger::init_from_env(env_logger::Env::default().default_filter_or("info"));
-    
+
     let app_host = env::var("APP_HOST").expect("APP_HOST must be set");
     let app_port = env::var("APP_PORT").expect("APP_PORT must be set");
     let app_url = format!("{}:{}", app_host, app_port);
@@ -89,8 +107,7 @@ async fn main() -> std::io::Result<()> {
             .service(controller::auth_scope())
             .service(controller::api_scope())
             .service(
-                SwaggerUi::new("/swagger/{_:.*}")
-                    .url("/api-docs/openapi.json", ApiDoc::openapi())
+                SwaggerUi::new("/swagger/{_:.*}").url("/api-docs/openapi.json", ApiDoc::openapi()),
             )
         // .service(Files::new("/", "./dist/").index_file("index.html"))
         // .default_service(|req: ServiceRequest| {

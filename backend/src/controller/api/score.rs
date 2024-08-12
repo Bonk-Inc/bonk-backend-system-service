@@ -1,7 +1,6 @@
 use actix_web::{delete, get, post, put, web, HttpResponse};
-use reqwest::StatusCode;
 use serde::Deserialize;
-use utoipa::{openapi::path::ParameterIn, OpenApi, ToSchema};
+use utoipa::{OpenApi, ToSchema};
 use uuid::Uuid;
 
 use crate::{
@@ -46,7 +45,7 @@ pub struct QueryParams {
 #[utoipa::path(
     get,
     path = "/score",
-    tag = "score",
+    tag = "Score",
     operation_id = "score_index",
     responses(
         (status = StatusCode::OK, description = "Scores fetched successfully", body = ScoresResponseBody)
@@ -63,7 +62,7 @@ pub async fn index(pool: web::Data<Pool>) -> actix_web::Result<HttpResponse, Ser
 #[utoipa::path(
     get,
     path = "/score/{id}",
-    tag = "score",
+    tag = "Score",
     operation_id = "score_show",
     params(
         ("id", Path, description = "Unique id of a Score")
@@ -87,7 +86,7 @@ pub async fn show(
 #[utoipa::path(
     get,
     path = "/score/game/{gameId}",
-    tag = "score",
+    tag = "Score",
     operation_id = "score_game_score",
     params(
         ("gameId", Path, description = "Unique id of a Game"),
@@ -95,7 +94,7 @@ pub async fn show(
     ),
     responses(
         (status = StatusCode::OK, description = "Score fetched by game successfully", body = ScoresResponseBody),
-        (status = StatusCode::NOT_FOUND, description = "No score found by game id")
+        (status = StatusCode::NOT_FOUND, description = "No Game found by game id")
     )
 )]
 #[get("/game/{gameId}/")]
@@ -115,7 +114,7 @@ pub async fn game_scores(
 #[utoipa::path(
     get,
     path = "/score/level/{levelId}",
-    tag = "score",
+    tag = "Score",
     operation_id = "score_level_score",
     params(
         ("levelId", Path, description = "Unique id of a Level"),
@@ -123,7 +122,7 @@ pub async fn game_scores(
     ),
     responses(
         (status = StatusCode::OK, description = "Score fetched by level successfully", body = ScoresResponseBody),
-        (status = StatusCode::NOT_FOUND, description = "No score found by level id")
+        (status = StatusCode::NOT_FOUND, description = "No Level found by level id")
     )
 )]
 #[get("/level/{levelId}/")]
@@ -143,7 +142,7 @@ pub async fn level_scores(
 #[utoipa::path(
     post,
     path = "/score",
-    tag = "score",
+    tag = "Score",
     operation_id = "score_store",
     request_body = ScoreDTO,
     responses(
@@ -165,14 +164,14 @@ pub async fn store(
 #[utoipa::path(
     put,
     path = "/score/{id}",
-    tag = "score",
+    tag = "Score",
     operation_id = "score_update",
     request_body = ScoreDTO,
     params(
         ("id", Path, description = "Unique id of a Score")
     ),
     responses(
-        (status = StatusCode::OK, description = "Score created successfully", body = ScoreResponseBody),
+        (status = StatusCode::OK, description = "Score updated successfully", body = ScoreResponseBody),
         (status = StatusCode::BAD_REQUEST, description = "Invalid input"),
         (status = StatusCode::NOT_FOUND, description = "No score found by id")
     )
@@ -192,8 +191,8 @@ pub async fn update(
 #[utoipa::path(
     delete,
     path = "/score/{id}",
-    tag = "score",
-    operation_id = "score_delete",
+    tag = "Score",
+    operation_id = "score_destroy",
     params(
         ("id", Path, description = "Unique id of a Score")
     ),

@@ -1,13 +1,48 @@
 use actix_web::{delete, get, post, put, web, HttpResponse};
+use utoipa::{OpenApi, ToSchema};
 use uuid::Uuid;
 
 use crate::{
     config::db::Pool,
     error::ServiceError,
-    models::{level::LevelDTO, respone::ResponseBody},
+    models::{level::{Level, LevelDTO}, respone::ResponseBody},
     service::level_service,
 };
 
+#[derive(OpenApi)]
+#[openapi(
+    paths(
+        index,
+        game_levels,
+        store,
+        update,
+        destroy
+    ),
+    components(schemas(Level, LevelDTO, LevelResponseBody, LevelsResponseBody))
+)]
+pub(super) struct LevelApi;
+
+#[derive(ToSchema)]
+pub struct LevelResponseBody {
+    pub message: String,
+    pub data: Level,
+}
+
+#[derive(ToSchema)]
+pub struct LevelsResponseBody {
+    pub message: String,
+    pub data: Vec<Level>,
+}
+
+#[utoipa::path(
+    get,
+    path = "/level",
+    tag = "Level",
+    operation_id = "level_index",
+    responses(
+        (status = StatusCode::OK, description = "Level fetched successfully", body = LevelsResponseBody)
+    )
+)]
 #[get("/")]
 pub async fn index(pool: web::Data<Pool>) -> actix_web::Result<HttpResponse, ServiceError> {
     match level_service::find_all(&pool) {
@@ -16,7 +51,20 @@ pub async fn index(pool: web::Data<Pool>) -> actix_web::Result<HttpResponse, Ser
     }
 }
 
-#[get("/game/{id}/")]
+#[utoipa::path(
+    get,
+    path = "/level/game/{gameId}",
+    tag = "Level",
+    operation_id = "level_games",
+    params(
+        ("gameId", Path, description = "Unique id of a Game"),
+    ),
+    responses(
+        (status = StatusCode::OK, description = "Levels fetched by game successfully", body = LevelsResponseBody),
+        (status = StatusCode::NOT_FOUND, description = "No Game found by game id")
+    )
+)]
+#[get("/game/{gameId}/")]
 pub async fn game_levels(
     pool: web::Data<Pool>,
     path: web::Path<Uuid>,
@@ -27,6 +75,17 @@ pub async fn game_levels(
     }
 }
 
+#[utoipa::path(
+    post,
+    path = "/level",
+    tag = "Level",
+    operation_id = "level_store",
+    request_body = LevelDTO,
+    responses(
+        (status = StatusCode::CREATED, description = "Level created successfully", body = LevelsResponseBody),
+        (status = StatusCode::BAD_REQUEST, description = "Invalid input")
+    )
+)]
 #[post("/")]
 pub async fn store(
     pool: web::Data<Pool>,
@@ -38,6 +97,21 @@ pub async fn store(
     }
 }
 
+#[utoipa::path(
+    put,
+    path = "/level/{id}",
+    tag = "Level",
+    operation_id = "level_update",
+    request_body = LevelDTO,
+    params(
+        ("id", Path, description = "Unique id of a Level"),
+    ),
+    responses(
+        (status = StatusCode::OK, description = "Level updated successfully", body = LevelsResponseBody),
+        (status = StatusCode::BAD_REQUEST, description = "Invalid input"),
+        (status = StatusCode::NOT_FOUND, description = "No level found by id")
+    )
+)]
 #[put("/{id}/")]
 pub async fn update(
     pool: web::Data<Pool>,
@@ -50,8 +124,21 @@ pub async fn update(
     }
 }
 
+#[utoipa::path(
+    delete,
+    path = "/level/{id}",
+    tag = "Level",
+    operation_id = "level_destroy",
+    params(
+        ("id", Path, description = "Unique id of a Level"),
+    ),
+    responses(
+        (status = StatusCode::NO_CONTENT, description = "Level deleted successfully"),
+        (status = StatusCode::NOT_FOUND, description = "No level found by id")
+    )
+)]
 #[delete("/{id}/")]
-pub async fn delete(
+pub async fn destroy(
     pool: web::Data<Pool>,
     path: web::Path<Uuid>,
 ) -> actix_web::Result<HttpResponse, ServiceError> {
