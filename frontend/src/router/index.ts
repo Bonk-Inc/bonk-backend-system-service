@@ -5,8 +5,14 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'home',
-      component: () => import('../views/Authenticate.vue')
+      redirect: to => {
+        return 'authenticate';
+      }
+    },
+    {
+      path: '/authenticate',
+      name: 'authenticate',
+      component: () => import('../views/Authenticate.vue'),
     },
   ]
 });

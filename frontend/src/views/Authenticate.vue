@@ -1,11 +1,33 @@
 <script setup lang="ts">
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { DatabaseZap, KeySquare } from 'lucide-vue-next';
+import AuthService from '@/lib/AuthService';
+import { AlertCircle, DatabaseZap, KeySquare } from 'lucide-vue-next';
+import { inject, ref } from 'vue';
+
+const auth = inject<AuthService>('auth');
+const error = ref(false);
+
+async function login() {
+  try {
+    await auth?.login();
+  } catch(e) {
+    error.value = true;
+  }
+};
 </script>
 
 <template>
   <main class="h-screen grid">
+    <Alert v-if="error" variant="destructive" class="absolute top-28 inset-x-0 w-full max-w-xl mx-auto">
+      <AlertCircle class="w-4 h-4" />
+      <AlertTitle>Fout tijdens het inloggen</AlertTitle>
+      <AlertDescription>
+        Er is wat fout gegaan tijdens het inloggen, probeer het later opnieuw
+      </AlertDescription>
+    </Alert>
+
     <Card class="w-full max-w-md place-self-center">
       <CardHeader class="text-center">
         <CardTitle class="flex justify-center items-center">
@@ -17,7 +39,7 @@ import { DatabaseZap, KeySquare } from 'lucide-vue-next';
         </CardDescription>
       </CardHeader>
       <CardContent class="grid my-6 gap-2">
-        <Button>
+        <Button @click="login">
           <KeySquare color="#fd4b2d" class="mr-2" />
           Inloggen met Authentik
         </Button>
