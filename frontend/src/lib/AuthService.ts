@@ -1,6 +1,6 @@
 import { UserManager, type UserManagerSettings, type UserProfile } from "oidc-client-ts";
 
-export default class AuthService {
+export class AuthService {
     #userManager: UserManager;
 
     constructor() {
@@ -8,6 +8,7 @@ export default class AuthService {
             authority: import.meta.env.VITE_APP_AUTH_URL,
             client_id: import.meta.env.VITE_APP_AUTH_CLIENT_ID,
             redirect_uri: import.meta.env.VITE_APP_AUTH_REDIRECT_URL,
+            response_type: 'code',
             automaticSilentRenew: true,
         };
 
@@ -20,6 +21,10 @@ export default class AuthService {
 
     async logout() {
         await this.#userManager.signoutRedirect();
+    }
+
+    handleLoginRedirect() {
+        return this.#userManager.signinRedirectCallback()
     }
 
     /**
@@ -52,3 +57,5 @@ export default class AuthService {
         return user?.access_token;
     }
 }
+
+export const authService = new AuthService();

@@ -2,14 +2,14 @@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import AuthService from '@/lib/AuthService';
+import type { AuthService } from '@/lib/AuthService';
 import { AlertCircle, DatabaseZap, KeySquare } from 'lucide-vue-next';
 import { inject, ref } from 'vue';
 
 const auth = inject<AuthService>('auth');
 const error = ref(false);
 
-async function login() {
+const login = async () => {
   try {
     await auth?.login();
   } catch(e) {
