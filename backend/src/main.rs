@@ -104,7 +104,6 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::Data::new(oauth2_client.clone()))
             .wrap(Logger::default())
             .wrap(setup_cors())
-            .service(controller::auth_scope())
             .service(controller::api_scope())
             .service(
                 SwaggerUi::new("/swagger/{_:.*}").url("/api-docs/openapi.json", ApiDoc::openapi()),
