@@ -4,10 +4,19 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import type { AuthService } from '@/lib/AuthService';
 import { AlertCircle, DatabaseZap, KeySquare } from 'lucide-vue-next';
-import { inject, ref } from 'vue';
+import { inject, onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 const auth = inject<AuthService>('auth');
+const router = useRouter();
 const error = ref(false);
+
+onMounted(async () => {
+  const loggedIn = await auth?.isUserLoggedIn();
+  if (loggedIn) {
+    router.push('app_home');
+  }
+});
 
 const login = async () => {
   try {
