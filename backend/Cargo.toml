@@ -18,7 +18,6 @@ env_logger = "0.11.5"
 futures-util = "0.3.30"
 jsonwebtoken = "9.3.0"
 log = "0.4.22"
-oauth2 = "4.4.2"
 reqwest = { version = "0.12.5", features = ["json"] }
 serde = { version = "1.0.206", features = ["derive"] }
 serde_json = "1.0.122"
