@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { DatabaseZap } from 'lucide-vue-next';
 import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, navigationMenuTriggerStyle } from './ui/navigation-menu';
+
+const apiUrl = import.meta.env.VITE_APP_API_URL;
 </script>
 
 <template>
@@ -13,7 +15,7 @@ import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuL
       <NavigationMenu>
         <NavigationMenuList>
           <NavigationMenuItem>
-            <NavigationMenuLink href="/swagger" :class="navigationMenuTriggerStyle()">
+            <NavigationMenuLink :href="`${apiUrl}/swagger/`" :class="navigationMenuTriggerStyle()">
               API Documentation
             </NavigationMenuLink>
           </NavigationMenuItem>
