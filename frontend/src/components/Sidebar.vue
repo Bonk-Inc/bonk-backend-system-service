@@ -1,17 +1,26 @@
 <script setup lang="ts">
 import { Joystick, List, Plus } from 'lucide-vue-next';
-import { defineProps } from 'vue';
 import { Button } from './ui/button';
 import { useRoute } from 'vue-router';
+import { inject } from 'vue';
 import type { Game } from '@/lib/Models';
+import type { ApiService } from '@/lib/ApiService';
 
-interface Props {
-  games: Game[]
-}
-
-const props = defineProps<Props>();
 const router = useRoute();
 const gameId = router.params.gameId ?? '';
+const apiService = inject<ApiService>('api');
+
+let games: Game[] = [];
+let errors: string = '';
+
+try {
+  const gamesResponse = await apiService?.get<Game[]>('api/game/');
+
+  if (gamesResponse)
+    games = gamesResponse.data;
+} catch (e: any) {
+  errors = e.message;
+}
 </script>
 
 <template>
@@ -27,7 +36,7 @@ const gameId = router.params.gameId ?? '';
     </div>
     <hr class="w-11/12 mx-auto">
     <ul class="py-2 game-menu">
-      <li v-for="game in props.games" class="flex justify-start items-center" :class="{ active: gameId === game.id }">
+      <li v-for="game in games" class="flex justify-start items-center" :class="{ active: gameId === game.id }">
         <Button variant="ghost" class="w-full rounded-none justify-start px-4 py-2">
           <Joystick class="mr-2" /> {{ game.name }}
         </Button>
