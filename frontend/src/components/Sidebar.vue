@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { Joystick, List, Plus } from 'lucide-vue-next';
 import { Button } from './ui/button';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { inject } from 'vue';
 import type { Game } from '@/lib/Models';
 import type { ApiService } from '@/lib/ApiService';
 
-const router = useRoute();
-const gameId = router.params.gameId ?? '';
+const route = useRoute();
+const router = useRouter();
+const gameId = route.params.gameId ?? '';
 const apiService = inject<ApiService>('api');
 
 let games: Game[] = [];
@@ -21,6 +22,10 @@ try {
 } catch (e: any) {
   errors = e.message;
 }
+
+const onClick = (gameId: string) => {
+  router.push(`/app/game/${gameId}`)
+};
 </script>
 
 <template>
@@ -37,7 +42,7 @@ try {
     <hr class="w-11/12 mx-auto">
     <ul class="py-2 game-menu">
       <li v-for="game in games" class="flex justify-start items-center" :class="{ active: gameId === game.id }">
-        <Button variant="ghost" class="w-full rounded-none justify-start px-4 py-2">
+        <Button variant="ghost" class="w-full rounded-none justify-start px-4 py-2" @click="onClick(game.id)">
           <Joystick class="mr-2" /> {{ game.name }}
         </Button>
       </li>
