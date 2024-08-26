@@ -85,9 +85,9 @@ async fn main() -> std::io::Result<()> {
     let db_pool = init_db_pool(&db_url);
     run_migration(&mut db_pool.get().unwrap());
 
-    let jwk_file = fetch_and_save_jwk().await;
-    if jwk_file.is_err() {
-        error!("Cannot save fetched jwk token, stopping program");
+    let jwks_file = fetch_and_save_jwks().await;
+    if jwks_file.is_err() {
+        error!("Cannot save fetched jwks token, stopping program");
         process::exit(0);
     }
 
@@ -116,29 +116,30 @@ async fn main() -> std::io::Result<()> {
     .await
 }
 
-async fn fetch_and_save_jwk() -> Result<(), Box<dyn Error>> {
-    let jwsk_url = env::var("OAUTH_JWSK_URL").expect("OAUTH_JWSK_URL must be set");
+async fn fetch_and_save_jwks() -> Result<(), Box<dyn Error>> {
+    let jwsk_url = env::var("OAUTH_JWKS_URL").expect("OAUTH_JWKS_URL must be set");
     let tokens = reqwest::get(&jwsk_url).await?.text().await;
 
     if tokens.is_err() {
         error!("Could not fetch token from {}", jwsk_url);
         return Err(Box::new(io::Error::new(
             ErrorKind::Other,
-            "Could not fetch JWSK token",
+            "Could not fetch JWKS token",
         )));
     }
 
+    info!("JWKS token fetched, saving to file");
     let file_options = OpenOptions::new()
         .write(true)
         .create(true)
         .open(JWK_FILE_PATH);
 
     if file_options.is_ok() {
-        info!("Write new JWK token to file");
+        info!("Write new JWKS token to file");
         let _ = file_options.unwrap().write_all(tokens.unwrap().as_bytes());
     } else {
         error!(
-            "Cannot write JWK token to file, reason {}",
+            "Cannot write JWKS token to file, reason {}",
             file_options.err().unwrap()
         )
     }
@@ -152,8 +153,8 @@ async fn refresh_jwk() {
     loop {
         delay.tick().await;
 
-        info!("Refreshing JWK token");
-        let _ = fetch_and_save_jwk().await;
+        info!("Refreshing JWKS token");
+        let _ = fetch_and_save_jwks().await;
     }
 }
 

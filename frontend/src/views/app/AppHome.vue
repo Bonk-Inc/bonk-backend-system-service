@@ -1,19 +1,35 @@
 <script setup lang="ts">
 import MainLayout from '@/components/layout/MainLayout.vue';
 import { Card, CardContent } from '@/components/ui/card';
+import type { ApiService } from '@/lib/ApiService';
 import type { AuthService } from '@/lib/AuthService';
+import type { GlobalStats } from '@/lib/Models/Stats';
 import { Joystick, Tally5 } from 'lucide-vue-next';
 import type { UserProfile } from 'oidc-client-ts';
 import { inject, onMounted, ref } from 'vue';
 
 const auth = inject<AuthService>('auth');
+const apiService = inject<ApiService>('api');
+
 const user = ref<UserProfile | undefined>();
+const stats = ref<GlobalStats>();
+const errors = ref<string>('');
 
 onMounted(async () => {
   user.value = await auth?.getProfile();
   console.log(await auth?.getProfile());
-})
 
+  await fetchStats();
+});
+
+const fetchStats = async () => {
+  try {
+    const statsResponse = await apiService?.get<GlobalStats>('api/stats/all/');
+    stats.value = statsResponse?.data;
+  } catch (e: any) {
+    errors.value = e.message;
+  }
+}
 </script>
 
 <template>
@@ -29,7 +45,7 @@ onMounted(async () => {
             <Joystick :size="36" class="mr-2 text-blue-500" />
             <div>
               <p class="mb-3">Games</p>
-              <p class="mt-3 text-xl text-right text-blue-500">6</p>
+              <p class="mt-3 text-xl text-right text-blue-500">{{ stats?.games }}</p>
             </div>
           </CardContent>
         </Card>
@@ -38,7 +54,7 @@ onMounted(async () => {
             <Tally5 :size="36" class="mr-2 text-blue-500" />
             <div>
               <p class="mb-3">Scores</p>
-              <p class="mt-3 text-xl text-right text-blue-500">6</p>
+              <p class="mt-3 text-xl text-right text-blue-500">{{ stats?.scores }}</p>
             </div>
           </CardContent>
         </Card>

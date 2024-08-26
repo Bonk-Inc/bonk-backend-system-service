@@ -9,8 +9,8 @@ export class AuthService {
             client_id: import.meta.env.VITE_APP_AUTH_CLIENT_ID,
             redirect_uri: import.meta.env.VITE_APP_AUTH_REDIRECT_URL,
             response_type: 'code',
-            scope: 'read:user',
-            //loadUserInfo: true,
+            scope: 'openid read:user',
+            loadUserInfo: true,
             automaticSilentRenew: true,
         };
 
