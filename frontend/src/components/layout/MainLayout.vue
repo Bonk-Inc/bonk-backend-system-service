@@ -2,13 +2,20 @@
 import { Skeleton } from '../ui/skeleton';
 import Header from '../Header.vue';
 import Sidebar from '../Sidebar.vue';
+import type { HtmlHTMLAttributes } from 'vue';
+import { cn } from '@/lib/utils';
 
+interface Props {
+  class?: HtmlHTMLAttributes['class'];
+}
+
+const props = defineProps<Props>();
 </script>
 
 <template>
   <Header />
   <div class="flex w-full content items-stretch">
-    <Suspense>     
+    <Suspense>
       <Sidebar />
       
       <template #fallback>
@@ -20,7 +27,7 @@ import Sidebar from '../Sidebar.vue';
       </template>
     </Suspense>
 
-    <main class="p-4">
+    <main :class="cn('p-4 w-full', props.class)">
       <slot></slot>
     </main>
   </div>

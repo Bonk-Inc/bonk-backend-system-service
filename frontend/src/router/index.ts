@@ -30,12 +30,10 @@ const router = createRouter({
     },
     {
       path: '/app',
-      name: 'app_home',
-      component: () => import('../views/app/AppHome.vue'),
+      children: appRoutes,
       meta: {
         requireAuth: true,
-      },
-      children: appRoutes
+      }
     }
   ]
 });

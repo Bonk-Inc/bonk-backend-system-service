@@ -89,6 +89,7 @@ module.exports = {
       },
       boxShadow: {
         'inner-l-solid': 'inset 4px 0 0 0 transparent',
+        'inner-b-solid': 'inset 0 -4px 0 0 transparent',
       }
     },
   },

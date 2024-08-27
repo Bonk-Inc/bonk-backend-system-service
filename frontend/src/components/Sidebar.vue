@@ -2,13 +2,13 @@
 import { Joystick, List, Plus } from 'lucide-vue-next';
 import { Button } from './ui/button';
 import { useRoute, useRouter } from 'vue-router';
-import { inject } from 'vue';
+import { inject, onMounted, ref, watch } from 'vue';
 import type { Game } from '@/lib/Models';
 import type { ApiService } from '@/lib/ApiService';
 
 const route = useRoute();
 const router = useRouter();
-const gameId = route.params.gameId ?? '';
+const gameId = ref<string>(route.params.gameId as string ?? '');
 const apiService = inject<ApiService>('api');
 
 let games: Game[] = [];
@@ -22,6 +22,11 @@ try {
 } catch (e: any) {
   errors = e.message;
 }
+
+watch(
+  () => route.params.gameId,
+  (newId) => gameId.value = newId as string ?? ''
+)
 
 const onClick = (gameId: string) => {
   router.push(`/app/game/${gameId}`)
