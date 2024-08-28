@@ -1,9 +1,53 @@
 <script setup lang="ts">
 import GameLayout from '@/components/layout/GameLayout.vue';
+import { Card, CardContent } from '@/components/ui/card';
+import { ApiService } from '@/lib/ApiService';
+import type { GameStats } from '@/lib/Models/Stats';
+import { Tally5 } from 'lucide-vue-next';
+import { inject, onMounted, ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
+
+const route = useRoute();
+const apiService = inject<ApiService>('api');
+
+const stats = ref<GameStats>();
+const errors = ref<string>('');
+
+onMounted(async () => {
+  const gameId = route.params.gameId as string;
+  await fetchStats(gameId);
+})
+
+watch(
+  () => route.params.gameId,
+  async (newId) => await fetchStats(newId as string)
+);
+
+const fetchStats = async (gameId: string) => {
+  try {
+    const statsResponse = await apiService?.get<GameStats>(`api/stats/game/${gameId}/`);
+    stats.value = statsResponse?.data;
+  } catch(e: any) {
+    errors.value = e.message;
+  }
+}
 </script>
 
 <template>
   <GameLayout>
-    <p>Hoi</p>
+    <section class="mt-4">
+      <h2 class="text-xl font-medium">Statistieken</h2>
+      <div class="grid gap-5 grid-cols-5 w-full mt-4 ">
+        <Card class="w-[288px]">
+          <CardContent class="pt-6 flex justify-between items-center">
+            <Tally5 :size="36" class="mr-2 text-blue-500" />
+            <div>
+              <p class="mb-3">Scores</p>
+              <p class="mt-3 text-xl text-right text-blue-500">{{ stats?.scores }}</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div> 
+    </section>
   </GameLayout>
 </template>

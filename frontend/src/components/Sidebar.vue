@@ -2,7 +2,7 @@
 import { Joystick, List, Plus } from 'lucide-vue-next';
 import { Button } from './ui/button';
 import { useRoute, useRouter } from 'vue-router';
-import { inject, onMounted, ref, watch } from 'vue';
+import { inject, ref, watch } from 'vue';
 import type { Game } from '@/lib/Models';
 import type { ApiService } from '@/lib/ApiService';
 
