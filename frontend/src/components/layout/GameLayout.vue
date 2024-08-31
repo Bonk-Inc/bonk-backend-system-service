@@ -35,7 +35,11 @@ const route = useRoute();
           </RouterLink>
         </TabsTrigger>
         <TabsTrigger value="settings">
-          <RouterLink class="flex items-center" :to="`settings`">
+          <RouterLink 
+            class="flex items-center" 
+            exact-active-class="text-blue-500"
+            :to="{ name: 'game_settings', params: { gameId: route.params.gameId } }"
+          >
             <Settings class="mr-2"/> Instellingen
           </RouterLink>
         </TabsTrigger>

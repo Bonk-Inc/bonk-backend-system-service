@@ -87,7 +87,7 @@ const addLevel = async () => {
             <Plus class="mr-2" /> Level toevoegen
           </Button>
         </DialogTrigger>
-        <DialogContent>
+        <DialogContent class="sm:max-w-[425px]">
           <DialogTitle>Level toevoegen</DialogTitle>
           <DialogDescription>Voeg een level toe aan de game</DialogDescription>
 

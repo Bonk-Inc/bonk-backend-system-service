@@ -18,6 +18,11 @@ export const appRoutes: RouteRecordRaw[] = [
                 path: "levels",
                 name: "game_levels",
                 component: () => import('../views/app/Level.vue'),
+            },
+            {
+                path: "settings",
+                name: "game_settings",
+                component: () => import('../views/app/Settings.vue')
             }
         ]
     }
