@@ -2,11 +2,14 @@
 import GameLayout from '@/components/layout/GameLayout.vue';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ApiService } from '@/lib/ApiService';
-import { type Level } from '@/lib/Models';
-import { Check, Copy, Trash } from 'lucide-vue-next';
+import { type LevelDTO, type Level } from '@/lib/Models';
+import { Check, Copy, Plus, Trash } from 'lucide-vue-next';
 import { inject, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 
@@ -17,6 +20,7 @@ const gameId = route.params.gameId as string;
 const levels = ref<Level[]>([]);
 const errors = ref<string>('');
 const info = ref<string>('');
+const newLevel = ref<LevelDTO>({ game_id: '', name: '' });
 
 onMounted(async () => {
   await fetchLevels(gameId);
@@ -51,6 +55,21 @@ const deleteLevel = async (id: string) => {
     setTimeout(() => errors.value = '', 5_000);
   }
 }
+
+const addLevel = async () => {
+  try { 
+    newLevel.value = { ...newLevel.value, game_id: gameId };
+    const body = JSON.stringify(newLevel.value);
+    const response = await apiService?.post<Level>('api/level/', body);
+
+    levels.value.push(response?.data as Level);
+    info.value = 'Level toegevoegd';
+    setTimeout(() => errors.value = '', 5_000);
+  } catch(e: any) {
+    errors.value = e.message;
+    setTimeout(() => errors.value = '', 5_000);
+  }
+};
 </script>
 
 <template>
@@ -60,6 +79,39 @@ const deleteLevel = async (id: string) => {
       <AlertTitle>Gelukt!</AlertTitle>
       <AlertDescription>{{ info }}</AlertDescription>
     </Alert>
+
+    <div class="pt-2 pb-4 flex justify-end items-center">
+      <Dialog>
+        <DialogTrigger as-child>
+          <Button>
+            <Plus class="mr-2" /> Level toevoegen
+          </Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogTitle>Level toevoegen</DialogTitle>
+          <DialogDescription>Voeg een level toe aan de game</DialogDescription>
+
+          <form class="grid gap-4 py-4">
+            <div class="grid grid-cols-4 items-center gap-4">
+              <Label for="level-name">
+                Naam*
+              </Label>
+              <Input
+                @input="event => newLevel = { ...newLevel, name: event.target.value }" 
+                id="level-name"
+                class="col-span-4"
+              />
+            </div>
+          </form>
+          
+          <DialogFooter>
+            <Button @click="addLevel">
+              Toevoegen
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
 
     <Table>
       <TableHeader>

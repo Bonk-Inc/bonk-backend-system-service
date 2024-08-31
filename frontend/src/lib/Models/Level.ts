@@ -5,3 +5,8 @@ export interface Level {
     created_at: string,
     updated_at: string
 }
+
+export interface LevelDTO {
+    name: string,
+    game_id: string
+}
