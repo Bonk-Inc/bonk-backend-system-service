@@ -12,22 +12,30 @@ const route = useRoute();
     <Tabs class="w-full border-border border-b" default-value="home">
       <TabsList>
         <TabsTrigger value="home">
-          <RouterLink class="flex items-center" :to="`${route.path}`">
+          <RouterLink 
+            class="flex items-center"
+            exact-active-class="text-blue-500"
+            :to="{ name: 'game_home', params: { gameId: route.params.gameId } }"
+          >
             <House class="mr-2"/> Home
           </RouterLink>
         </TabsTrigger>
         <TabsTrigger value="levels">
-          <RouterLink class="flex items-center" :to="`${route.path}/levels`">
+          <RouterLink 
+            class="flex items-center" 
+            exact-active-class="text-blue-500"
+            :to="{ name: 'game_levels', params: { gameId: route.params.gameId } }"
+          >
             <Map class="mr-2" /> Levels
           </RouterLink>
         </TabsTrigger>
         <TabsTrigger value="scores">
-          <RouterLink class="flex items-center" :to="`${route.path}/scores`">
+          <RouterLink class="flex items-center" :to="`scores`">
             <Tally5 class="mr-2"/> scores
           </RouterLink>
         </TabsTrigger>
         <TabsTrigger value="settings">
-          <RouterLink class="flex items-center" :to="`${route.path}/settings`">
+          <RouterLink class="flex items-center" :to="`settings`">
             <Settings class="mr-2"/> Instellingen
           </RouterLink>
         </TabsTrigger>

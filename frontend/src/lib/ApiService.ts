@@ -66,18 +66,17 @@ export class ApiService {
         return data;
     }
 
-    async delete<T>(path: string): Promise<ResponseBody<T>> {
+    async delete(path: string): Promise<void> {
         const accessToken = await this.#authService.getAccessToken();
         const response = await fetch(`${this.#baseUrl}/${path}`, {
+            method: 'DELETE',
             headers: { 'Authorization': `Bearer ${accessToken}`}
         });
 
-        const data = await response.json() as ResponseBody<T>;
         if (!response.ok) {
+            const data = await response.json() as ResponseBody<void>;
             throw new Error(data.message)
         }
-
-        return data;
     }
 }
 

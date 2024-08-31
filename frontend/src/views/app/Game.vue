@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ApiService } from '@/lib/ApiService';
 import type { GameStats } from '@/lib/Models/Stats';
 import { Tally5 } from 'lucide-vue-next';
-import { inject, onMounted, ref, watch } from 'vue';
+import { inject, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 const route = useRoute();
@@ -13,17 +13,13 @@ const apiService = inject<ApiService>('api');
 const stats = ref<GameStats>();
 const errors = ref<string>('');
 
-onMounted(async () => {
-  const gameId = route.params.gameId as string;
-  await fetchStats(gameId);
-})
-
 watch(
   () => route.params.gameId,
-  async (newId) => await fetchStats(newId as string)
+  async (newId) => await fetchStats(newId as string),
+  { immediate: true }
 );
 
-const fetchStats = async (gameId: string) => {
+async function fetchStats(gameId: string) {
   try {
     const statsResponse = await apiService?.get<GameStats>(`api/stats/game/${gameId}/`);
     stats.value = statsResponse?.data;
