@@ -30,8 +30,12 @@ const route = useRoute();
           </RouterLink>
         </TabsTrigger>
         <TabsTrigger value="scores">
-          <RouterLink class="flex items-center" :to="`scores`">
-            <Tally5 class="mr-2"/> scores
+          <RouterLink 
+            class="flex items-center" 
+            exact-active-class="text-blue-500"
+            :to="{ name: 'game_scores', params: { gameId: route.params.gameId } }"
+          >
+            <Tally5 class="mr-2"/> Scores
           </RouterLink>
         </TabsTrigger>
         <TabsTrigger value="settings">

@@ -2,13 +2,13 @@
 import GameLayout from '@/components/layout/GameLayout.vue';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ApiService } from '@/lib/ApiService';
-import { type LevelDTO, type Level } from '@/lib/Models';
+import type { LevelDTO, Level } from '@/lib/Models';
 import { Check, Copy, Plus, Trash } from 'lucide-vue-next';
 import { inject, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
@@ -113,38 +113,40 @@ const addLevel = async () => {
       </Dialog>
     </div>
 
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Naam</TableHead>
-          <TableHead></TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        <TableRow v-for="level in levels">
-          <TableCell>{{ level.name }}</TableCell>
-          <TableCell>
-            <div class="flex items-center justify-end">
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger as-child>
-                    <Button variant="ghost" size="icon" @click="copyLevelId(level.id)">
-                      <Copy :size="20" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Kopieer Level ID</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-             
-              <Button variant="ghost" size="icon" class="ml-4" @click="deleteLevel(level.id)">
-                <Trash :size="20" />
-              </Button>
-            </div>
-          </TableCell>
-        </TableRow>
-      </TableBody>
-    </Table>
+    <div class="rounded-md border">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Naam</TableHead>
+            <TableHead></TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <TableRow v-for="level in levels">
+            <TableCell>{{ level.name }}</TableCell>
+            <TableCell>
+              <div class="flex items-center justify-end">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger as-child>
+                      <Button variant="ghost" size="icon" @click="copyLevelId(level.id)">
+                        <Copy :size="20" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Kopieer Level ID</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              
+                <Button variant="ghost" size="icon" class="ml-4" @click="deleteLevel(level.id)">
+                  <Trash :size="20" />
+                </Button>
+              </div>
+            </TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
+    </div>
   </GameLayout>
 </template>

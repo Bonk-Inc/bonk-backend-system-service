@@ -2,7 +2,7 @@
 import GameLayout from '@/components/layout/GameLayout.vue';
 import { Card, CardContent } from '@/components/ui/card';
 import { ApiService } from '@/lib/ApiService';
-import type { GameStats } from '@/lib/Models/Stats';
+import type { GameStats } from '@/lib/Models';
 import { Tally5 } from 'lucide-vue-next';
 import { inject, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';

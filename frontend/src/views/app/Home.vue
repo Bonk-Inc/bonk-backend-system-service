@@ -3,7 +3,7 @@ import MainLayout from '@/components/layout/MainLayout.vue';
 import { Card, CardContent } from '@/components/ui/card';
 import type { ApiService } from '@/lib/ApiService';
 import type { AuthService } from '@/lib/AuthService';
-import type { GlobalStats } from '@/lib/Models/Stats';
+import type { GlobalStats } from '@/lib/Models';
 import { Joystick, Tally5 } from 'lucide-vue-next';
 import type { UserProfile } from 'oidc-client-ts';
 import { inject, onMounted, ref } from 'vue';
