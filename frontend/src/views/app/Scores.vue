@@ -7,7 +7,7 @@ import { ApiService } from '@/lib/ApiService';
 import type { Score } from '@/lib/Models';
 import type { ColumnDef } from '@tanstack/vue-table';
 import { format, parseISO } from 'date-fns';
-import { ArrowUpDown } from 'lucide-vue-next';
+import { ArrowUpDown, Eye, EyeOff } from 'lucide-vue-next';
 import { h, inject, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 
@@ -60,13 +60,11 @@ const columns: ColumnDef<Score>[] = [
   {
     accessorKey: 'is_hidden',
     header: 'Verborgen',
-    cell: ({ row }) => h(Checkbox, {
-      checked: Boolean(row.getValue('is_hidden')),
-      'onUpdate:checked': async (value) => {
-        const newScore = { ...row.original, is_hidden: !!value }
-        await updateVisibility(newScore);
-      }
-    })
+    cell: ({ row }) => {
+      const hidden = row.original.is_hidden;
+      const icon = hidden ? EyeOff : Eye;
+      return h(icon)
+    }
   }
 ];
 

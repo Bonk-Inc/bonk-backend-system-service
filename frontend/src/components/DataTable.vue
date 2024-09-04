@@ -1,8 +1,9 @@
 <script setup lang="ts" generic="TData, TValue">
-import { FlexRender, getCoreRowModel, getPaginationRowModel, getSortedRowModel, useVueTable, type ColumnDef, type SortingState, type Table as VueTable } from '@tanstack/vue-table';
+import { FlexRender, getCoreRowModel, getPaginationRowModel, getSortedRowModel, useVueTable, type ColumnDef, type SortingState } from '@tanstack/vue-table';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
-import { ref, watch } from 'vue';
+import { ref } from 'vue';
 import { valueUpdater } from '@/lib/utils';
+import DataTablePagination from './DataTablePagination.vue';
 
 const props = defineProps<{
   data: TData[],
@@ -10,27 +11,17 @@ const props = defineProps<{
 }>();
 
 const sorting = ref<SortingState>();
-const table = ref<VueTable<TData>>(createTable());
-
-watch(
-  () => props.data,
-  () => table.value = createTable(),
-  { deep: true }
-);
-
-function createTable(): VueTable<TData> {
-  return useVueTable({
-    get data() { return props.data },
-    get columns() { return props.columns },
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    onSortingChange: updaterOrValue => valueUpdater(updaterOrValue, sorting),
-    state: {
-      get sorting() { return sorting.value }
-    }
-  })
-};
+const table = useVueTable({
+  get data() { return props.data },
+  get columns() { return props.columns },
+  getCoreRowModel: getCoreRowModel(),
+  getSortedRowModel: getSortedRowModel(),
+  getPaginationRowModel: getPaginationRowModel(),
+  onSortingChange: updaterOrValue => valueUpdater(updaterOrValue, sorting),
+  state: {
+    get sorting() { return sorting.value }
+  }
+});
 </script>
 
 <template>
@@ -64,4 +55,5 @@ function createTable(): VueTable<TData> {
       </TableBody>
     </Table>
   </div>
+  <DataTablePagination :table="table" />
 </template>
