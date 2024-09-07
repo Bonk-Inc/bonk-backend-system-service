@@ -194,7 +194,7 @@ pub async fn update(
     tag = "Score",
     operation_id = "score_destroy",
     params(
-        ("id", Path, description = "Unique id of a Score")
+        ("id", Path, description = "Unique id(s) of a Score (splits on comma)")
     ),
     responses(
         (status = StatusCode::NO_CONTENT, description = "Score deleted successfully"),
