@@ -3,11 +3,12 @@ import DataTable from '@/components/DataTable.vue';
 import GameLayout from '@/components/layout/GameLayout.vue';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ApiService } from '@/lib/ApiService';
-import type { Score } from '@/lib/Models';
+import type { Level, Score } from '@/lib/Models';
 import type { RowSelectionState, ColumnDef } from '@tanstack/vue-table';
 import { format, parseISO } from 'date-fns';
-import { ArrowUpDown, Eye, EyeOff, Plus, Trash2 } from 'lucide-vue-next';
+import { ArrowUpDown, CircleX, Eye, EyeOff, Plus, Trash2 } from 'lucide-vue-next';
 import { h, inject, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 
@@ -16,6 +17,7 @@ const apiService = inject<ApiService>('api')
 const gameId = route.params.gameId as string;
 
 const scores = ref<Score[]>([]);
+const levels = ref<Level[]>([]);
 const selectedScores = ref<RowSelectionState>({});
 
 const columns: ColumnDef<Score>[] = [
@@ -71,12 +73,28 @@ const columns: ColumnDef<Score>[] = [
 
 onMounted(async () => {
   try {
-    const response = await apiService?.get<Score[]>(`api/score/game/${gameId}/?hidden=true`);
-    scores.value = response?.data!;
+    const responseScores = await apiService?.get<Score[]>(`api/score/game/${gameId}/?hidden=true`);
+    const responseLevels = await apiService?.get<Level[]>(`api/level/game/${gameId}/`);
+
+    scores.value = responseScores?.data!;
+    levels.value = responseLevels?.data!;
   } catch (e: any) {
 
   }
 })
+
+const filterLevel = async (level: string) => {
+  const url = level.length > 0
+    ? `api/score/level/${level}/?hidden=true`
+    : `api/score/game/${gameId}/?hidden=true`;
+
+  try {
+    const response = await apiService?.get<Score[]>(url);
+    scores.value = response?.data!;
+  } catch (e: any) {
+
+  }
+}
 
 const updateVisibility = async (score: Score) => {
   try {
@@ -116,9 +134,21 @@ const deleteSelectedRows = async () => {
         size="icon">
         <Trash2 :size="24" class="text-destructive" />
       </Button>
-      <Button>
-        <Plus class="mr-2"/> Toevoegen
-      </Button>
+      <div class="flex items-center justify-start" v-else>
+        <div class="flex items-center">
+          <Select class="mt-2" @update:model-value="$event => filterLevel($event)">
+            <SelectTrigger class="w-[160px]">
+              <SelectValue placeholder="Filter op Level" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem v-for="level in levels" :key="level.id" :value="level.id">
+                {{ level.name }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+      </div>
     </div>
     <DataTable 
       :data="scores" 
