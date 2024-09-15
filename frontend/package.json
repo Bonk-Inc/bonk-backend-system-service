@@ -12,22 +12,25 @@
   },
   "dependencies": {
     "@tanstack/vue-table": "^8.20.5",
+    "@vee-validate/zod": "^4.13.2",
     "@vueuse/core": "11.0.3",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
-    "lucide-vue-next": "0.438.0",
+    "lucide-vue-next": "^0.439.0",
     "oidc-client-ts": "^3.0.1",
     "radix-vue": "^1.9.4",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
     "vaul-vue": "^0.2.0",
-    "vue": "^3.4.37",
-    "vue-router": "^4.4.3"
+    "vee-validate": "^4.13.2",
+    "vue": "^3.5.3",
+    "vue-router": "^4.4.3",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@tsconfig/node20": "^20.1.4",
-    "@types/node": "22.5.2",
+    "@types/node": "^22.5.4",
     "@vitejs/plugin-vue": "^5.1.2",
     "@vue/tsconfig": "^0.5.1",
     "autoprefixer": "^10.4.20",
@@ -35,6 +38,6 @@
     "tailwindcss": "^3.4.9",
     "typescript": "~5.5.4",
     "vite": "^5.4.0",
-    "vue-tsc": "2.1.4"
+    "vue-tsc": "^2.1.6"
   }
 }

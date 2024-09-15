@@ -8,9 +8,9 @@ import { ApiService } from '@/lib/ApiService';
 import type { Level, Score } from '@/lib/Models';
 import type { RowSelectionState, ColumnDef } from '@tanstack/vue-table';
 import { format, parseISO } from 'date-fns';
-import { ArrowUpDown, CircleX, Eye, EyeOff, Plus, Trash2 } from 'lucide-vue-next';
+import { ArrowUpDown, Eye, EyeOff, Plus, Trash2 } from 'lucide-vue-next';
 import { h, inject, onMounted, ref } from 'vue';
-import { useRoute } from 'vue-router';
+import { RouterLink, useRoute } from 'vue-router';
 
 const route = useRoute();
 const apiService = inject<ApiService>('api')
@@ -147,8 +147,12 @@ const deleteSelectedRows = async () => {
             </SelectContent>
           </Select>
         </div>
-        
       </div>
+      <Button as-child>
+        <RouterLink :to="{ name: 'add_score', query: { gameId } }">
+          <Plus class="mr-2" /> Toevoegen
+        </RouterLink>
+      </Button>
     </div>
     <DataTable 
       :data="scores" 

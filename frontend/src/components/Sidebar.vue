@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Joystick, List, Plus } from 'lucide-vue-next';
 import { Button } from './ui/button';
-import { useRoute, useRouter } from 'vue-router';
+import { RouterLink, useRoute } from 'vue-router';
 import { inject, ref, watch } from 'vue';
 import { type GameDTO, type Game } from '@/lib/Models';
 import type { ApiService } from '@/lib/ApiService';
@@ -10,7 +10,6 @@ import { Label } from './ui/label';
 import { Input } from './ui/input';
 
 const route = useRoute();
-const router = useRouter();
 const apiService = inject<ApiService>('api');
 
 const gameId = ref<string>(route.params.gameId as string ?? '');
@@ -30,11 +29,7 @@ try {
 watch(
   () => route.params.gameId,
   (newId) => gameId.value = newId as string ?? ''
-)
-
-const onClick = (gameId: string) => {
-  router.push(`/app/game/${gameId}`)
-};
+);
 
 const saveGame = async () => {
   const body = JSON.stringify(newGame.value);
@@ -46,7 +41,6 @@ const saveGame = async () => {
     errors.value = e.message;
   }
 }
-
 </script>
 
 <template>
@@ -92,9 +86,11 @@ const saveGame = async () => {
     </div>
     <hr class="w-11/12 mx-auto">
     <ul class="py-2 game-menu">
-      <li v-for="game in games" class="flex justify-start items-center" :class="{ active: gameId === game.id }">
-        <Button variant="ghost" class="w-full rounded-none justify-start px-4 py-2" @click="onClick(game.id)">
-          <Joystick class="mr-2" /> {{ game.name }}
+      <li v-for="game in games" class="flex justify-start items-center" :class="{ active: gameId === game.id }" :key="game.id">
+        <Button variant="ghost" class="w-full rounded-none justify-start px-4 py-2" as-child> 
+          <RouterLink :to="{ name: 'game_home', params: { gameId: game.id }}">
+            <Joystick class="mr-2" /> {{ game.name }}
+          </RouterLink>
         </Button>
       </li>
     </ul>

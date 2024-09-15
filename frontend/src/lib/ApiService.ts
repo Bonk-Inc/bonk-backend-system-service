@@ -1,3 +1,4 @@
+import { useRouter, type Router } from 'vue-router';
 import { authService, type AuthService } from './AuthService';
 
 export interface ResponseBody<T> {
@@ -8,10 +9,12 @@ export interface ResponseBody<T> {
 export class ApiService {
     #baseUrl: string;
     #authService: AuthService;
+    #router: Router;
 
     constructor(baseUrl: string) {
         this.#baseUrl = baseUrl;
         this.#authService = authService;
+        this.#router = useRouter();
     }
 
     async get<T>(path: string): Promise<ResponseBody<T>> {
@@ -22,6 +25,11 @@ export class ApiService {
 
         const data = await response.json() as ResponseBody<T>;
         if (!response.ok) {
+            if(response.status === 401) {
+                console.log("error auth");
+                this.#router.push({ name: 'authenticate' });
+            }
+
             throw new Error(data.message)
         }
 

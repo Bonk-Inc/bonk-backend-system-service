@@ -30,5 +30,15 @@ export const appRoutes: RouteRecordRaw[] = [
                 component: () => import('../views/app/Settings.vue')
             }
         ]
+    },
+    {
+        path: "score",
+        children: [
+            {
+                path: "add",
+                name: "add_score",
+                component: () => import('../views/app/ScoreForm.vue')
+            }
+        ]
     }
 ]
