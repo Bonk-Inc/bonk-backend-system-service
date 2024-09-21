@@ -8,7 +8,7 @@ import { ApiService } from '@/lib/ApiService';
 import type { Level, Score } from '@/lib/Models';
 import type { RowSelectionState, ColumnDef } from '@tanstack/vue-table';
 import { format, parseISO } from 'date-fns';
-import { ArrowUpDown, Eye, EyeOff, Plus, Trash2 } from 'lucide-vue-next';
+import { ArrowUpDown, Eye, EyeOff, Pencil, Plus, Trash2 } from 'lucide-vue-next';
 import { h, inject, onMounted, ref } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 
@@ -68,6 +68,15 @@ const columns: ColumnDef<Score>[] = [
       const icon = hidden ? EyeOff : Eye;
       return h(icon)
     }
+  },
+  {
+    accessorKey: 'actions',
+    header: '',
+    cell: ({ row }) => h(
+      RouterLink,
+      { to: { name: 'add_score', query: { gameId, scoreId: row.original.id } } },
+      () => h(Pencil)
+    )
   }
 ];
 

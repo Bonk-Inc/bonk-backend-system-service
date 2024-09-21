@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { NumberField, NumberFieldContent, NumberFieldInput } from '@/components/ui/number-field';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ApiService } from '@/lib/ApiService';
-import type { Score, Level } from '@/lib/Models';
+import type { Score, Level, ScoreDTO } from '@/lib/Models';
 import { toTypedSchema } from '@vee-validate/zod';
 import { useForm } from 'vee-validate';
 import { inject, onMounted, ref } from 'vue';
@@ -18,8 +18,11 @@ import * as z from 'zod';
 const route = useRoute();
 const router = useRouter();
 const apiService = inject<ApiService>('api');
+
 const levels = ref<Level[]>([]);
+
 const gameId = route.query['gameId'] ?? '';
+const scoreId = route.query['scoreId'] ?? '';
 
 const formSchema = toTypedSchema(z.object({
   level_id: z.string().uuid(),
@@ -28,10 +31,18 @@ const formSchema = toTypedSchema(z.object({
   is_hidden: z.boolean().default(false)
 }));
 
-const { handleSubmit, setFieldValue } = useForm({ validationSchema: formSchema });
+const { handleSubmit, setFieldValue, setValues } = useForm({
+  validationSchema: formSchema,
+});
+
 const onSubmit = handleSubmit(async (values) => {
   try {
-    const response = await apiService?.post<Score>('api/score/', JSON.stringify(values));
+    if (scoreId) {
+      await apiService?.put<Score>(`api/score/${scoreId}/`, JSON.stringify(values));
+    } else {
+      await apiService?.post<Score>('api/score/', JSON.stringify(values));
+    }
+
     router.push({ name: 'game_scores', params: { gameId: gameId }})
   } catch (e: any) {
 
@@ -43,6 +54,18 @@ onMounted(async () => {
     const url = gameId ? `api/level/game/${gameId}/` : 'api/level/';
     const response = await apiService?.get<Level[]>(url);
     levels.value = response?.data!;
+
+    if (scoreId) {
+      const scoreResponse = await apiService?.get<ScoreDTO>(`api/score/${scoreId}/`);
+      const data = scoreResponse?.data!;
+      
+      setValues({
+        is_hidden: data.is_hidden,
+        username: data.username,
+        level_id: data.level_id,
+        score: data.score
+      })
+    }
   } catch (e: any) {
 
   }
