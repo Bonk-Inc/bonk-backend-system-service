@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import GameLayout from '@/components/layout/GameLayout.vue';
 import { Card, CardContent } from '@/components/ui/card';
+import { Toaster, useToast } from '@/components/ui/toast';
 import { ApiService } from '@/lib/ApiService';
 import type { GameStats } from '@/lib/Models';
 import { Tally5 } from 'lucide-vue-next';
@@ -9,9 +10,9 @@ import { useRoute } from 'vue-router';
 
 const route = useRoute();
 const apiService = inject<ApiService>('api');
+const { toast } = useToast();
 
 const stats = ref<GameStats>();
-const errors = ref<string>('');
 
 watch(
   () => route.params.gameId,
@@ -24,13 +25,19 @@ async function fetchStats(gameId: string) {
     const statsResponse = await apiService?.get<GameStats>(`api/stats/game/${gameId}/`);
     stats.value = statsResponse?.data;
   } catch(e: any) {
-    errors.value = e.message;
+    toast({
+      title: 'Er ging wat fout :(',
+      variant: 'destructive',
+      description: 'Er is wat fout gegaan tijdens het ophalen van de game statistieken'
+    });
   }
 }
 </script>
 
 <template>
   <GameLayout>
+    <Toaster />
+
     <section class="mt-4">
       <h2 class="text-xl font-medium">Statistieken</h2>
       <div class="grid gap-5 grid-cols-5 w-full mt-4 ">

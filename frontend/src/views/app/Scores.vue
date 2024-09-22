@@ -4,6 +4,7 @@ import GameLayout from '@/components/layout/GameLayout.vue';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Toaster, useToast } from '@/components/ui/toast';
 import { ApiService } from '@/lib/ApiService';
 import type { Level, Score } from '@/lib/Models';
 import type { RowSelectionState, ColumnDef } from '@tanstack/vue-table';
@@ -15,6 +16,7 @@ import { RouterLink, useRoute } from 'vue-router';
 const route = useRoute();
 const apiService = inject<ApiService>('api')
 const gameId = route.params.gameId as string;
+const { toast } = useToast();
 
 const scores = ref<Score[]>([]);
 const levels = ref<Level[]>([]);
@@ -88,7 +90,11 @@ onMounted(async () => {
     scores.value = responseScores?.data!;
     levels.value = responseLevels?.data!;
   } catch (e: any) {
-
+    toast({
+      title: 'Er ging wat fout :(',
+      variant: 'destructive',
+      description: 'Er is wat fout gegaan tijdens het ophalen van de data'
+    });
   }
 })
 
@@ -101,7 +107,11 @@ const filterLevel = async (level: string) => {
     const response = await apiService?.get<Score[]>(url);
     scores.value = response?.data!;
   } catch (e: any) {
-
+    toast({
+      title: 'Er ging wat fout :(',
+      variant: 'destructive',
+      description: 'Er is wat fout gegaan tijdens het ophalen van de scores'
+    });
   }
 }
 
@@ -128,13 +138,19 @@ const deleteSelectedRows = async () => {
     scores.value = response?.data!;
     selectedScores.value = {};
   } catch(e: any) {
-
+    toast({
+      title: 'Er ging wat fout :(',
+      variant: 'destructive',
+      description: 'Er is wat fout gegaan tijdens het verwijderen van de scores'
+    });
   }
 }
 </script>
 
 <template>
   <GameLayout>
+    <Toaster />
+
     <div class="pt-2 pb-4 flex justify-between items-center">
       <Button 
         v-if="Object.keys(selectedScores).length > 0"

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import MainLayout from '@/components/layout/MainLayout.vue';
 import { Card, CardContent } from '@/components/ui/card';
+import { Toaster, useToast } from '@/components/ui/toast';
 import type { ApiService } from '@/lib/ApiService';
 import type { AuthService } from '@/lib/AuthService';
 import type { GlobalStats } from '@/lib/Models';
@@ -10,10 +11,10 @@ import { inject, onMounted, ref } from 'vue';
 
 const auth = inject<AuthService>('auth');
 const apiService = inject<ApiService>('api');
+const { toast } = useToast();
 
 const user = ref<UserProfile | undefined>();
 const stats = ref<GlobalStats>();
-const errors = ref<string>('');
 
 onMounted(async () => {
   user.value = await auth?.getProfile();
@@ -27,13 +28,19 @@ const fetchStats = async () => {
     const statsResponse = await apiService?.get<GlobalStats>('api/stats/all/');
     stats.value = statsResponse?.data;
   } catch (e: any) {
-    errors.value = e.message;
+    toast({
+      title: 'Er ging wat fout :(',
+      variant: 'destructive',
+      description: 'Er is wat fout gegaan tijdens het ophalen van de globale statistieken'
+    });
   }
 }
 </script>
 
 <template>
   <MainLayout>
+    <Toaster />
+
     <h1 class="text-3xl font-medium">
       Welkom! {{ user?.name }}
     </h1>

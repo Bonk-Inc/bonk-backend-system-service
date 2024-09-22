@@ -9,12 +9,11 @@ export interface ResponseBody<T> {
 export class ApiService {
     #baseUrl: string;
     #authService: AuthService;
-    #router: Router;
+    //#router: Router;
 
     constructor(baseUrl: string) {
         this.#baseUrl = baseUrl;
         this.#authService = authService;
-        this.#router = useRouter();
     }
 
     async get<T>(path: string): Promise<ResponseBody<T>> {
@@ -27,7 +26,7 @@ export class ApiService {
         if (!response.ok) {
             if(response.status === 401) {
                 console.log("error auth");
-                this.#router.push({ name: 'authenticate' });
+               // this.#router.push({ name: 'authenticate' });
             }
 
             throw new Error(data.message)

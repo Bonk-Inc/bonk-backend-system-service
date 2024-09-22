@@ -1,25 +1,24 @@
 <script setup lang="ts">
 import GameLayout from '@/components/layout/GameLayout.vue';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Toaster, useToast } from '@/components/ui/toast';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ApiService } from '@/lib/ApiService';
 import type { LevelDTO, Level } from '@/lib/Models';
-import { Check, Copy, Plus, Trash } from 'lucide-vue-next';
+import { Copy, Plus, Trash } from 'lucide-vue-next';
 import { inject, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 
 const route = useRoute();
 const apiService = inject<ApiService>('api');
 const gameId = route.params.gameId as string;
+const { toast } = useToast();
 
 const levels = ref<Level[]>([]);
-const errors = ref<string>('');
-const info = ref<string>('');
 const newLevel = ref<LevelDTO>({ game_id: '', name: '' });
 
 onMounted(async () => {
@@ -31,13 +30,21 @@ const fetchLevels = async (id: string) => {
     const response = await apiService?.get<Level[]>(`api/level/game/${id}/`);
     levels.value = response?.data ?? [];
   } catch(e: any) {
-    errors.value = e.message;
+    toast({
+      title: 'Er ging wat fout :(',
+      variant: 'destructive',
+      description: 'Er is wat fout gegaan tijdens het ophalen van de levels'
+    });
   }
 };
 
 const copyLevelId = async (id: string) => {
   try {
     await navigator.clipboard.writeText(id);
+
+    toast({
+      description: 'Level ID gekopieerd!'
+    });
   } catch (e: any) {
     console.error(e.message);
   }
@@ -46,13 +53,18 @@ const copyLevelId = async (id: string) => {
 const deleteLevel = async (id: string) => {
   try {
     await apiService?.delete(`api/level/${id}/`);
-    info.value = 'Level verwijderd';
-
-    setTimeout(() => info.value = '', 5_000);
     await fetchLevels(gameId);
+
+    toast({
+      title: 'Gelukt!',
+      description: 'De geselecteerde level, en alle onderliggende scores, zijn verwijderd'
+    });
   } catch (e: any) {
-    errors.value = e.message;
-    setTimeout(() => errors.value = '', 5_000);
+    toast({
+      title: 'Er ging wat fout :(',
+      variant: 'destructive',
+      description: 'Er is wat fout gegaan tijdens het verwijderen van de level'
+    });
   }
 }
 
@@ -62,23 +74,25 @@ const addLevel = async () => {
     const body = JSON.stringify(newLevel.value);
     const response = await apiService?.post<Level>('api/level/', body);
 
-    levels.value.push(response?.data as Level);
-    info.value = 'Level toegevoegd';
-    setTimeout(() => errors.value = '', 5_000);
+    levels.value.push(response?.data!);
+
+    toast({
+      title: 'Gelukt!',
+      description: 'Level is toegevoegd'
+    });
   } catch(e: any) {
-    errors.value = e.message;
-    setTimeout(() => errors.value = '', 5_000);
+    toast({
+      title: 'Er ging wat fout :(',
+      variant: 'destructive',
+      description: 'Er is wat fout gegaan tijdens het toevoegen van de level'
+    });
   }
 };
 </script>
 
 <template>
   <GameLayout>
-    <Alert v-if="info" class="absolute z-10 selection:top-20 inset-x-0 w-full max-w-xl mx-auto">
-      <Check class="w-4 h-4" />
-      <AlertTitle>Gelukt!</AlertTitle>
-      <AlertDescription>{{ info }}</AlertDescription>
-    </Alert>
+    <Toaster />
 
     <div class="pt-2 pb-4 flex justify-end items-center">
       <Dialog>

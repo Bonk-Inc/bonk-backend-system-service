@@ -2,6 +2,7 @@
 import GameLayout from '@/components/layout/GameLayout.vue';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Toaster, useToast } from '@/components/ui/toast';
 import type { ApiService } from '@/lib/ApiService';
 import { Copy, Trash } from 'lucide-vue-next';
 import { inject } from 'vue';
@@ -10,12 +11,17 @@ import { useRoute, useRouter } from 'vue-router';
 const route = useRoute();
 const router = useRouter();
 const apiService = inject<ApiService>('api');
+const { toast } = useToast();
 
 const gameId = route.params.gameId as string;
 
 const copyGameId = async () => {
   try {
     await navigator.clipboard.writeText(gameId);
+
+    toast({
+      description: 'Game ID gekopieerd!'
+    });
   } catch (e: any) {
     console.error(e.message);
   }
@@ -26,13 +32,19 @@ const deleteGame = async() => {
     await apiService?.delete(`api/game/${gameId}/`);
     router.push({ name: 'app_home' });
   } catch(e: any) {
-
+    toast({
+      title: 'Er ging wat fout :(',
+      variant: 'destructive',
+      description: 'Er is wat fout gegaan tijdens het verwijderen van de game'
+    });
   }
 }
 </script>
 
 <template>
   <GameLayout>
+    <Toaster />
+    
     <h2 class="text-xl font-medium">Instellingen</h2>
     <div class="grid grid-cols-4">
       <div class="py-4">

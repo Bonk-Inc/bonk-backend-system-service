@@ -7,6 +7,7 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/comp
 import { Input } from '@/components/ui/input';
 import { NumberField, NumberFieldContent, NumberFieldInput } from '@/components/ui/number-field';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Toaster, useToast } from '@/components/ui/toast';
 import { ApiService } from '@/lib/ApiService';
 import type { Score, Level, ScoreDTO } from '@/lib/Models';
 import { toTypedSchema } from '@vee-validate/zod';
@@ -18,6 +19,7 @@ import * as z from 'zod';
 const route = useRoute();
 const router = useRouter();
 const apiService = inject<ApiService>('api');
+const { toast } = useToast();
 
 const levels = ref<Level[]>([]);
 
@@ -37,15 +39,26 @@ const { handleSubmit, setFieldValue, setValues } = useForm({
 
 const onSubmit = handleSubmit(async (values) => {
   try {
+    let description = '';
     if (scoreId) {
       await apiService?.put<Score>(`api/score/${scoreId}/`, JSON.stringify(values));
+      description = 'Het updaten van de score is gelukt'
     } else {
       await apiService?.post<Score>('api/score/', JSON.stringify(values));
+      description = 'Het opslaan van de nieuwe score is geluk';
     }
 
-    router.push({ name: 'game_scores', params: { gameId: gameId }})
+    router.push({ name: 'game_scores', params: { gameId: gameId }});
+    toast({
+      title: 'Gelukt!',
+      description
+    });
   } catch (e: any) {
-
+    toast({
+      title: 'Er ging wat fout :(',
+      variant: 'destructive',
+      description: 'Er is wat fout gegaan tijdens het opslaan van de score'
+    });
   }
 });
 
@@ -67,13 +80,19 @@ onMounted(async () => {
       })
     }
   } catch (e: any) {
-
+    toast({
+      title: 'Er ging wat fout :(',
+      variant: 'destructive',
+      description: 'Er is wat fout gegaan tijdens het ophalen van de data'
+    });
   }
 });
 </script>
 
 <template>
   <MainLayout>
+    <Toaster />
+
     <Card class="w-1/2 container my-4">
       <CardHeader>
         <CardTitle>Score details</CardTitle>
