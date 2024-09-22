@@ -4,7 +4,7 @@ import GameLayout from '@/components/layout/GameLayout.vue';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Toaster, useToast } from '@/components/ui/toast';
+import { useToast } from '@/components/ui/toast';
 import { ApiService } from '@/lib/ApiService';
 import type { Level, Score } from '@/lib/Models';
 import type { RowSelectionState, ColumnDef } from '@tanstack/vue-table';
@@ -149,8 +149,6 @@ const deleteSelectedRows = async () => {
 
 <template>
   <GameLayout>
-    <Toaster />
-
     <div class="pt-2 pb-4 flex justify-between items-center">
       <Button 
         v-if="Object.keys(selectedScores).length > 0"

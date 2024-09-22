@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import MainLayout from '@/components/layout/MainLayout.vue';
 import { Card, CardContent } from '@/components/ui/card';
-import { Toaster, useToast } from '@/components/ui/toast';
+import { useToast } from '@/components/ui/toast';
 import type { ApiService } from '@/lib/ApiService';
 import type { AuthService } from '@/lib/AuthService';
 import type { GlobalStats } from '@/lib/Models';
@@ -39,8 +39,6 @@ const fetchStats = async () => {
 
 <template>
   <MainLayout>
-    <Toaster />
-
     <h1 class="text-3xl font-medium">
       Welkom! {{ user?.name }}
     </h1>

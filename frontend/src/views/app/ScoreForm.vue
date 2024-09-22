@@ -7,7 +7,7 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/comp
 import { Input } from '@/components/ui/input';
 import { NumberField, NumberFieldContent, NumberFieldInput } from '@/components/ui/number-field';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Toaster, useToast } from '@/components/ui/toast';
+import { useToast } from '@/components/ui/toast';
 import { ApiService } from '@/lib/ApiService';
 import type { Score, Level, ScoreDTO } from '@/lib/Models';
 import { toTypedSchema } from '@vee-validate/zod';
@@ -91,8 +91,6 @@ onMounted(async () => {
 
 <template>
   <MainLayout>
-    <Toaster />
-
     <Card class="w-1/2 container my-4">
       <CardHeader>
         <CardTitle>Score details</CardTitle>

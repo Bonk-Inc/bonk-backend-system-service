@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle, Di
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Toaster, useToast } from '@/components/ui/toast';
+import { useToast } from '@/components/ui/toast';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ApiService } from '@/lib/ApiService';
 import type { LevelDTO, Level } from '@/lib/Models';
@@ -92,8 +92,6 @@ const addLevel = async () => {
 
 <template>
   <GameLayout>
-    <Toaster />
-
     <div class="pt-2 pb-4 flex justify-end items-center">
       <Dialog>
         <DialogTrigger as-child>

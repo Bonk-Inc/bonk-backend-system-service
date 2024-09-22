@@ -2,7 +2,7 @@
 import GameLayout from '@/components/layout/GameLayout.vue';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Toaster, useToast } from '@/components/ui/toast';
+import { useToast } from '@/components/ui/toast';
 import type { ApiService } from '@/lib/ApiService';
 import { Copy, Trash } from 'lucide-vue-next';
 import { inject } from 'vue';
@@ -43,7 +43,6 @@ const deleteGame = async() => {
 
 <template>
   <GameLayout>
-    <Toaster />
     
     <h2 class="text-xl font-medium">Instellingen</h2>
     <div class="grid grid-cols-4">

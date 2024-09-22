@@ -4,6 +4,7 @@ import Header from '../Header.vue';
 import Sidebar from '../Sidebar.vue';
 import type { HtmlHTMLAttributes } from 'vue';
 import { cn } from '@/lib/utils';
+import { Toaster } from '../ui/toast';
 
 interface Props {
   class?: HtmlHTMLAttributes['class'];
@@ -13,6 +14,7 @@ const props = defineProps<Props>();
 </script>
 
 <template>
+  <Toaster />
   <Header />
   <div class="flex w-full content items-stretch">
     <Suspense>
