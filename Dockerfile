@@ -1,7 +1,7 @@
 #####################################################################
 ## Build Backend
 ####################################################################
-FROM rust:1.80-slim-bookworm AS backend-build
+FROM rust:1.81-slim-bookworm AS backend-build
 
 # install extra dependencies for cryptography.
 RUN apt-get update && apt-get install -y libssl-dev libpq-dev pkg-config

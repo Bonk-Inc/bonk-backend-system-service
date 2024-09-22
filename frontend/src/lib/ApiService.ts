@@ -1,4 +1,4 @@
-import { useRouter, type Router } from 'vue-router';
+import type { Router } from 'vue-router';
 import { authService, type AuthService } from './AuthService';
 
 export interface ResponseBody<T> {
@@ -9,11 +9,12 @@ export interface ResponseBody<T> {
 export class ApiService {
     #baseUrl: string;
     #authService: AuthService;
-    //#router: Router;
+    #router: Router;
 
-    constructor(baseUrl: string) {
+    constructor(baseUrl: string, router: Router) {
         this.#baseUrl = baseUrl;
         this.#authService = authService;
+        this.#router = router;
     }
 
     async get<T>(path: string): Promise<ResponseBody<T>> {
@@ -87,4 +88,4 @@ export class ApiService {
     }
 }
 
-export const apiService = new ApiService(import.meta.env.VITE_APP_API_URL);
+export const apiService = (router: Router) => new ApiService(import.meta.env.VITE_APP_API_URL, router);
