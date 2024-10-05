@@ -69,7 +69,7 @@ const saveGame = async () => {
                 Naam*
               </Label>
               <Input 
-                @input="event => newGame = { name: event.target.value }" 
+                @input="(event: Event) => newGame = { name: (event.target as HTMLInputElement).value }" 
                 id="game-name" 
                 class="col-span-4"
               />

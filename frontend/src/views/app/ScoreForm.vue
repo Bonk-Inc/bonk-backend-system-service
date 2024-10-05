@@ -23,7 +23,7 @@ const { toast } = useToast();
 
 const levels = ref<Level[]>([]);
 
-const gameId = route.query['gameId'] ?? '';
+const gameId = route.query['gameId'] as string ?? '';
 const scoreId = route.query['scoreId'] ?? '';
 
 const formSchema = toTypedSchema(z.object({
@@ -48,7 +48,7 @@ const onSubmit = handleSubmit(async (values) => {
       description = 'Het opslaan van de nieuwe score is geluk';
     }
 
-    router.push({ name: 'game_scores', params: { gameId: gameId }});
+    router.push({ name: 'game_scores', params: { gameId }});
     toast({
       title: 'Gelukt!',
       description

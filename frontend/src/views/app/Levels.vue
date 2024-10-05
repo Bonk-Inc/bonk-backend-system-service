@@ -109,7 +109,7 @@ const addLevel = async () => {
                 Naam*
               </Label>
               <Input
-                @input="event => newLevel = { ...newLevel, name: event.target.value }" 
+                @input="(event: Event) => newLevel = { ...newLevel, name: (event.target as HTMLInputElement).value }" 
                 id="level-name"
                 class="col-span-4"
               />
