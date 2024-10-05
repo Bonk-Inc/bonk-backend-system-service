@@ -102,14 +102,14 @@ async fn main() -> std::io::Result<()> {
             .service(
                 SwaggerUi::new("/swagger/{_:.*}").url("/api-docs/openapi.json", ApiDoc::openapi()),
             )
-        // .service(Files::new("/", "./dist/").index_file("index.html"))
-        // .default_service(|req: ServiceRequest| {
-        //     let (http_req, _payload) = req.into_parts();
-        //     async {
-        //         let response = NamedFile::open("./dist/index.html")?.into_response(&http_req);
-        //         Ok(ServiceResponse::new(http_req, response))
-        //     }
-        // })
+            .service(Files::new("/", "./dist/").index_file("index.html"))
+            .default_service(|req: ServiceRequest| {
+                let (http_req, _payload) = req.into_parts();
+                async {
+                    let response = NamedFile::open("./dist/index.html")?.into_response(&http_req);
+                    Ok(ServiceResponse::new(http_req, response))
+                }
+            })
     })
     .bind(&app_url)?
     .run()
