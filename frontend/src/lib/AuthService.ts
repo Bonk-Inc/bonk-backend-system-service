@@ -36,6 +36,7 @@ export class AuthService {
     handleLogoutRedirect() {
         return this.#userManager.signoutRedirectCallback()
     }
+    
     /**
      * Checks whether or not a user is currently logged in.
      *

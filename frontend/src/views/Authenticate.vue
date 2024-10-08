@@ -21,7 +21,8 @@ onMounted(async () => {
 const login = async () => {
   try {
     await auth?.login();
-  } catch(e) {
+  } catch(e: unknown) {
+    console.error(e);
     error.value = true;
   }
 };
