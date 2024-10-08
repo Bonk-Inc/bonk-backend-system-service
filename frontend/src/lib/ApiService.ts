@@ -1,4 +1,3 @@
-import type { Router } from 'vue-router';
 import { authService, type AuthService } from './AuthService';
 
 export interface ResponseBody<T> {
@@ -9,12 +8,10 @@ export interface ResponseBody<T> {
 export class ApiService {
     #baseUrl: string;
     #authService: AuthService;
-    #router: Router;
 
-    constructor(baseUrl: string, router: Router) {
+    constructor(baseUrl: string) {
         this.#baseUrl = baseUrl;
         this.#authService = authService;
-        this.#router = router;
     }
 
     async get<T>(path: string): Promise<ResponseBody<T>> {
@@ -92,11 +89,11 @@ export class ApiService {
             if(response.status === 401) {
                 this.#authService.logout();
             }
-            
+
             const data = await response.json() as ResponseBody<void>;
             throw new Error(data.message)
         }
     }
 }
 
-export const apiService = (router: Router) => new ApiService(import.meta.env.VITE_APP_API_URL, router);
+export const apiService = new ApiService(import.meta.env.VITE_APP_API_URL);
