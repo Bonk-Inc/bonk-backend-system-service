@@ -24,12 +24,11 @@ jobs:
       
       - name: Create frontend .env file
         run: |
-          cd frontend/ & cat <<EOT >> .env
-          VITE_APP_API_URL=${{ vars.APP_API_URL }}
+          echo "VITE_APP_API_URL=${{ vars.APP_API_URL }}
           VITE_APP_AUTH_URL=${{ vars.APP_AUTH_URL }}
           VITE_APP_AUTH_CLIENT_ID=${{ vars.APP_AUTH_CLIENT_ID }}
           VITE_APP_AUTH_REDIRECT_URL=${{ vars.APP_AUTH_REDIRECT_UR }}
-          EOT
+          " > ./frontend/.env
 
       - name: test
         run: ls -la frontend/
