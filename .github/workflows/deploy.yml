@@ -31,6 +31,9 @@ jobs:
           VITE_APP_AUTH_REDIRECT_URL=${{ vars.APP_AUTH_REDIRECT_UR }}
           EOT
 
+      - name: test
+        run: ls -la frontend/
+
       - name: Log into registry ${{ env.REGISTRY }}
         uses: docker/login-action@v2
         with:
