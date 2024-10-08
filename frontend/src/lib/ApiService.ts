@@ -26,8 +26,7 @@ export class ApiService {
         const data = await response.json() as ResponseBody<T>;
         if (!response.ok) {
             if(response.status === 401) {
-                console.log("error auth");
-               // this.#router.push({ name: 'authenticate' });
+                this.#authService.logout();
             }
 
             throw new Error(data.message)
@@ -49,6 +48,10 @@ export class ApiService {
 
         const data = await response.json() as ResponseBody<T>;
         if (!response.ok) {
+            if(response.status === 401) {
+                this.#authService.logout();
+            }
+
             throw new Error(data.message)
         }
 
@@ -68,6 +71,10 @@ export class ApiService {
 
         const data = await response.json() as ResponseBody<T>;
         if (!response.ok) {
+            if(response.status === 401) {
+                this.#authService.logout();
+            }
+
             throw new Error(data.message)
         }
 
@@ -82,6 +89,10 @@ export class ApiService {
         });
 
         if (!response.ok) {
+            if(response.status === 401) {
+                this.#authService.logout();
+            }
+            
             const data = await response.json() as ResponseBody<void>;
             throw new Error(data.message)
         }

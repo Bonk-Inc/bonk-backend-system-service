@@ -22,13 +22,20 @@ export class AuthService {
     }
 
     async logout() {
-        await this.#userManager.signoutRedirect();
+        try {
+            await this.#userManager.signoutRedirect();
+        } catch (e: unknown) {
+            console.error(e);
+        }
     }
 
     handleLoginRedirect() {
         return this.#userManager.signinRedirectCallback()
     }
 
+    handleLogoutRedirect() {
+        return this.#userManager.signoutRedirectCallback()
+    }
     /**
      * Checks whether or not a user is currently logged in.
      *
