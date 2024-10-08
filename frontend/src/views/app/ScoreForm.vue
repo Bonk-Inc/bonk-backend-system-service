@@ -53,7 +53,7 @@ const onSubmit = handleSubmit(async (values) => {
       title: 'Gelukt!',
       description
     });
-  } catch (e: any) {
+  } catch (e: unknown) {
     toast({
       title: 'Er ging wat fout :(',
       variant: 'destructive',
@@ -79,7 +79,7 @@ onMounted(async () => {
         score: data.score
       })
     }
-  } catch (e: any) {
+  } catch (e: unknown) {
     toast({
       title: 'Er ging wat fout :(',
       variant: 'destructive',

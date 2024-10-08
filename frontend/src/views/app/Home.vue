@@ -27,7 +27,7 @@ const fetchStats = async () => {
   try {
     const statsResponse = await apiService?.get<GlobalStats>('api/stats/all/');
     stats.value = statsResponse?.data;
-  } catch (e: any) {
+  } catch (e: unknown) {
     toast({
       title: 'Er ging wat fout :(',
       variant: 'destructive',

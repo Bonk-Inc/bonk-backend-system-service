@@ -89,7 +89,7 @@ onMounted(async () => {
 
     scores.value = responseScores?.data!;
     levels.value = responseLevels?.data!;
-  } catch (e: any) {
+  } catch (e: unknown) {
     toast({
       title: 'Er ging wat fout :(',
       variant: 'destructive',
@@ -106,7 +106,7 @@ const filterLevel = async (level: string) => {
   try {
     const response = await apiService?.get<Score[]>(url);
     scores.value = response?.data!;
-  } catch (e: any) {
+  } catch (e: unknown) {
     toast({
       title: 'Er ging wat fout :(',
       variant: 'destructive',
@@ -120,7 +120,7 @@ const updateVisibility = async (score: Score) => {
     const response = await apiService?.put<Score>(`api/score/${score.id}/`, JSON.stringify(score));
     const index = scores.value.findIndex(s => s.id === response?.data.id);
     scores.value.splice(index, 1, response?.data as Score);
-  } catch (e: any) {
+  } catch (e: unknown) {
 
   }
 };
@@ -137,7 +137,7 @@ const deleteSelectedRows = async () => {
 
     scores.value = response?.data!;
     selectedScores.value = {};
-  } catch(e: any) {
+  } catch(e: unknown) {
     toast({
       title: 'Er ging wat fout :(',
       variant: 'destructive',

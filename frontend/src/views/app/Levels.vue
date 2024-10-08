@@ -29,7 +29,7 @@ const fetchLevels = async (id: string) => {
   try {
     const response = await apiService?.get<Level[]>(`api/level/game/${id}/`);
     levels.value = response?.data ?? [];
-  } catch(e: any) {
+  } catch(e: unknown) {
     toast({
       title: 'Er ging wat fout :(',
       variant: 'destructive',
@@ -45,8 +45,8 @@ const copyLevelId = async (id: string) => {
     toast({
       description: 'Level ID gekopieerd!'
     });
-  } catch (e: any) {
-    console.error(e.message);
+  } catch (e: unknown) {
+    console.error(e);
   }
 }
 
@@ -59,7 +59,7 @@ const deleteLevel = async (id: string) => {
       title: 'Gelukt!',
       description: 'De geselecteerde level, en alle onderliggende scores, zijn verwijderd'
     });
-  } catch (e: any) {
+  } catch (e: unknown) {
     toast({
       title: 'Er ging wat fout :(',
       variant: 'destructive',
@@ -80,7 +80,7 @@ const addLevel = async () => {
       title: 'Gelukt!',
       description: 'Level is toegevoegd'
     });
-  } catch(e: any) {
+  } catch(e: unknown) {
     toast({
       title: 'Er ging wat fout :(',
       variant: 'destructive',

@@ -24,7 +24,7 @@ async function fetchStats(gameId: string) {
   try {
     const statsResponse = await apiService?.get<GameStats>(`api/stats/game/${gameId}/`);
     stats.value = statsResponse?.data;
-  } catch(e: any) {
+  } catch(e: unknown) {
     toast({
       title: 'Er ging wat fout :(',
       variant: 'destructive',
