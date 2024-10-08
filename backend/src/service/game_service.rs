@@ -1,13 +1,14 @@
 use actix_web::web;
-use babs::models::Level;
 use uuid::Uuid;
 
 use crate::{
     config::db::Pool,
     error::ServiceError,
     models::{
-        game::{Game, GameDTO}, level::LevelDTO, Model
-    }
+        game::{Game, GameDTO},
+        level::{Level, LevelDTO},
+        Model,
+    },
 };
 
 pub fn find_all(pool: &web::Data<Pool>) -> Result<Vec<Game>, ServiceError> {
@@ -31,15 +32,18 @@ pub fn find_by_id(id: Uuid, pool: &web::Data<Pool>) -> Result<Game, ServiceError
 pub fn insert(new_game: GameDTO, pool: &web::Data<Pool>) -> Result<Game, ServiceError> {
     match Game::insert(new_game, &mut pool.get().unwrap()) {
         Ok(game) => {
-            let level = LevelDTO { name: "Level 1".to_owned(), game_id: game.id };
+            let level = LevelDTO {
+                name: "Level 1".to_owned(),
+                game_id: game.id,
+            };
 
             match Level::insert(level, &mut pool.get().unwrap()) {
                 Ok(_) => Ok(game),
                 Err(_) => Err(ServiceError::InternalServerError {
                     error_message: "Could not add level to newly created game".to_string(),
-                })
+                }),
             }
-        },
+        }
         Err(_) => Err(ServiceError::InternalServerError {
             error_message: "Could not add new game in database".to_string(),
         }),

@@ -4,7 +4,9 @@ use crate::config::db::Connection;
 
 pub mod game;
 pub mod level;
+pub mod respone;
 pub mod score;
+pub mod stats;
 
 pub trait Model<T, I, D> {
     fn find_all(conn: &mut Connection) -> QueryResult<Vec<T>>;

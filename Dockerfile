@@ -1,7 +1,7 @@
 #####################################################################
 ## Build Backend
 ####################################################################
-FROM rust:1.80-slim-bookworm AS backend-build
+FROM rust:1.81-slim-bookworm AS backend-build
 
 # install extra dependencies for cryptography.
 RUN apt-get update && apt-get install -y libssl-dev libpq-dev pkg-config
@@ -9,46 +9,25 @@ RUN apt-get update && apt-get install -y libssl-dev libpq-dev pkg-config
 # set the working directory.
 WORKDIR /bonk-inc-backend
 
-# copy project files to the working directory.
-COPY ./ .
+# copy backend project files to the working directory.
+COPY ./backend/ .
 
 # build the backend to a executable.
-RUN cargo build --target x86_64-unknown-linux-gnu --release -p babs_backend
+RUN cargo build --target x86_64-unknown-linux-gnu --release -p babs-server
 
 #####################################################################
 ## Build Front-end
 ####################################################################
-FROM rust:1.80-slim-bookworm AS frontend-build
-
-# install dependencies
-RUN apt-get update && apt-get install -y libssl-dev libpq-dev pkg-config curl
-
-# install node for npx command
-ENV NODE_VERSION=20.11.0
-RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
-ENV NVM_DIR=/root/.nvm
-RUN . "$NVM_DIR/nvm.sh" && nvm install ${NODE_VERSION}
-RUN . "$NVM_DIR/nvm.sh" && nvm use v${NODE_VERSION}
-RUN . "$NVM_DIR/nvm.sh" && nvm alias default v${NODE_VERSION}
-ENV PATH="$NVM_DIR/versions/node/v${NODE_VERSION}/bin/:${PATH}"
-
-# add WASM build target to rust and install Trunk
-RUN rustup target add wasm32-unknown-unknown
-RUN cargo install --locked trunk
+FROM node:lts-bookworm-slim as frontend-build
 
 # set the working directory.
 WORKDIR /bonk-inc-backend
 
-# copy project files to the working directory.
-COPY ./ .
+# copy front-end project files to the working directory.
+COPY ./frontend/ .
 
-# create .env file
-RUN cd ./frontend/ && cat <<EOT >> .env
-APP_API_URL="https://babs.bonk.group"
-EOT
-
-# build the front-end to a WASM file and extra javascript.
-RUN cd ./frontend/ && trunk build --release
+# build the front-end vue project.
+RUN npm run build
 
 #####################################################################
 ## Final image
@@ -66,7 +45,7 @@ COPY --from=backend-build /etc/group /etc/group
 WORKDIR /bonk-inc-backend
 
 # Copy our build
-COPY --from=backend-build /bonk-inc-backend/target/x86_64-unknown-linux-gnu/release/bonk-inc-backend ./
+COPY --from=backend-build /bonk-inc-backend/target/x86_64-unknown-linux-gnu/release/babs-server ./
 COPY --from=frontend-build /bonk-inc-backend/dist/ ./dist/
 
 # create appuser
@@ -94,4 +73,4 @@ USER bonk-inc-backend:bonk-inc-backend
 
 EXPOSE 8080
 
-CMD ["/bonk-inc-backend/bonk-inc-backend"]
+CMD ["/bonk-inc-backend/babs-server"]

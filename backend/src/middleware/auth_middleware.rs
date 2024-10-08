@@ -5,13 +5,12 @@ use actix_web::{
     dev::{forward_ready, Service, ServiceRequest, ServiceResponse, Transform},
     Error, HttpResponse,
 };
-use babs::respone::ResponseBody;
 use futures_util::future::{ok, LocalBoxFuture, Ready};
 use jsonwebtoken::{Algorithm, DecodingKey, Validation};
 use log::{error, info};
 use serde::{Deserialize, Serialize};
 
-use crate::service::oauth2_service;
+use crate::{models::respone::ResponseBody, service::oauth2_service};
 
 #[derive(Debug, Serialize, Deserialize)]
 struct Claims {
@@ -84,9 +83,9 @@ where
                     let response: HttpResponse<EitherBody<B>> = HttpResponse::Unauthorized()
                         .json(ResponseBody::new("Error during authenticating", ""))
                         .map_into_right_body();
-    
-                    return Box::pin(async { Ok(ServiceResponse::new(request, response)) });    
-                },
+
+                    return Box::pin(async { Ok(ServiceResponse::new(request, response)) });
+                }
             },
             None => {
                 error!("Could not get a JWK");
@@ -103,7 +102,10 @@ where
         match jsonwebtoken::decode::<Claims>(token.as_str(), &decoding_key, &validation) {
             Ok(_) => info!("User authenticated"),
             Err(err) => {
-                info!("User authentication failed, invalid token. Reason '{:?}'", err.kind());
+                info!(
+                    "User authentication failed, invalid token. Reason '{:?}'",
+                    err.kind()
+                );
 
                 let (request, _) = req.into_parts();
                 let response = HttpResponse::Unauthorized()

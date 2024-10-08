@@ -1,37 +1,74 @@
 use std::{
+    env,
     error::Error,
     fs::OpenOptions,
-    io::{Write, ErrorKind, self}, 
+    io::{self, ErrorKind, Write},
+    process,
     time::Duration,
-    env,
-    process
 };
 
 use actix_cors::Cors;
 use actix_files::{Files, NamedFile};
 use actix_web::{
+    dev::{ServiceRequest, ServiceResponse},
     middleware::Logger,
-    rt::{time::interval, spawn},
-    App, 
-    HttpServer, 
-    web, dev::{ServiceRequest, ServiceResponse}
+    rt::{spawn, time::interval},
+    web, App, HttpServer,
 };
-use config::{
-    db::{init_db_pool, run_migration},
-    oauth2::OAuth2Client
+use config::db::{init_db_pool, run_migration};
+use controller::api::{
+    game::{self, GameResponseBody, GamesResponseBody},
+    level::{self, LevelResponseBody, LevelsResponseBody},
+    score::{self, ScoreResponseBody, ScoresResponseBody},
 };
 #[cfg(debug_assertions)]
 use dotenvy::dotenv;
-use log::{info, error};
+use log::{error, info};
+use models::{
+    game::{Game, GameDTO},
+    level::{Level, LevelDTO},
+    score::{Score, ScoreDTO},
+};
+use utoipa::OpenApi;
+use utoipa_swagger_ui::SwaggerUi;
 
 pub mod config;
 pub mod controller;
 pub mod error;
 pub mod middleware;
 pub mod models;
+pub mod schema;
 pub mod service;
 
 pub const JWK_FILE_PATH: &str = "data/jwk.json";
+
+#[derive(OpenApi)]
+#[openapi(
+    info(
+        title = "Bonk inc Backend",
+        description = "My Api description"
+    ),
+    servers((url = "https://babs.bonk.group/api")),
+    paths(
+        game::index, game::show, game::store, game::update, game::destroy,
+        level::index, level::game_levels, level::store, level::update, level::destroy,
+        score::index, score::show, score::game_scores, score::level_scores,
+        score::store, score::update, score::destroy,
+    ),
+    tags(
+        (name = "Game", description = "Game management endpoints."),
+        (name = "Level", description = " "),
+        (name = "Score", description = "Score management endpoints.")
+    ),
+    components(
+        schemas(
+            Game, GameDTO, GameResponseBody, GamesResponseBody, 
+            Level, LevelDTO, LevelResponseBody, LevelsResponseBody,
+            Score, ScoreDTO, ScoreResponseBody, ScoresResponseBody
+        )
+    )
+)]
+struct ApiDoc;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -44,15 +81,13 @@ async fn main() -> std::io::Result<()> {
     let app_port = env::var("APP_PORT").expect("APP_PORT must be set");
     let app_url = format!("{}:{}", app_host, app_port);
 
-    let oauth2_client = OAuth2Client::new().await;
-
     let db_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     let db_pool = init_db_pool(&db_url);
     run_migration(&mut db_pool.get().unwrap());
 
-    let jwk_file = fetch_and_save_jwk().await;
-    if jwk_file.is_err() {
-        error!("Cannot save fetched jwk token, stopping program");
+    let jwks_file = fetch_and_save_jwks().await;
+    if jwks_file.is_err() {
+        error!("Cannot save fetched jwks token, stopping program");
         process::exit(0);
     }
 
@@ -61,14 +96,12 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(db_pool.clone()))
-            .app_data(web::Data::new(oauth2_client.clone()))
-            .wrap(actix_web::middleware::NormalizePath::new(
-                actix_web::middleware::TrailingSlash::Always,
-            ))
             .wrap(Logger::default())
             .wrap(setup_cors())
-            .service(controller::auth_scope())
             .service(controller::api_scope())
+            .service(
+                SwaggerUi::new("/swagger/{_:.*}").url("/api-docs/openapi.json", ApiDoc::openapi()),
+            )
             .service(Files::new("/", "./dist/").index_file("index.html"))
             .default_service(|req: ServiceRequest| {
                 let (http_req, _payload) = req.into_parts();
@@ -83,31 +116,35 @@ async fn main() -> std::io::Result<()> {
     .await
 }
 
-async fn fetch_and_save_jwk() -> Result<(), Box<dyn Error>> {
-    let jwsk_url = env::var("OAUTH_JWSK_URL").expect("OAUTH_JWSK_URL must be set");
-    let tokens = reqwest::get(&jwsk_url)
-        .await?
-        .text()
-        .await;
+async fn fetch_and_save_jwks() -> Result<(), Box<dyn Error>> {
+    let jwsk_url = env::var("OAUTH_JWKS_URL").expect("OAUTH_JWKS_URL must be set");
+    let tokens = reqwest::get(&jwsk_url).await?.text().await;
 
     if tokens.is_err() {
         error!("Could not fetch token from {}", jwsk_url);
-        return Err(Box::new(io::Error::new(ErrorKind::Other, "Could not fetch JWSK token")));
+        return Err(Box::new(io::Error::new(
+            ErrorKind::Other,
+            "Could not fetch JWKS token",
+        )));
     }
 
+    info!("JWKS token fetched, saving to file");
     let file_options = OpenOptions::new()
         .write(true)
         .create(true)
         .open(JWK_FILE_PATH);
 
     if file_options.is_ok() {
-        info!("Write new JWK token to file");
+        info!("Write new JWKS token to file");
         let _ = file_options.unwrap().write_all(tokens.unwrap().as_bytes());
     } else {
-        error!("Cannot write JWK token to file, reason {}", file_options.err().unwrap())
+        error!(
+            "Cannot write JWKS token to file, reason {}",
+            file_options.err().unwrap()
+        )
     }
 
-   Ok(()) 
+    Ok(())
 }
 
 async fn refresh_jwk() {
@@ -115,9 +152,9 @@ async fn refresh_jwk() {
 
     loop {
         delay.tick().await;
-    
-        info!("Refreshing JWK token");
-        let _ = fetch_and_save_jwk().await;
+
+        info!("Refreshing JWKS token");
+        let _ = fetch_and_save_jwks().await;
     }
 }
 

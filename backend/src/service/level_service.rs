@@ -1,11 +1,13 @@
 use actix_web::web;
-use babs::models::Level;
 use uuid::Uuid;
 
 use crate::{
     config::db::Pool,
     error::ServiceError,
-    models::{level::{self, LevelDTO}, Model},
+    models::{
+        level::{self, Level, LevelDTO},
+        Model,
+    },
 };
 
 use super::game_service;
@@ -37,7 +39,7 @@ pub fn find_by_game(game_id: Uuid, pool: &web::Data<Pool>) -> Result<Vec<Level>,
 
     match level::find_by_game(game_id, &mut pool.get().unwrap()) {
         Ok(levels) => Ok(levels),
-        Err(_) =>  Err(ServiceError::InternalServerError {
+        Err(_) => Err(ServiceError::InternalServerError {
             error_message: "Cannot add a new level in database".to_string(),
         }),
     }
@@ -65,9 +67,9 @@ pub fn update(
 
     match Level::update(id, updated_level, &mut pool.get().unwrap()) {
         Ok(level) => Ok(level),
-        Err(_) => Err(ServiceError::InternalServerError { 
-            error_message: "Could not update level".to_string()
-        })
+        Err(_) => Err(ServiceError::InternalServerError {
+            error_message: "Could not update level".to_string(),
+        }),
     }
 }
 
@@ -80,8 +82,8 @@ pub fn delete(id: Uuid, pool: &web::Data<Pool>) -> Result<usize, ServiceError> {
 
     match Level::delete(id, &mut pool.get().unwrap()) {
         Ok(results) => Ok(results),
-        Err(_) => Err(ServiceError::InternalServerError { 
-            error_message: "Could not delete level".to_string()
+        Err(_) => Err(ServiceError::InternalServerError {
+            error_message: "Could not delete level".to_string(),
         }),
     }
 }
