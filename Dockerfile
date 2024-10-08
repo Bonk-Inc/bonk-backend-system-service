@@ -26,6 +26,9 @@ WORKDIR /bonk-inc-backend
 # copy front-end project files to the working directory.
 COPY ./frontend/ .
 
+# download the required dependencies vue app.
+RUN npm install
+
 # build the front-end vue project.
 RUN npm run build
 
