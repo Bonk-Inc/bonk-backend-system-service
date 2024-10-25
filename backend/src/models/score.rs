@@ -19,10 +19,10 @@ pub struct Score {
     #[serde(rename = "score")]
     pub highscore: i32,
     pub is_hidden: bool,
-    pub game_id: Option<Uuid>,
     pub created_at: NaiveDateTime,
     pub updated_at: Option<NaiveDateTime>,
     pub level_id: Option<Uuid>,
+    pub user_id: Option<Uuid>
 }
 
 #[derive(Insertable, AsChangeset, Serialize, Deserialize, ToSchema)]
@@ -57,7 +57,7 @@ impl Model<Score, Uuid, ScoreDTO> for Score {
     ) -> QueryResult<Score> {
         diesel::update(score)
             .filter(id.eq(score_id))
-            .set((updated_score, game_id.eq(None::<Uuid>)))
+            .set((updated_score))
             .get_result::<Score>(conn)
     }
 
@@ -76,8 +76,7 @@ pub fn find_by_game(
     let mut query = score::table
         .into_boxed()
         .left_join(level::table)
-        .filter(level::game_id.eq(game))
-        .or_filter(game_id.eq(game));
+        .filter(level::game_id.eq(game));
 
     if !include_hidden {
         query = query.filter(is_hidden.eq(false));
