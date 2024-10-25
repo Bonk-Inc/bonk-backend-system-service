@@ -6,22 +6,19 @@ edition = "2021"
 readme = "README.md"
 
 [dependencies]
-actix-cors = "0.7.0"
-actix-files = "0.6.6"
-actix-web = "4.9.0"
+axum = { version = "0.7.7", features = ["macros"] }
 chrono = { version = "0.4.38", features = ["serde"] }
-derive_more = { version = "1.0.0", features = ["display", "error"] }
 diesel = { version = "2.2.4", features = ["postgres", "chrono", "uuid", "r2d2"] }
 diesel_migrations = "2.2.0"
 dotenvy = "0.15.7"
 env_logger = "0.11.5"
-futures-util = "0.3.31"
 jsonwebtoken = "9.3.0"
 log = "0.4.22"
 reqwest = { version = "0.12.8", features = ["json"] }
 serde = { version = "1.0.213", features = ["derive"] }
 serde_json = "1.0.132"
-utoipa = { version = "5.1.2", features = ["actix_extras", "chrono", "uuid"] }
-utoipa-swagger-ui = { version = "8.0.3", features = ["actix-web", "reqwest"] }
+tokio = { version = "1.41.0", features = ["full"] }
+tower-http = { version = "0.6.1", features = ["cors", "fs"] }
+utoipa = { version = "5.1.2", features = ["axum_extras", "chrono", "uuid"] }
+utoipa-swagger-ui = { version = "8.0.3", features = ["axum", "reqwest"] }
 uuid = { version = "1.11.0", features = ["serde", "v4"] }
-validator = { version = "0.18.1", features = ["derive"] }

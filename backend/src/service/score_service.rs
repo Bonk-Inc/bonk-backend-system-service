@@ -1,11 +1,11 @@
 use std::str::FromStr;
 
-use actix_web::web;
+use axum::http::StatusCode;
 use uuid::Uuid;
 
 use crate::{
     config::db::Pool,
-    error::ServiceError,
+    error::{internal_error, not_found_error},
     models::{
         score::{self, Score, ScoreDTO},
         Model,
@@ -14,91 +14,91 @@ use crate::{
 
 use super::{game_service, level_service};
 
-pub fn find_all(pool: &web::Data<Pool>) -> Result<Vec<Score>, ServiceError> {
+pub fn find_all(pool: &Pool) -> Result<Vec<Score>, (StatusCode, String)> {
     match Score::find_all(&mut pool.get().unwrap()) {
         Ok(scores) => Ok(scores),
-        Err(_) => Err(ServiceError::InternalServerError {
-            error_message: "Error while fetching scores occured".to_string(),
-        }),
+        Err(_) => Err(internal_error(
+            "Error while fetching scores occured".to_string(),
+        )),
     }
 }
 
-pub fn find_by_id(id: Uuid, pool: &web::Data<Pool>) -> Result<Score, ServiceError> {
+pub fn find_by_id(id: Uuid, pool: &Pool) -> Result<Score, (StatusCode, String)> {
     match Score::find_by_id(id, &mut pool.get().unwrap()) {
         Ok(score) => Ok(score),
-        Err(_) => Err(ServiceError::NotFound {
-            error_message: format!("Score with id '{}' not found", id.to_string()),
-        }),
+        Err(_) => Err(not_found_error(format!(
+            "Score with id '{}' not found",
+            id.to_string()
+        ))),
     }
 }
 
 pub fn find_by_game(
     game_id: Uuid,
     include_hidden: bool,
-    pool: &web::Data<Pool>,
-) -> Result<Vec<Score>, ServiceError> {
+    pool: &Pool,
+) -> Result<Vec<Score>, (StatusCode, String)> {
     if !game_service::game_exisits(game_id, pool) {
-        return Err(ServiceError::NotFound {
-            error_message: format!("Game with id '{}' not found", game_id.to_string()),
-        });
+        return Err(not_found_error(format!(
+            "Game with id '{}' not found",
+            game_id.to_string()
+        )));
     }
 
     match score::find_by_game(game_id, include_hidden, &mut pool.get().unwrap()) {
         Ok(score) => Ok(score),
-        Err(_) => Err(ServiceError::InternalServerError {
-            error_message: "An error occured when trying to fetch scores".to_string(),
-        }),
+        Err(_) => Err(internal_error(
+            "An error occured when trying to fetch scores".to_string(),
+        )),
     }
 }
 
 pub fn find_by_level(
     level_id: Uuid,
     include_hidden: bool,
-    pool: &web::Data<Pool>,
-) -> Result<Vec<Score>, ServiceError> {
+    pool: &Pool,
+) -> Result<Vec<Score>, (StatusCode, String)> {
     if !level_service::level_exists(level_id, pool) {
-        return Err(ServiceError::NotFound {
-            error_message: format!("Level with id '{}' not found", level_id.to_string()),
-        });
+        return Err(not_found_error(format!(
+            "Level with id '{}' not found",
+            level_id.to_string()
+        )));
     }
 
     match score::find_by_level(level_id, include_hidden, &mut pool.get().unwrap()) {
         Ok(score) => Ok(score),
-        Err(_) => Err(ServiceError::InternalServerError {
-            error_message: "An error occured when trying to fetch scores".to_string(),
-        }),
+        Err(_) => Err(internal_error(
+            "An error occured when trying to fetch scores".to_string(),
+        )),
     }
 }
 
-pub fn insert(new_score: ScoreDTO, pool: &web::Data<Pool>) -> Result<Score, ServiceError> {
+pub fn insert(new_score: ScoreDTO, pool: &Pool) -> Result<Score, (StatusCode, String)> {
     match Score::insert(new_score, &mut pool.get().unwrap()) {
         Ok(score) => Ok(score),
-        Err(_) => Err(ServiceError::InternalServerError {
-            error_message: "Error saving new score".to_string(),
-        }),
+        Err(_) => Err(internal_error("Error saving new score".to_string())),
     }
 }
 
 pub fn update(
     id: Uuid,
     updated_score: ScoreDTO,
-    pool: &web::Data<Pool>,
-) -> Result<Score, ServiceError> {
+    pool: &Pool,
+) -> Result<Score, (StatusCode, String)> {
     if !score_exisits(id, pool) {
-        return Err(ServiceError::NotFound {
-            error_message: format!("Score with id '{}' not found", id.to_string()),
-        });
+        return Err(not_found_error(format!(
+            "Score with id '{}' not found",
+            id.to_string()
+        )));
     }
 
     match Score::update(id, updated_score, &mut pool.get().unwrap()) {
         Ok(score) => Ok(score),
-        Err(_) => Err(ServiceError::InternalServerError {
-            error_message: "Error while updating score".to_string(),
-        }),
+        Err(_) => Err(internal_error("Error while updating score".to_string())),
     }
 }
 
-pub fn delete(ids: String, pool: &web::Data<Pool>) -> Result<usize, ServiceError> {
+pub fn delete(ids: String, pool: &Pool) -> Result<usize, (StatusCode, String)> {
     let score_ids = ids
         .split(',')
         .filter_map(|s| Uuid::from_str(s).ok())
@@ -106,13 +106,11 @@ pub fn delete(ids: String, pool: &web::Data<Pool>) -> Result<usize, ServiceError
 
     match Score::delete_many(score_ids, &mut pool.get().unwrap()) {
         Ok(result) => Ok(result),
-        Err(_) => Err(ServiceError::InternalServerError {
-            error_message: "Error while deleting score".to_string(),
-        }),
+        Err(_) => Err(internal_error("Error while deleting score".to_string())),
     }
 }
 
-pub fn score_exisits(id: Uuid, pool: &web::Data<Pool>) -> bool {
+pub fn score_exisits(id: Uuid, pool: &Pool) -> bool {
     let score = Score::find_by_id(id, &mut pool.get().unwrap());
 
     return score.is_ok();

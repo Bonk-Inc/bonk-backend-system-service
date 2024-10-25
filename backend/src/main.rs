@@ -1,21 +1,15 @@
 use std::{
-    env,
+    env, 
     error::Error,
-    fs::OpenOptions,
+    fs::OpenOptions, 
     io::{self, ErrorKind, Write},
-    process,
-    time::Duration,
+    net::SocketAddr, 
+    sync::{Arc, RwLock}, 
+    time::Duration
 };
 
-use actix_cors::Cors;
-use actix_files::{Files, NamedFile};
-use actix_web::{
-    dev::{ServiceRequest, ServiceResponse},
-    middleware::Logger,
-    rt::{spawn, time::interval},
-    web, App, HttpServer,
-};
-use config::db::{init_db_pool, run_migration};
+use axum::{http::Method, Router};
+use config::db::{init_db_pool, run_migration, Pool};
 use controller::api::{
     game::{GameApi, GameResponseBody, GamesResponseBody},
     level::{LevelApi, LevelResponseBody, LevelsResponseBody},
@@ -29,6 +23,9 @@ use models::{
     level::{Level, LevelDTO},
     score::{Score, ScoreDTO},
 };
+use reqwest::header::{ACCEPT, AUTHORIZATION, CONTENT_DISPOSITION, CONTENT_TYPE};
+use tokio::{net::TcpListener, spawn, time::interval};
+use tower_http::{cors::{Any, CorsLayer}, services::ServeDir};
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
@@ -69,8 +66,8 @@ pub const JWK_FILE_PATH: &str = "data/jwk.json";
 )]
 struct ApiDoc;
 
-#[actix_web::main]
-async fn main() -> std::io::Result<()> {
+#[tokio::main]
+async fn main() {
     #[cfg(debug_assertions)]
     dotenv().expect(".env file not found");
 
@@ -84,35 +81,23 @@ async fn main() -> std::io::Result<()> {
     let db_pool = init_db_pool(&db_url);
     run_migration(&mut db_pool.get().unwrap());
 
-    let jwks_file = fetch_and_save_jwks().await;
-    if jwks_file.is_err() {
-        error!("Cannot save fetched jwks token, stopping program");
-        process::exit(0);
-    }
+    let state = SharedState::new(RwLock::new(AppState { db: db_pool }));
+
+    let front_end = ServeDir::new("./dist/")
+        .append_index_html_on_directories(true);
+
+    let app = Router::new()
+        .nest("/api", controller::api_routes())
+        .nest_service("/", front_end)
+        .merge(SwaggerUi::new("/swagger").url("/api-docs/openapi.json", ApiDoc::openapi()))
+        .layer(setup_cors())
+        .with_state(state);
+
+    let addr: SocketAddr = app_url.parse().expect("Cannot parse app url to socket");
+    let listener = TcpListener::bind(addr).await.unwrap();
 
     spawn(refresh_jwk());
-
-    HttpServer::new(move || {
-        App::new()
-            .app_data(web::Data::new(db_pool.clone()))
-            .wrap(Logger::default())
-            .wrap(setup_cors())
-            .service(controller::api_scope())
-            .service(
-                SwaggerUi::new("/swagger/{_:.*}").url("/api-docs/openapi.json", ApiDoc::openapi()),
-            )
-            .service(Files::new("/", "./dist/").index_file("index.html"))
-            .default_service(|req: ServiceRequest| {
-                let (http_req, _payload) = req.into_parts();
-                async {
-                    let response = NamedFile::open("./dist/index.html")?.into_response(&http_req);
-                    Ok(ServiceResponse::new(http_req, response))
-                }
-            })
-    })
-    .bind(&app_url)?
-    .run()
-    .await
+    axum::serve(listener, app).await.unwrap();
 }
 
 async fn fetch_and_save_jwks() -> Result<(), Box<dyn Error>> {
@@ -157,16 +142,18 @@ async fn refresh_jwk() {
     }
 }
 
-fn setup_cors() -> Cors {
-    Cors::default()
-        .allow_any_origin()
-        .allowed_methods(vec!["GET", "POST", "PUT", "PATCH", "DELETE"])
-        .allowed_headers(vec![
-            actix_web::http::header::AUTHORIZATION,
-            actix_web::http::header::ACCEPT,
-        ])
-        .allowed_header(actix_web::http::header::CONTENT_TYPE)
-        .expose_headers(&[actix_web::http::header::CONTENT_DISPOSITION])
-        .supports_credentials()
-        .max_age(3600)
+fn setup_cors() -> CorsLayer {
+    CorsLayer::new()
+        .allow_origin(Any)
+        .allow_methods([Method::GET, Method::POST, Method::PUT, Method::PATCH, Method::DELETE])
+        .allow_headers([AUTHORIZATION, ACCEPT, CONTENT_TYPE])
+        .expose_headers([CONTENT_DISPOSITION])
+        .max_age(Duration::from_secs(3600))
+}
+
+type SharedState = Arc<RwLock<AppState>>;
+
+#[derive(Clone)]
+pub struct AppState {
+    db: Pool
 }

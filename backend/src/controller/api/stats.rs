@@ -1,18 +1,23 @@
-use actix_web::{get, web, HttpResponse};
+use axum::{
+    extract::{Path, State},
+    http::StatusCode,
+    Json,
+};
 use uuid::Uuid;
 
 use crate::{
-    config::db::Pool,
-    error::ServiceError,
     models::{
         respone::ResponseBody,
         stats::{GameStats, GlobalStats},
     },
     service::stats_service,
+    SharedState,
 };
 
-#[get("/all/")]
-pub async fn all(pool: web::Data<Pool>) -> actix_web::Result<HttpResponse, ServiceError> {
+pub async fn all(
+    State(app_state): State<SharedState>,
+) -> Result<Json<ResponseBody<GlobalStats>>, (StatusCode, String)> {
+    let pool = &app_state.read().unwrap().db;
     let game_count = stats_service::count_games(&pool)?;
     let score_count = stats_service::count_scores(None, &pool)?;
 
@@ -21,19 +26,19 @@ pub async fn all(pool: web::Data<Pool>) -> actix_web::Result<HttpResponse, Servi
         scores: score_count,
     };
 
-    Ok(HttpResponse::Ok().json(ResponseBody::new("Stats fetched", stats)))
+    Ok(Json(ResponseBody::new("Global stats fechted", stats)))
 }
 
-#[get("/game/{id}/")]
 pub async fn game_stats(
-    path: web::Path<Uuid>,
-    pool: web::Data<Pool>,
-) -> actix_web::Result<HttpResponse, ServiceError> {
-    let score_count = stats_service::count_scores(Some(path.into_inner()), &pool)?;
+    Path(id): Path<Uuid>,
+    State(app_state): State<SharedState>,
+) -> Result<Json<ResponseBody<GameStats>>, (StatusCode, String)> {
+    let pool = &app_state.read().unwrap().db;
+    let score_count = stats_service::count_scores(Some(id), pool)?;
 
     let game_stats = GameStats {
         scores: score_count,
     };
 
-    Ok(HttpResponse::Ok().json(ResponseBody::new("Game stats fetched", game_stats)))
+    Ok(Json(ResponseBody::new("Game stats fetched", game_stats)))
 }

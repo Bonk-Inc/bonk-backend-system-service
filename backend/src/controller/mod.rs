@@ -1,23 +1,16 @@
-use actix_web::{web, Scope, middleware::Compat};
+use axum::{middleware, routing::get, Router};
 
-use crate::middleware::auth_middleware::Authentication;
+use crate::{middleware::auth_middleware, SharedState};
 
 pub mod api;
 
-pub fn api_scope() -> Scope {
-    web::scope("/api")
-        .service(api::healthcheck)
-        .service(api::score_scope())
-        .service(
-            api::game_scope()
-                .wrap(Compat::new(Authentication))
-        )
-        .service(
-            api::level_scope()
-                .wrap(Compat::new(Authentication))
-        )
-        .service(
-            api::stats_scope()
-                .wrap(Compat::new(Authentication))
-        )
+pub fn api_routes() -> Router<SharedState> {
+    Router::new()
+        .nest("/game", api::game_routes())
+        .nest("/level", api::level_routes())
+        .nest("/stats", api::stats_routes())
+        .layer(middleware::from_fn(auth_middleware::verify_token))
+        .route("/healthcheck", get(api::healthcheck))
+        .nest("/score", api::score_routes())
+
 }
