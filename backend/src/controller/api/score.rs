@@ -23,7 +23,7 @@ use crate::{
     ),
     components(schemas(Score, ScoreDTO, ScoreResponseBody, ScoresResponseBody))
 )]
-pub(super) struct ScoreApi;
+pub struct ScoreApi;
 
 #[derive(ToSchema)]
 pub struct ScoreResponseBody {
@@ -44,7 +44,7 @@ pub struct QueryParams {
 
 #[utoipa::path(
     get,
-    path = "/score",
+    path = "/",
     tag = "Score",
     operation_id = "score_index",
     responses(
@@ -61,7 +61,7 @@ pub async fn index(pool: web::Data<Pool>) -> actix_web::Result<HttpResponse, Ser
 
 #[utoipa::path(
     get,
-    path = "/score/{id}",
+    path = "/{id}/",
     tag = "Score",
     operation_id = "score_show",
     params(
@@ -85,7 +85,7 @@ pub async fn show(
 
 #[utoipa::path(
     get,
-    path = "/score/game/{gameId}",
+    path = "/game/{gameId}/",
     tag = "Score",
     operation_id = "score_game_score",
     params(
@@ -113,7 +113,7 @@ pub async fn game_scores(
 
 #[utoipa::path(
     get,
-    path = "/score/level/{levelId}",
+    path = "/level/{levelId}/",
     tag = "Score",
     operation_id = "score_level_score",
     params(
@@ -141,7 +141,7 @@ pub async fn level_scores(
 
 #[utoipa::path(
     post,
-    path = "/score",
+    path = "/",
     tag = "Score",
     operation_id = "score_store",
     request_body = ScoreDTO,
@@ -163,7 +163,7 @@ pub async fn store(
 
 #[utoipa::path(
     put,
-    path = "/score/{id}",
+    path = "/{id}/",
     tag = "Score",
     operation_id = "score_update",
     request_body = ScoreDTO,
@@ -190,7 +190,7 @@ pub async fn update(
 
 #[utoipa::path(
     delete,
-    path = "/score/{id}",
+    path = "/{id}/",
     tag = "Score",
     operation_id = "score_destroy",
     params(
