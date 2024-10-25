@@ -1,26 +1,26 @@
-use actix_web::{delete, get, post, put, web, HttpResponse};
+use std::collections::HashMap;
+
+use axum::{
+    extract::{Path, Query, State},
+    http::StatusCode,
+    Json,
+};
 use serde::Deserialize;
 use utoipa::{OpenApi, ToSchema};
 use uuid::Uuid;
 
 use crate::{
-    config::db::Pool,
-    error::ServiceError,
-    models::{respone::ResponseBody, score::{Score, ScoreDTO}},
+    models::{
+        respone::ResponseBody,
+        score::{Score, ScoreDTO},
+    },
     service::score_service,
+    SharedState,
 };
 
 #[derive(OpenApi)]
 #[openapi(
-    paths(
-        index,
-        show,
-        game_scores,
-        level_scores,
-        store,
-        update,
-        destroy
-    ),
+    paths(index, show, game_scores, level_scores, store, update, destroy),
     components(schemas(Score, ScoreDTO, ScoreResponseBody, ScoresResponseBody))
 )]
 pub struct ScoreApi;
@@ -44,24 +44,27 @@ pub struct QueryParams {
 
 #[utoipa::path(
     get,
-    path = "/",
+    path = "",
     tag = "Score",
     operation_id = "score_index",
     responses(
         (status = StatusCode::OK, description = "Scores fetched successfully", body = ScoresResponseBody)
     )
 )]
-#[get("/")]
-pub async fn index(pool: web::Data<Pool>) -> actix_web::Result<HttpResponse, ServiceError> {
-    match score_service::find_all(&pool) {
-        Ok(scores) => Ok(HttpResponse::Ok().json(ResponseBody::new("Scores fetched", scores))),
+pub async fn index(
+    State(app_state): State<SharedState>,
+) -> Result<Json<ResponseBody<Vec<Score>>>, (StatusCode, String)> {
+    let pool = &app_state.read().unwrap().db;
+
+    match score_service::find_all(pool) {
+        Ok(scores) => Ok(Json(ResponseBody::new("Scores fetched", scores))),
         Err(err) => Err(err),
     }
 }
 
 #[utoipa::path(
     get,
-    path = "/{id}/",
+    path = "/{id}",
     tag = "Score",
     operation_id = "score_show",
     params(
@@ -72,20 +75,21 @@ pub async fn index(pool: web::Data<Pool>) -> actix_web::Result<HttpResponse, Ser
         (status = StatusCode::NOT_FOUND, description = "No score found by id")
     )
 )]
-#[get("/{id}/")]
 pub async fn show(
-    pool: web::Data<Pool>,
-    path: web::Path<Uuid>,
-) -> actix_web::Result<HttpResponse, ServiceError> {
-    match score_service::find_by_id(path.into_inner(), &pool) {
-        Ok(score) => Ok(HttpResponse::Ok().json(ResponseBody::new("Score fetched", score))),
+    State(app_state): State<SharedState>,
+    Path(id): Path<Uuid>,
+) -> Result<Json<ResponseBody<Score>>, (StatusCode, String)> {
+    let pool = &app_state.read().unwrap().db;
+
+    match score_service::find_by_id(id, pool) {
+        Ok(score) => Ok(Json(ResponseBody::new("Score fetched", score))),
         Err(err) => Err(err),
     }
 }
 
 #[utoipa::path(
     get,
-    path = "/game/{gameId}/",
+    path = "/game/{gameId}",
     tag = "Score",
     operation_id = "score_game_score",
     params(
@@ -97,23 +101,27 @@ pub async fn show(
         (status = StatusCode::NOT_FOUND, description = "No Game found by game id")
     )
 )]
-#[get("/game/{gameId}/")]
 pub async fn game_scores(
-    pool: web::Data<Pool>,
-    path: web::Path<Uuid>,
-    query: web::Query<QueryParams>,
-) -> actix_web::Result<HttpResponse, ServiceError> {
-    let query_params = query.into_inner();
+    State(app_state): State<SharedState>,
+    Path(game_id): Path<Uuid>,
+    Query(params): Query<HashMap<String, String>>,
+) -> Result<Json<ResponseBody<Vec<Score>>>, (StatusCode, String)> {
+    let pool = &app_state.read().unwrap().db;
+    let show_hidden = params
+        .get("hidden")
+        .unwrap_or(&"false".to_string())
+        .to_lowercase()
+        .eq("true");
 
-    match score_service::find_by_game(path.into_inner(), query_params.hidden, &pool) {
-        Ok(scores) => Ok(HttpResponse::Ok().json(ResponseBody::new("Scores fetched", scores))),
+    match score_service::find_by_game(game_id, show_hidden, pool) {
+        Ok(scores) => Ok(Json(ResponseBody::new("Scores fetched", scores))),
         Err(err) => Err(err),
     }
 }
 
 #[utoipa::path(
     get,
-    path = "/level/{levelId}/",
+    path = "/level/{levelId}",
     tag = "Score",
     operation_id = "score_level_score",
     params(
@@ -125,23 +133,27 @@ pub async fn game_scores(
         (status = StatusCode::NOT_FOUND, description = "No Level found by level id")
     )
 )]
-#[get("/level/{levelId}/")]
 pub async fn level_scores(
-    pool: web::Data<Pool>,
-    path: web::Path<Uuid>,
-    query: web::Query<QueryParams>,
-) -> actix_web::Result<HttpResponse, ServiceError> {
-    let query_params = query.into_inner();
+    State(app_state): State<SharedState>,
+    Path(level_id): Path<Uuid>,
+    Query(params): Query<HashMap<String, String>>,
+) -> Result<Json<ResponseBody<Vec<Score>>>, (StatusCode, String)> {
+    let pool = &app_state.read().unwrap().db;
+    let show_hidden = params
+        .get("hidden")
+        .unwrap_or(&"false".to_string())
+        .to_lowercase()
+        .eq("true");
 
-    match score_service::find_by_level(path.into_inner(), query_params.hidden, &pool) {
-        Ok(scores) => Ok(HttpResponse::Ok().json(ResponseBody::new("Scores fetched", scores))),
+    match score_service::find_by_level(level_id, show_hidden, pool) {
+        Ok(scores) => Ok(Json(ResponseBody::new("Scores fetched", scores))),
         Err(err) => Err(err),
     }
 }
 
 #[utoipa::path(
     post,
-    path = "/",
+    path = "",
     tag = "Score",
     operation_id = "score_store",
     request_body = ScoreDTO,
@@ -150,20 +162,24 @@ pub async fn level_scores(
         (status = StatusCode::BAD_REQUEST, description = "Invalid input")
     )
 )]
-#[post("/")]
 pub async fn store(
-    pool: web::Data<Pool>,
-    data: web::Json<ScoreDTO>,
-) -> actix_web::Result<HttpResponse, ServiceError> {
-    match score_service::insert(data.into_inner(), &pool) {
-        Ok(scores) => Ok(HttpResponse::Created().json(ResponseBody::new("Score saved", scores))),
+    State(app_state): State<SharedState>,
+    Json(new_score): Json<ScoreDTO>,
+) -> Result<(StatusCode, Json<ResponseBody<Score>>), (StatusCode, String)> {
+    let pool = &app_state.read().unwrap().db;
+
+    match score_service::insert(new_score, pool) {
+        Ok(scores) => Ok((
+            StatusCode::CREATED,
+            Json(ResponseBody::new("Score saved", scores)),
+        )),
         Err(err) => Err(err),
     }
 }
 
 #[utoipa::path(
     put,
-    path = "/{id}/",
+    path = "/{id}",
     tag = "Score",
     operation_id = "score_update",
     request_body = ScoreDTO,
@@ -176,38 +192,40 @@ pub async fn store(
         (status = StatusCode::NOT_FOUND, description = "No score found by id")
     )
 )]
-#[put("/{id}/")]
 pub async fn update(
-    pool: web::Data<Pool>,
-    data: web::Json<ScoreDTO>,
-    path: web::Path<Uuid>,
-) -> actix_web::Result<HttpResponse, ServiceError> {
-    match score_service::update(path.into_inner(), data.into_inner(), &pool) {
-        Ok(scores) => Ok(HttpResponse::Ok().json(ResponseBody::new("Score updated", scores))),
+    State(app_state): State<SharedState>,
+    Path(id): Path<Uuid>,
+    Json(updated_score): Json<ScoreDTO>,
+) -> Result<Json<ResponseBody<Score>>, (StatusCode, String)> {
+    let pool = &app_state.read().unwrap().db;
+
+    match score_service::update(id, updated_score, pool) {
+        Ok(scores) => Ok(Json(ResponseBody::new("Score updated", scores))),
         Err(err) => Err(err),
     }
 }
 
 #[utoipa::path(
     delete,
-    path = "/{id}/",
+    path = "/{id}",
     tag = "Score",
     operation_id = "score_destroy",
     params(
-        ("id", Path, description = "Unique id(s) of a Score (splits on comma)")
+        ("id", Path, description = "Unique id(s) of a Score (comma seperated)")
     ),
     responses(
         (status = StatusCode::NO_CONTENT, description = "Score deleted successfully"),
         (status = StatusCode::NOT_FOUND, description = "No score found by id")
     )
 )]
-#[delete("/({id})/")]
 pub async fn destroy(
-    pool: web::Data<Pool>,
-    path: web::Path<String>,
-) -> actix_web::Result<HttpResponse, ServiceError> {
-    match score_service::delete(path.into_inner(), &pool) {
-        Ok(_) => Ok(HttpResponse::NoContent().body("")),
+    State(app_state): State<SharedState>,
+    Path(id): Path<String>,
+) -> Result<StatusCode, (StatusCode, String)> {
+    let pool = &app_state.read().unwrap().db;
+
+    match score_service::delete(id, &pool) {
+        Ok(_) => Ok(StatusCode::NO_CONTENT),
         Err(err) => Err(err),
     }
 }

@@ -1,26 +1,24 @@
-use actix_web::web;
+use reqwest::StatusCode;
 use uuid::Uuid;
 
 use crate::{
     config::db::Pool,
-    error::ServiceError,
+    error::internal_error,
     models::{game, score},
 };
 
-pub fn count_games(pool: &web::Data<Pool>) -> Result<i64, ServiceError> {
+pub fn count_games(pool: &Pool) -> Result<i64, (StatusCode, String)> {
     match game::count_games(&mut pool.get().unwrap()) {
         Ok(count) => Ok(count),
-        Err(_) => Err(ServiceError::InternalServerError {
-            error_message: "Cannot count games in database".to_string(),
-        }),
+        Err(_) => Err(internal_error("Cannot count games in database".to_string())),
     }
 }
 
-pub fn count_scores(id: Option<Uuid>, pool: &web::Data<Pool>) -> Result<i64, ServiceError> {
+pub fn count_scores(id: Option<Uuid>, pool: &Pool) -> Result<i64, (StatusCode, String)> {
     match score::count_score(id, &mut pool.get().unwrap()) {
         Ok(count) => Ok(count),
-        Err(_) => Err(ServiceError::InternalServerError {
-            error_message: "Cannot count scores in database".to_string(),
-        }),
+        Err(_) => Err(internal_error(
+            "Cannot count scores in database".to_string(),
+        )),
     }
 }

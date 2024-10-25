@@ -1,12 +1,10 @@
-use actix_web::{delete, get, post, put, web, HttpResponse};
+use axum::{extract::{State, Path}, http::StatusCode, Json};
 use utoipa::{OpenApi, ToSchema};
 use uuid::Uuid;
 
 use crate::{
-    config::db::Pool,
-    error::ServiceError,
     models::{level::{Level, LevelDTO}, respone::ResponseBody},
-    service::level_service,
+    service::level_service, SharedState,
 };
 
 #[derive(OpenApi)]
@@ -36,24 +34,27 @@ pub struct LevelsResponseBody {
 
 #[utoipa::path(
     get,
-    path = "/",
+    path = "",
     tag = "Level",
     operation_id = "level_index",
     responses(
         (status = StatusCode::OK, description = "Level fetched successfully", body = LevelsResponseBody)
     )
 )]
-#[get("/")]
-pub async fn index(pool: web::Data<Pool>) -> actix_web::Result<HttpResponse, ServiceError> {
-    match level_service::find_all(&pool) {
-        Ok(levels) => Ok(HttpResponse::Ok().json(ResponseBody::new("Levels fetched", levels))),
+pub async fn index(
+    State(app_state): State<SharedState>,
+) -> Result<Json<ResponseBody<Vec<Level>>>, (StatusCode, String)> {
+    let pool = &app_state.read().unwrap().db;
+
+    match level_service::find_all(pool) {
+        Ok(levels) => Ok(Json(ResponseBody::new("Levels fetched", levels))),
         Err(err) => Err(err),
     }
 }
 
 #[utoipa::path(
     get,
-    path = "/game/{gameId}/",
+    path = "/game/{gameId}",
     tag = "Level",
     operation_id = "level_games",
     params(
@@ -64,20 +65,21 @@ pub async fn index(pool: web::Data<Pool>) -> actix_web::Result<HttpResponse, Ser
         (status = StatusCode::NOT_FOUND, description = "No Game found by game id")
     )
 )]
-#[get("/game/{gameId}/")]
 pub async fn game_levels(
-    pool: web::Data<Pool>,
-    path: web::Path<Uuid>,
-) -> actix_web::Result<HttpResponse, ServiceError> {
-    match level_service::find_by_game(path.into_inner(), &pool) {
-        Ok(levels) => Ok(HttpResponse::Ok().json(ResponseBody::new("Levels fetched", levels))),
+    State(app_state): State<SharedState>,
+    Path(game_id): Path<Uuid>,
+) -> Result<Json<ResponseBody<Vec<Level>>>, (StatusCode, String)> {
+    let pool = &app_state.read().unwrap().db;
+
+    match level_service::find_by_game(game_id, pool) {
+        Ok(levels) => Ok(Json(ResponseBody::new("Levels fetched", levels))),
         Err(err) => Err(err),
     }
 }
 
 #[utoipa::path(
     post,
-    path = "/",
+    path = "",
     tag = "Level",
     operation_id = "level_store",
     request_body = LevelDTO,
@@ -86,20 +88,21 @@ pub async fn game_levels(
         (status = StatusCode::BAD_REQUEST, description = "Invalid input")
     )
 )]
-#[post("/")]
 pub async fn store(
-    pool: web::Data<Pool>,
-    data: web::Json<LevelDTO>,
-) -> actix_web::Result<HttpResponse, ServiceError> {
-    match level_service::insert(data.into_inner(), &pool) {
-        Ok(level) => Ok(HttpResponse::Created().json(ResponseBody::new("Level created", level))),
+    State(app_state): State<SharedState>,
+    Json(new_level): Json<LevelDTO>,
+) -> Result<(StatusCode, Json<ResponseBody<Level>>), (StatusCode, String)> {
+    let pool = &app_state.read().unwrap().db;
+
+    match level_service::insert(new_level, pool) {
+        Ok(level) => Ok((StatusCode::CREATED, Json(ResponseBody::new("Level created", level)))),
         Err(error) => Err(error),
     }
 }
 
 #[utoipa::path(
     put,
-    path = "/{id}/",
+    path = "/{id}",
     tag = "Level",
     operation_id = "level_update",
     request_body = LevelDTO,
@@ -112,21 +115,22 @@ pub async fn store(
         (status = StatusCode::NOT_FOUND, description = "No level found by id")
     )
 )]
-#[put("/{id}/")]
 pub async fn update(
-    pool: web::Data<Pool>,
-    data: web::Json<LevelDTO>,
-    path: web::Path<Uuid>,
-) -> actix_web::Result<HttpResponse, ServiceError> {
-    match level_service::update(path.into_inner(), data.into_inner(), &pool) {
-        Ok(level) => Ok(HttpResponse::Ok().json(ResponseBody::new("Level updated", level))),
+    State(app_state): State<SharedState>,
+    Path(id): Path<Uuid>,
+    Json(updated_level): Json<LevelDTO>,
+) -> Result<Json<ResponseBody<Level>>, (StatusCode, String)> {
+    let pool = &app_state.read().unwrap().db;
+
+    match level_service::update(id, updated_level, pool) {
+        Ok(level) => Ok(Json(ResponseBody::new("Level updated", level))),
         Err(error) => Err(error),
     }
 }
 
 #[utoipa::path(
     delete,
-    path = "/{id}/",
+    path = "/{id}",
     tag = "Level",
     operation_id = "level_destroy",
     params(
@@ -137,13 +141,14 @@ pub async fn update(
         (status = StatusCode::NOT_FOUND, description = "No level found by id")
     )
 )]
-#[delete("/{id}/")]
 pub async fn destroy(
-    pool: web::Data<Pool>,
-    path: web::Path<Uuid>,
-) -> actix_web::Result<HttpResponse, ServiceError> {
-    match level_service::delete(path.into_inner(), &pool) {
-        Ok(_) => Ok(HttpResponse::NoContent().body("")),
+    State(app_state): State<SharedState>,
+    Path(id): Path<Uuid>,
+) -> Result<StatusCode, (StatusCode, String)> {
+    let pool = &app_state.read().unwrap().db;
+
+    match level_service::delete(id, pool) {
+        Ok(_) => Ok(StatusCode::NO_CONTENT),
         Err(err) => Err(err),
     }
 }
