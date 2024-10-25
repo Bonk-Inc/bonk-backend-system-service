@@ -17,9 +17,9 @@ use actix_web::{
 };
 use config::db::{init_db_pool, run_migration};
 use controller::api::{
-    game::{self, GameResponseBody, GamesResponseBody},
-    level::{self, LevelResponseBody, LevelsResponseBody},
-    score::{self, ScoreResponseBody, ScoresResponseBody},
+    game::{GameApi, GameResponseBody, GamesResponseBody},
+    level::{LevelApi, LevelResponseBody, LevelsResponseBody},
+    score::{ScoreApi, ScoreResponseBody, ScoresResponseBody},
 };
 #[cfg(debug_assertions)]
 use dotenvy::dotenv;
@@ -49,11 +49,10 @@ pub const JWK_FILE_PATH: &str = "data/jwk.json";
         description = "My Api description"
     ),
     servers((url = "https://babs.bonk.group/api")),
-    paths(
-        game::index, game::show, game::store, game::update, game::destroy,
-        level::index, level::game_levels, level::store, level::update, level::destroy,
-        score::index, score::show, score::game_scores, score::level_scores,
-        score::store, score::update, score::destroy,
+    nest(
+        (path = "/game", api = GameApi),
+        (path = "/level", api = LevelApi),
+        (path = "/score", api = ScoreApi)
     ),
     tags(
         (name = "Game", description = "Game management endpoints."),

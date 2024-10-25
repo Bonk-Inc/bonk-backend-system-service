@@ -20,7 +20,7 @@ use crate::{
     ),
     components(schemas(Level, LevelDTO, LevelResponseBody, LevelsResponseBody))
 )]
-pub(super) struct LevelApi;
+pub struct LevelApi;
 
 #[derive(ToSchema)]
 pub struct LevelResponseBody {
@@ -36,7 +36,7 @@ pub struct LevelsResponseBody {
 
 #[utoipa::path(
     get,
-    path = "/level",
+    path = "/",
     tag = "Level",
     operation_id = "level_index",
     responses(
@@ -53,7 +53,7 @@ pub async fn index(pool: web::Data<Pool>) -> actix_web::Result<HttpResponse, Ser
 
 #[utoipa::path(
     get,
-    path = "/level/game/{gameId}",
+    path = "/game/{gameId}/",
     tag = "Level",
     operation_id = "level_games",
     params(
@@ -77,7 +77,7 @@ pub async fn game_levels(
 
 #[utoipa::path(
     post,
-    path = "/level",
+    path = "/",
     tag = "Level",
     operation_id = "level_store",
     request_body = LevelDTO,
@@ -99,7 +99,7 @@ pub async fn store(
 
 #[utoipa::path(
     put,
-    path = "/level/{id}",
+    path = "/{id}/",
     tag = "Level",
     operation_id = "level_update",
     request_body = LevelDTO,
@@ -126,7 +126,7 @@ pub async fn update(
 
 #[utoipa::path(
     delete,
-    path = "/level/{id}",
+    path = "/{id}/",
     tag = "Level",
     operation_id = "level_destroy",
     params(
