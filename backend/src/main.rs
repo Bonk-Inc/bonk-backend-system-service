@@ -2,13 +2,12 @@ use std::{
     env, 
     error::Error,
     fs::OpenOptions, 
-    io::{self, ErrorKind, Write},
+    io::{ErrorKind, Write},
     net::SocketAddr, 
     sync::{Arc, RwLock}, 
     time::Duration
 };
 
-use axum::{http::Method, Router};
 use config::db::{init_db_pool, run_migration, Pool};
 use controller::api::{
     game::{GameApi, GameResponseBody, GamesResponseBody},
@@ -23,17 +22,15 @@ use models::{
     level::{Level, LevelDTO},
     score::{Score, ScoreDTO},
 };
-use reqwest::header::{ACCEPT, AUTHORIZATION, CONTENT_DISPOSITION, CONTENT_TYPE};
 use tokio::{net::TcpListener, spawn, time::interval};
-use tower_http::{cors::{Any, CorsLayer}, services::ServeDir};
 use utoipa::OpenApi;
-use utoipa_swagger_ui::SwaggerUi;
 
 pub mod config;
 pub mod controller;
 pub mod error;
 pub mod middleware;
 pub mod models;
+pub mod routes;
 pub mod schema;
 pub mod service;
 
@@ -83,18 +80,9 @@ async fn main() {
 
     let state = SharedState::new(RwLock::new(AppState { db: db_pool }));
 
-    let front_end = ServeDir::new("./dist/")
-        .append_index_html_on_directories(true);
-
-    let app = Router::new()
-        .nest("/api", controller::api_routes())
-        .nest_service("/", front_end)
-        .merge(SwaggerUi::new("/swagger").url("/api-docs/openapi.json", ApiDoc::openapi()))
-        .layer(setup_cors())
-        .with_state(state);
-
     let addr: SocketAddr = app_url.parse().expect("Cannot parse app url to socket");
     let listener = TcpListener::bind(addr).await.unwrap();
+    let app = routes::create_app(state).await;
 
     spawn(refresh_jwk());
     axum::serve(listener, app).await.unwrap();
@@ -106,7 +94,7 @@ async fn fetch_and_save_jwks() -> Result<(), Box<dyn Error>> {
 
     if tokens.is_err() {
         error!("Could not fetch token from {}", jwsk_url);
-        return Err(Box::new(io::Error::new(
+        return Err(Box::new(std::io::Error::new(
             ErrorKind::Other,
             "Could not fetch JWKS token",
         )));
@@ -140,15 +128,6 @@ async fn refresh_jwk() {
         info!("Refreshing JWKS token");
         let _ = fetch_and_save_jwks().await;
     }
-}
-
-fn setup_cors() -> CorsLayer {
-    CorsLayer::new()
-        .allow_origin(Any)
-        .allow_methods([Method::GET, Method::POST, Method::PUT, Method::PATCH, Method::DELETE])
-        .allow_headers([AUTHORIZATION, ACCEPT, CONTENT_TYPE])
-        .expose_headers([CONTENT_DISPOSITION])
-        .max_age(Duration::from_secs(3600))
 }
 
 type SharedState = Arc<RwLock<AppState>>;
