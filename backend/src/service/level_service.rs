@@ -1,4 +1,3 @@
-use axum::{http::StatusCode, Json};
 use uuid::Uuid;
 
 use crate::{
@@ -12,14 +11,14 @@ use crate::{
 
 use super::game_service;
 
-pub fn find_all(pool: &Pool) -> Result<Vec<Level>, (StatusCode, Json<ErrorResponse>)> {
+pub fn find_all(pool: &Pool) -> Result<Vec<Level>, ErrorResponse> {
     match Level::find_all(&mut pool.get().unwrap()) {
         Ok(levels) => Ok(levels),
         Err(_) => Err(internal_error("Cannot fetch levels".to_string())),
     }
 }
 
-pub fn find_by_id(id: Uuid, pool: &Pool) -> Result<Level, (StatusCode, Json<ErrorResponse>)> {
+pub fn find_by_id(id: Uuid, pool: &Pool) -> Result<Level, ErrorResponse> {
     match Level::find_by_id(id, &mut pool.get().unwrap()) {
         Ok(level) => Ok(level),
         Err(_) => Err(not_found_error(format!(
@@ -29,7 +28,7 @@ pub fn find_by_id(id: Uuid, pool: &Pool) -> Result<Level, (StatusCode, Json<Erro
     }
 }
 
-pub fn find_by_game(game_id: Uuid, pool: &Pool) -> Result<Vec<Level>, (StatusCode, Json<ErrorResponse>)> {
+pub fn find_by_game(game_id: Uuid, pool: &Pool) -> Result<Vec<Level>, ErrorResponse> {
     if !game_service::game_exisits(game_id, pool) {
         return Err(not_found_error(format!(
             "Game with id '{}' not found",
@@ -45,7 +44,7 @@ pub fn find_by_game(game_id: Uuid, pool: &Pool) -> Result<Vec<Level>, (StatusCod
     }
 }
 
-pub fn insert(new_level: LevelDTO, pool: &Pool) -> Result<Level, (StatusCode, Json<ErrorResponse>)> {
+pub fn insert(new_level: LevelDTO, pool: &Pool) -> Result<Level, ErrorResponse> {
     match Level::insert(new_level, &mut pool.get().unwrap()) {
         Ok(level) => Ok(level),
         Err(_) => Err(internal_error(
@@ -58,7 +57,7 @@ pub fn update(
     id: Uuid,
     updated_level: LevelDTO,
     pool: &Pool,
-) -> Result<Level, (StatusCode, Json<ErrorResponse>)> {
+) -> Result<Level, ErrorResponse> {
     if !level_exists(id, pool) {
         return Err(not_found_error(format!(
             "Level with id '{}' not found",
@@ -72,7 +71,7 @@ pub fn update(
     }
 }
 
-pub fn delete(id: Uuid, pool: &Pool) -> Result<usize, (StatusCode, Json<ErrorResponse>)> {
+pub fn delete(id: Uuid, pool: &Pool) -> Result<usize, ErrorResponse> {
     if !level_exists(id, pool) {
         return Err(not_found_error(format!(
             "Level with id '{}' not found",
