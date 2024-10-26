@@ -2,10 +2,9 @@ use std::env;
 
 use axum::{
     extract::Request,
-    http::{HeaderMap, StatusCode},
+    http::HeaderMap,
     middleware::Next,
-    response::Response,
-    Json,
+    response::Response
 };
 use jsonwebtoken::{Algorithm, DecodingKey, Validation};
 use log::{error, info};
@@ -24,7 +23,7 @@ pub async fn verify_token(
     headers: HeaderMap,
     req: Request,
     next: Next,
-) -> Result<Response, (StatusCode, Json<ErrorResponse>)> {
+) -> Result<Response, ErrorResponse> {
     let audience = env::var("OAUTH_CLIENT_ID").expect("OAUTH_CLIENT_ID must be set");
     let jwk_token = oauth2_service::get_jwk_tokens();
     let auth_token = headers.get("Authorization");

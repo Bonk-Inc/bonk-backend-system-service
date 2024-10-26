@@ -1,7 +1,6 @@
 use axum::{
     extract::{Path, State},
-    http::StatusCode,
-    Json,
+    Json
 };
 use uuid::Uuid;
 
@@ -14,7 +13,7 @@ use crate::{
 
 pub async fn all(
     State(app_state): State<SharedState>,
-) -> Result<Json<ResponseBody<GlobalStats>>, (StatusCode, Json<ErrorResponse>)> {
+) -> Result<Json<ResponseBody<GlobalStats>>, ErrorResponse> {
     let pool = &app_state.read().unwrap().db;
     let game_count = stats_service::count_games(&pool)?;
     let score_count = stats_service::count_scores(None, &pool)?;
@@ -30,7 +29,7 @@ pub async fn all(
 pub async fn game_stats(
     Path(id): Path<Uuid>,
     State(app_state): State<SharedState>,
-) -> Result<Json<ResponseBody<GameStats>>, (StatusCode, Json<ErrorResponse>)> {
+) -> Result<Json<ResponseBody<GameStats>>, ErrorResponse> {
     let pool = &app_state.read().unwrap().db;
     let score_count = stats_service::count_scores(Some(id), pool)?;
 

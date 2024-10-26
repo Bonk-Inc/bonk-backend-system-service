@@ -1,4 +1,3 @@
-use axum::{http::StatusCode, Json};
 use uuid::Uuid;
 
 use crate::{
@@ -9,21 +8,21 @@ use crate::{
     }
 };
 
-pub fn find_all(pool: &Pool) -> Result<Vec<Game>, (StatusCode, Json<ErrorResponse>)> {
+pub fn find_all(pool: &Pool) -> Result<Vec<Game>, ErrorResponse> {
     match Game::find_all(&mut pool.get().unwrap()) {
         Ok(games) => Ok(games),
         Err(_) => Err(internal_error("Cannot fetch games".to_string())),
     }
 }
 
-pub fn find_by_id(id: Uuid, pool: &Pool) -> Result<Game, (StatusCode, Json<ErrorResponse>)> {
+pub fn find_by_id(id: Uuid, pool: &Pool) -> Result<Game, ErrorResponse> {
     match Game::find_by_id(id, &mut pool.get().unwrap()) {
         Ok(game) => Ok(game),
         Err(_) => Err(not_found_error(format!("Game with id '{}' not found", id.to_string()),)),
     }
 }
 
-pub fn insert(new_game: GameDTO, pool: &Pool) -> Result<Game, (StatusCode, Json<ErrorResponse>)> {
+pub fn insert(new_game: GameDTO, pool: &Pool) -> Result<Game, ErrorResponse> {
     match Game::insert(new_game, &mut pool.get().unwrap()) {
         Ok(game) => {
             let level = LevelDTO {
@@ -44,7 +43,7 @@ pub fn update(
     id: Uuid,
     updated_game: GameDTO,
     pool: &Pool,
-) -> Result<Game, (StatusCode, Json<ErrorResponse>)> {
+) -> Result<Game, ErrorResponse> {
     if !game_exisits(id, pool) {
         return Err(not_found_error(format!("Game with id '{}' not found", id.to_string())));
     }
@@ -55,7 +54,7 @@ pub fn update(
     }
 }
 
-pub fn delete(id: Uuid, pool: &Pool) -> Result<usize, (StatusCode, Json<ErrorResponse>)> {
+pub fn delete(id: Uuid, pool: &Pool) -> Result<usize, ErrorResponse> {
     if !game_exisits(id, pool) {
         return Err(not_found_error(format!("Game with id '{}' not found", id.to_string())));
     }

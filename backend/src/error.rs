@@ -1,35 +1,40 @@
-use axum::{http::StatusCode, Json};
+use axum::{http::StatusCode, response::{IntoResponse, Response}, Json};
 use serde::Serialize;
 
-pub fn internal_error(err: String) -> (StatusCode, Json<ErrorResponse>) {
-    let error_resp = ErrorResponse {
+pub fn internal_error(err: String) -> ErrorResponse {
+    ErrorResponse {
         status: "fail",
-        message: err
-    };
-
-    (StatusCode::INTERNAL_SERVER_ERROR, Json(error_resp))
+        message: err,
+        code: StatusCode::INTERNAL_SERVER_ERROR
+    }
 }
 
-pub fn not_found_error(err: String) -> (StatusCode, Json<ErrorResponse>) {
-    let error_resp = ErrorResponse {
+pub fn not_found_error(err: String) -> ErrorResponse {
+    ErrorResponse {
         status: "fail",
-        message: err
-    };
-
-    (StatusCode::NOT_FOUND, Json(error_resp))
+        message: err,
+        code: StatusCode::NOT_FOUND
+    }
 }
 
-pub fn unauthorized_error(err: String) -> (StatusCode, Json<ErrorResponse>) {
-    let error_resp = ErrorResponse {
+pub fn unauthorized_error(err: String) -> ErrorResponse {
+    ErrorResponse {
         status: "fail",
-        message: err
-    };
-
-    (StatusCode::UNAUTHORIZED, Json(error_resp))
+        message: err,
+        code: StatusCode::UNAUTHORIZED
+    }
 }
 
 #[derive(Debug, Serialize)]
 pub struct ErrorResponse {
     pub status: &'static str,
     pub message: String,
+    #[serde(skip)]
+    pub code: StatusCode,
+}
+
+impl IntoResponse for ErrorResponse {
+    fn into_response(self) -> Response {
+        (self.code, Json(self)).into_response()
+    }
 }

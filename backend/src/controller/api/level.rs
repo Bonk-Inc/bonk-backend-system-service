@@ -42,7 +42,7 @@ pub struct LevelsResponseBody {
 )]
 pub async fn index(
     State(app_state): State<SharedState>,
-) -> Result<Json<ResponseBody<Vec<Level>>>, (StatusCode, Json<ErrorResponse>)> {
+) -> Result<Json<ResponseBody<Vec<Level>>>, ErrorResponse> {
     let pool = &app_state.read().unwrap().db;
 
     match level_service::find_all(pool) {
@@ -67,7 +67,7 @@ pub async fn index(
 pub async fn game_levels(
     State(app_state): State<SharedState>,
     Path(game_id): Path<Uuid>,
-) -> Result<Json<ResponseBody<Vec<Level>>>, (StatusCode, Json<ErrorResponse>)> {
+) -> Result<Json<ResponseBody<Vec<Level>>>, ErrorResponse> {
     let pool = &app_state.read().unwrap().db;
 
     match level_service::find_by_game(game_id, pool) {
@@ -90,7 +90,7 @@ pub async fn game_levels(
 pub async fn store(
     State(app_state): State<SharedState>,
     Json(new_level): Json<LevelDTO>,
-) -> Result<(StatusCode, Json<ResponseBody<Level>>), (StatusCode, Json<ErrorResponse>)> {
+) -> Result<(StatusCode, Json<ResponseBody<Level>>), ErrorResponse> {
     let pool = &app_state.read().unwrap().db;
 
     match level_service::insert(new_level, pool) {
@@ -118,7 +118,7 @@ pub async fn update(
     State(app_state): State<SharedState>,
     Path(id): Path<Uuid>,
     Json(updated_level): Json<LevelDTO>,
-) -> Result<Json<ResponseBody<Level>>, (StatusCode, Json<ErrorResponse>)> {
+) -> Result<Json<ResponseBody<Level>>, ErrorResponse> {
     let pool = &app_state.read().unwrap().db;
 
     match level_service::update(id, updated_level, pool) {
@@ -143,7 +143,7 @@ pub async fn update(
 pub async fn destroy(
     State(app_state): State<SharedState>,
     Path(id): Path<Uuid>,
-) -> Result<StatusCode, (StatusCode, Json<ErrorResponse>)> {
+) -> Result<StatusCode, ErrorResponse> {
     let pool = &app_state.read().unwrap().db;
 
     match level_service::delete(id, pool) {

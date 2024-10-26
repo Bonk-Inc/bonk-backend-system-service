@@ -1,6 +1,5 @@
 use std::str::FromStr;
 
-use axum::{http::StatusCode, Json};
 use uuid::Uuid;
 
 use crate::{
@@ -14,7 +13,7 @@ use crate::{
 
 use super::{game_service, level_service};
 
-pub fn find_all(pool: &Pool) -> Result<Vec<Score>, (StatusCode, Json<ErrorResponse>)> {
+pub fn find_all(pool: &Pool) -> Result<Vec<Score>, ErrorResponse> {
     match Score::find_all(&mut pool.get().unwrap()) {
         Ok(scores) => Ok(scores),
         Err(_) => Err(internal_error(
@@ -23,7 +22,7 @@ pub fn find_all(pool: &Pool) -> Result<Vec<Score>, (StatusCode, Json<ErrorRespon
     }
 }
 
-pub fn find_by_id(id: Uuid, pool: &Pool) -> Result<Score, (StatusCode, Json<ErrorResponse>)> {
+pub fn find_by_id(id: Uuid, pool: &Pool) -> Result<Score, ErrorResponse> {
     match Score::find_by_id(id, &mut pool.get().unwrap()) {
         Ok(score) => Ok(score),
         Err(_) => Err(not_found_error(format!(
@@ -37,7 +36,7 @@ pub fn find_by_game(
     game_id: Uuid,
     include_hidden: bool,
     pool: &Pool,
-) -> Result<Vec<Score>, (StatusCode, Json<ErrorResponse>)> {
+) -> Result<Vec<Score>, ErrorResponse> {
     if !game_service::game_exisits(game_id, pool) {
         return Err(not_found_error(format!(
             "Game with id '{}' not found",
@@ -57,7 +56,7 @@ pub fn find_by_level(
     level_id: Uuid,
     include_hidden: bool,
     pool: &Pool,
-) -> Result<Vec<Score>, (StatusCode, Json<ErrorResponse>)> {
+) -> Result<Vec<Score>, ErrorResponse> {
     if !level_service::level_exists(level_id, pool) {
         return Err(not_found_error(format!(
             "Level with id '{}' not found",
@@ -73,7 +72,7 @@ pub fn find_by_level(
     }
 }
 
-pub fn insert(new_score: ScoreDTO, pool: &Pool) -> Result<Score, (StatusCode, Json<ErrorResponse>)> {
+pub fn insert(new_score: ScoreDTO, pool: &Pool) -> Result<Score, ErrorResponse> {
     match Score::insert(new_score, &mut pool.get().unwrap()) {
         Ok(score) => Ok(score),
         Err(err) => Err(internal_error(format!("Error saving new score, {}", err))),
@@ -84,7 +83,7 @@ pub fn update(
     id: Uuid,
     updated_score: ScoreDTO,
     pool: &Pool,
-) -> Result<Score, (StatusCode, Json<ErrorResponse>)> {
+) -> Result<Score, ErrorResponse> {
     if !score_exisits(id, pool) {
         return Err(not_found_error(format!(
             "Score with id '{}' not found",
@@ -98,7 +97,7 @@ pub fn update(
     }
 }
 
-pub fn delete(ids: String, pool: &Pool) -> Result<usize, (StatusCode, Json<ErrorResponse>)> {
+pub fn delete(ids: String, pool: &Pool) -> Result<usize, ErrorResponse> {
     let score_ids = ids
         .split(',')
         .filter_map(|s| Uuid::from_str(s).ok())
