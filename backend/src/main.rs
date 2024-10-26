@@ -12,6 +12,7 @@ use config::db::{init_db_pool, run_migration, Pool};
 use controller::api::{game::GameApi, level::LevelApi, score::ScoreApi};
 #[cfg(debug_assertions)]
 use dotenvy::dotenv;
+use error::ErrorResponse;
 use log::{error, info};
 use tokio::{net::TcpListener, spawn, time::interval};
 use utoipa::OpenApi;
@@ -43,7 +44,8 @@ pub const JWK_FILE_PATH: &str = "data/jwk.json";
         (name = "Game", description = "Game management endpoints."),
         (name = "Level", description = " "),
         (name = "Score", description = "Score management endpoints.")
-    )
+    ),
+    components(schemas(ErrorResponse))
 )]
 struct ApiDoc;
 

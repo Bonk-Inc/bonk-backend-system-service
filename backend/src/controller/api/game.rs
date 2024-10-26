@@ -62,7 +62,7 @@ pub async fn index(
     ),
     responses(
         (status = StatusCode::OK, description = "Gam fetched successfully", body = GameResponseBody),
-        (status = StatusCode::NOT_FOUND, description = "No game found by id")
+        (status = StatusCode::NOT_FOUND, description = "No game found by id", body = ErrorResponse)
     )
 )]
 pub async fn show(
@@ -85,7 +85,7 @@ pub async fn show(
     request_body = GameDTO,
     responses(
         (status = StatusCode::CREATED, description = "Game created successfully", body = GameResponseBody),
-        (status = StatusCode::BAD_REQUEST, description = "Invalid input")
+        (status = StatusCode::BAD_REQUEST, description = "Invalid input", body = ErrorResponse)
     )
 )]
 pub async fn store(
@@ -114,8 +114,8 @@ pub async fn store(
     ),
     responses(
         (status = StatusCode::OK, description = "Game updated successfully", body = GameResponseBody),
-        (status = StatusCode::BAD_REQUEST, description = "Invalid input"),
-        (status = StatusCode::NOT_FOUND, description = "No game found by id")
+        (status = StatusCode::BAD_REQUEST, description = "Invalid input", body = ErrorResponse),
+        (status = StatusCode::NOT_FOUND, description = "No game found by id", body = ErrorResponse)
     )
 )]
 pub async fn update(
@@ -141,7 +141,7 @@ pub async fn update(
     ),
     responses(
         (status = StatusCode::NO_CONTENT, description = "Game deleted successfully"),
-        (status = StatusCode::NOT_FOUND, description = "No score found by id")
+        (status = StatusCode::NOT_FOUND, description = "No score found by id", body = ErrorResponse)
     )
 )]
 pub async fn destroy(
