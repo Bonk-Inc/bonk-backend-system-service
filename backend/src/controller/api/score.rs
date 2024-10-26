@@ -10,12 +10,10 @@ use utoipa::{OpenApi, ToSchema};
 use uuid::Uuid;
 
 use crate::{
-    models::{
+    error::ErrorResponse, models::{
         respone::ResponseBody,
         score::{Score, ScoreDTO},
-    },
-    service::score_service,
-    SharedState,
+    }, service::score_service, SharedState
 };
 
 #[derive(OpenApi)]
@@ -53,7 +51,7 @@ pub struct QueryParams {
 )]
 pub async fn index(
     State(app_state): State<SharedState>,
-) -> Result<Json<ResponseBody<Vec<Score>>>, (StatusCode, String)> {
+) -> Result<Json<ResponseBody<Vec<Score>>>, (StatusCode, Json<ErrorResponse>)> {
     let pool = &app_state.read().unwrap().db;
 
     match score_service::find_all(pool) {
@@ -78,7 +76,7 @@ pub async fn index(
 pub async fn show(
     State(app_state): State<SharedState>,
     Path(id): Path<Uuid>,
-) -> Result<Json<ResponseBody<Score>>, (StatusCode, String)> {
+) -> Result<Json<ResponseBody<Score>>, (StatusCode, Json<ErrorResponse>)> {
     let pool = &app_state.read().unwrap().db;
 
     match score_service::find_by_id(id, pool) {
@@ -105,7 +103,7 @@ pub async fn game_scores(
     State(app_state): State<SharedState>,
     Path(game_id): Path<Uuid>,
     Query(params): Query<HashMap<String, String>>,
-) -> Result<Json<ResponseBody<Vec<Score>>>, (StatusCode, String)> {
+) -> Result<Json<ResponseBody<Vec<Score>>>, (StatusCode, Json<ErrorResponse>)> {
     let pool = &app_state.read().unwrap().db;
     let show_hidden = params
         .get("hidden")
@@ -137,7 +135,7 @@ pub async fn level_scores(
     State(app_state): State<SharedState>,
     Path(level_id): Path<Uuid>,
     Query(params): Query<HashMap<String, String>>,
-) -> Result<Json<ResponseBody<Vec<Score>>>, (StatusCode, String)> {
+) -> Result<Json<ResponseBody<Vec<Score>>>, (StatusCode, Json<ErrorResponse>)> {
     let pool = &app_state.read().unwrap().db;
     let show_hidden = params
         .get("hidden")
@@ -165,7 +163,7 @@ pub async fn level_scores(
 pub async fn store(
     State(app_state): State<SharedState>,
     Json(new_score): Json<ScoreDTO>,
-) -> Result<(StatusCode, Json<ResponseBody<Score>>), (StatusCode, String)> {
+) -> Result<(StatusCode, Json<ResponseBody<Score>>), (StatusCode, Json<ErrorResponse>)> {
     let pool = &app_state.read().unwrap().db;
 
     match score_service::insert(new_score, pool) {
@@ -196,7 +194,7 @@ pub async fn update(
     State(app_state): State<SharedState>,
     Path(id): Path<Uuid>,
     Json(updated_score): Json<ScoreDTO>,
-) -> Result<Json<ResponseBody<Score>>, (StatusCode, String)> {
+) -> Result<Json<ResponseBody<Score>>, (StatusCode, Json<ErrorResponse>)> {
     let pool = &app_state.read().unwrap().db;
 
     match score_service::update(id, updated_score, pool) {
@@ -221,7 +219,7 @@ pub async fn update(
 pub async fn destroy(
     State(app_state): State<SharedState>,
     Path(id): Path<String>,
-) -> Result<StatusCode, (StatusCode, String)> {
+) -> Result<StatusCode, (StatusCode, Json<ErrorResponse>)> {
     let pool = &app_state.read().unwrap().db;
 
     match score_service::delete(id, &pool) {

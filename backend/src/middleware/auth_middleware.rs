@@ -11,19 +11,13 @@ use jsonwebtoken::{Algorithm, DecodingKey, Validation};
 use log::{error, info};
 use serde::{Deserialize, Serialize};
 
-use crate::service::oauth2_service;
+use crate::{error::{unauthorized_error, ErrorResponse}, service::oauth2_service};
 
 #[derive(Debug, Serialize, Deserialize)]
 struct Claims {
     aud: String,
     sub: String,
     exp: usize,
-}
-
-#[derive(Debug, Serialize)]
-pub struct ErrorResponse {
-    pub status: &'static str,
-    pub message: String,
 }
 
 pub async fn verify_token(
@@ -36,12 +30,7 @@ pub async fn verify_token(
     let auth_token = headers.get("Authorization");
 
     if auth_token.is_none() || jwk_token.is_err() {
-        let response = ErrorResponse {
-            status: "fail",
-            message: "Invalid token".to_string(),
-        };
-
-        return Err((StatusCode::UNAUTHORIZED, Json(response)));
+        return Err(unauthorized_error("Invalid token".to_string()));
     }
 
     let token = auth_token.unwrap().to_str().unwrap().replace("Bearer ", "");
@@ -54,23 +43,13 @@ pub async fn verify_token(
             Err(_) => {
                 error!("Could not decode the JWK");
 
-                let response = ErrorResponse {
-                    status: "fail",
-                    message: "Error during authenticating".to_string(),
-                };
-
-                return Err((StatusCode::UNAUTHORIZED, Json(response)));
+                return Err(unauthorized_error("Error during authenticating".to_string()));
             }
         },
         None => {
             error!("Could not get a JWK");
 
-            let response = ErrorResponse {
-                status: "fail",
-                message: "Error during authenticating".to_owned(),
-            };
-
-            return Err((StatusCode::UNAUTHORIZED, Json(response)));
+            return Err(unauthorized_error("Error during authenticating".to_string()));
         }
     };
 
@@ -82,12 +61,7 @@ pub async fn verify_token(
                 err.kind()
             );
 
-            let response = ErrorResponse {
-                status: "fail",
-                message: "Invalid token".to_owned(),
-            };
-
-            return Err((StatusCode::UNAUTHORIZED, Json(response)));
+            return Err(unauthorized_error("Invalid token".to_string()));
         }
     }
 

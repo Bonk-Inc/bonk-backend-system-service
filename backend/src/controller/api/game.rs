@@ -7,12 +7,10 @@ use utoipa::{OpenApi, ToSchema};
 use uuid::Uuid;
 
 use crate::{
-    models::{
+    error::ErrorResponse, models::{
         game::{Game, GameDTO},
         respone::ResponseBody,
-    },
-    service::game_service,
-    SharedState,
+    }, service::game_service, SharedState
 };
 
 #[derive(OpenApi)]
@@ -45,7 +43,7 @@ pub struct GamesResponseBody {
 )]
 pub async fn index(
     State(app_state): State<SharedState>,
-) -> Result<Json<ResponseBody<Vec<Game>>>, (StatusCode, String)> {
+) -> Result<Json<ResponseBody<Vec<Game>>>, (StatusCode, Json<ErrorResponse>)> {
     let pool = &app_state.read().unwrap().db;
 
     match game_service::find_all(pool) {
@@ -70,7 +68,7 @@ pub async fn index(
 pub async fn show(
     State(app_state): State<SharedState>,
     Path(id): Path<Uuid>,
-) -> Result<Json<ResponseBody<Game>>, (StatusCode, String)> {
+) -> Result<Json<ResponseBody<Game>>, (StatusCode, Json<ErrorResponse>)> {
     let pool = &app_state.read().unwrap().db;
 
     match game_service::find_by_id(id, pool) {
@@ -93,7 +91,7 @@ pub async fn show(
 pub async fn store(
     State(app_state): State<SharedState>,
     Json(new_game): Json<GameDTO>,
-) -> Result<(StatusCode, Json<ResponseBody<Game>>), (StatusCode, String)> {
+) -> Result<(StatusCode, Json<ResponseBody<Game>>), (StatusCode, Json<ErrorResponse>)> {
     let pool = &app_state.read().unwrap().db;
 
     match game_service::insert(new_game, pool) {
@@ -124,7 +122,7 @@ pub async fn update(
     State(app_state): State<SharedState>,
     Path(id): Path<Uuid>,
     Json(updated_game): Json<GameDTO>,
-) -> Result<Json<ResponseBody<Game>>, (StatusCode, String)> {
+) -> Result<Json<ResponseBody<Game>>, (StatusCode, Json<ErrorResponse>)> {
     let pool = &app_state.read().unwrap().db;
 
     match game_service::update(id, updated_game, pool) {
@@ -149,7 +147,7 @@ pub async fn update(
 pub async fn destroy(
     State(app_state): State<SharedState>,
     Path(id): Path<Uuid>,
-) -> Result<StatusCode, (StatusCode, String)> {
+) -> Result<StatusCode, (StatusCode, Json<ErrorResponse>)> {
     let pool = &app_state.read().unwrap().db;
 
     match game_service::delete(id, pool) {
