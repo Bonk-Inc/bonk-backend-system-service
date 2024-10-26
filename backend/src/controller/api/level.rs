@@ -3,8 +3,7 @@ use utoipa::{OpenApi, ToSchema};
 use uuid::Uuid;
 
 use crate::{
-    models::{level::{Level, LevelDTO}, respone::ResponseBody},
-    service::level_service, SharedState,
+    error::ErrorResponse, models::{level::{Level, LevelDTO}, respone::ResponseBody}, service::level_service, SharedState
 };
 
 #[derive(OpenApi)]
@@ -43,7 +42,7 @@ pub struct LevelsResponseBody {
 )]
 pub async fn index(
     State(app_state): State<SharedState>,
-) -> Result<Json<ResponseBody<Vec<Level>>>, (StatusCode, String)> {
+) -> Result<Json<ResponseBody<Vec<Level>>>, (StatusCode, Json<ErrorResponse>)> {
     let pool = &app_state.read().unwrap().db;
 
     match level_service::find_all(pool) {
@@ -68,7 +67,7 @@ pub async fn index(
 pub async fn game_levels(
     State(app_state): State<SharedState>,
     Path(game_id): Path<Uuid>,
-) -> Result<Json<ResponseBody<Vec<Level>>>, (StatusCode, String)> {
+) -> Result<Json<ResponseBody<Vec<Level>>>, (StatusCode, Json<ErrorResponse>)> {
     let pool = &app_state.read().unwrap().db;
 
     match level_service::find_by_game(game_id, pool) {
@@ -91,7 +90,7 @@ pub async fn game_levels(
 pub async fn store(
     State(app_state): State<SharedState>,
     Json(new_level): Json<LevelDTO>,
-) -> Result<(StatusCode, Json<ResponseBody<Level>>), (StatusCode, String)> {
+) -> Result<(StatusCode, Json<ResponseBody<Level>>), (StatusCode, Json<ErrorResponse>)> {
     let pool = &app_state.read().unwrap().db;
 
     match level_service::insert(new_level, pool) {
@@ -119,7 +118,7 @@ pub async fn update(
     State(app_state): State<SharedState>,
     Path(id): Path<Uuid>,
     Json(updated_level): Json<LevelDTO>,
-) -> Result<Json<ResponseBody<Level>>, (StatusCode, String)> {
+) -> Result<Json<ResponseBody<Level>>, (StatusCode, Json<ErrorResponse>)> {
     let pool = &app_state.read().unwrap().db;
 
     match level_service::update(id, updated_level, pool) {
@@ -144,7 +143,7 @@ pub async fn update(
 pub async fn destroy(
     State(app_state): State<SharedState>,
     Path(id): Path<Uuid>,
-) -> Result<StatusCode, (StatusCode, String)> {
+) -> Result<StatusCode, (StatusCode, Json<ErrorResponse>)> {
     let pool = &app_state.read().unwrap().db;
 
     match level_service::delete(id, pool) {
