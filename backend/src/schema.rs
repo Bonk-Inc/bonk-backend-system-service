@@ -25,9 +25,8 @@ diesel::table! {
     score (id) {
         id -> Uuid,
         #[max_length = 50]
-        username -> Varchar,
-        #[sql_name = "score"]
-        highscore -> Int4,
+        username -> Nullable<Varchar>,
+        score -> Int4,
         is_hidden -> Bool,
         created_at -> Timestamp,
         updated_at -> Nullable<Timestamp>,

@@ -15,7 +15,7 @@ use crate::{
 #[diesel(belongs_to(Level))]
 pub struct Score {
     pub id: Uuid,
-    pub username: String,
+    pub username: Option<String>,
     #[serde(rename = "score")]
     pub highscore: i32,
     pub is_hidden: bool,
@@ -28,11 +28,12 @@ pub struct Score {
 #[derive(Insertable, AsChangeset, Serialize, Deserialize, ToSchema)]
 #[diesel(table_name = score)]
 pub struct ScoreDTO {
-    pub username: String,
+    pub username: Option<String>,
     #[serde(rename = "score")]
     pub highscore: i32,
     pub is_hidden: bool,
     pub level_id: Uuid,
+    pub user_id: Option<Uuid>,
 }
 
 impl Model<Score, Uuid, ScoreDTO> for Score {
@@ -57,7 +58,7 @@ impl Model<Score, Uuid, ScoreDTO> for Score {
     ) -> QueryResult<Score> {
         diesel::update(score)
             .filter(id.eq(score_id))
-            .set((updated_score))
+            .set(updated_score)
             .get_result::<Score>(conn)
     }
 

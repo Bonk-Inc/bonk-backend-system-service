@@ -76,7 +76,7 @@ pub fn find_by_level(
 pub fn insert(new_score: ScoreDTO, pool: &Pool) -> Result<Score, (StatusCode, String)> {
     match Score::insert(new_score, &mut pool.get().unwrap()) {
         Ok(score) => Ok(score),
-        Err(_) => Err(internal_error("Error saving new score".to_string())),
+        Err(err) => Err(internal_error(format!("Error saving new score, {}", err))),
     }
 }
 

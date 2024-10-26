@@ -1,27 +1,18 @@
 use std::{
-    env, 
+    env,
     error::Error,
-    fs::OpenOptions, 
+    fs::OpenOptions,
     io::{ErrorKind, Write},
-    net::SocketAddr, 
-    sync::{Arc, RwLock}, 
-    time::Duration
+    net::SocketAddr,
+    sync::{Arc, RwLock},
+    time::Duration,
 };
 
 use config::db::{init_db_pool, run_migration, Pool};
-use controller::api::{
-    game::{GameApi, GameResponseBody, GamesResponseBody},
-    level::{LevelApi, LevelResponseBody, LevelsResponseBody},
-    score::{ScoreApi, ScoreResponseBody, ScoresResponseBody},
-};
+use controller::api::{game::GameApi, level::LevelApi, score::ScoreApi};
 #[cfg(debug_assertions)]
 use dotenvy::dotenv;
 use log::{error, info};
-use models::{
-    game::{Game, GameDTO},
-    level::{Level, LevelDTO},
-    score::{Score, ScoreDTO},
-};
 use tokio::{net::TcpListener, spawn, time::interval};
 use utoipa::OpenApi;
 
@@ -52,13 +43,6 @@ pub const JWK_FILE_PATH: &str = "data/jwk.json";
         (name = "Game", description = "Game management endpoints."),
         (name = "Level", description = " "),
         (name = "Score", description = "Score management endpoints.")
-    ),
-    components(
-        schemas(
-            Game, GameDTO, GameResponseBody, GamesResponseBody, 
-            Level, LevelDTO, LevelResponseBody, LevelsResponseBody,
-            Score, ScoreDTO, ScoreResponseBody, ScoresResponseBody
-        )
     )
 )]
 struct ApiDoc;
@@ -134,5 +118,5 @@ type SharedState = Arc<RwLock<AppState>>;
 
 #[derive(Clone)]
 pub struct AppState {
-    db: Pool
+    db: Pool,
 }
