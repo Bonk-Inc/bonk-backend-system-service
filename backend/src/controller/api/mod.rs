@@ -6,6 +6,7 @@ pub mod game;
 pub mod level;
 pub mod score;
 pub mod stats;
+pub mod user;
 
 pub fn game_routes() -> Router<SharedState> {
     Router::new()
@@ -32,6 +33,11 @@ pub fn stats_routes() -> Router<SharedState> {
     Router::new()
         .route("/all", get(stats::all))
         .route("/game/:id", get(stats::game_stats))
+}
+
+pub fn user_routes() -> Router<SharedState> {
+    Router::new()
+        .route("/:game_id", get(user::index))
 }
 
 pub async fn healthcheck() -> &'static str {

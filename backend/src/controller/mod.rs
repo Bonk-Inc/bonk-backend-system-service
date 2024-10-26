@@ -10,7 +10,7 @@ pub fn api_routes() -> Router<SharedState> {
         .nest("/level", api::level_routes())
         .nest("/stats", api::stats_routes())
         .layer(middleware::from_fn(auth_middleware::verify_token))
-        .route("/healthcheck", get(api::healthcheck))
         .nest("/score", api::score_routes())
-
+        .nest("/user", api::user_routes())
+        .route("/healthcheck", get(api::healthcheck))
 }
