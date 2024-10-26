@@ -1,11 +1,16 @@
-use axum::{http::StatusCode, response::{IntoResponse, Response}, Json};
+use axum::{
+    http::StatusCode,
+    response::{IntoResponse, Response},
+    Json,
+};
 use serde::Serialize;
+use utoipa::ToSchema;
 
 pub fn internal_error(err: String) -> ErrorResponse {
     ErrorResponse {
         status: "fail",
         message: err,
-        code: StatusCode::INTERNAL_SERVER_ERROR
+        code: StatusCode::INTERNAL_SERVER_ERROR,
     }
 }
 
@@ -13,7 +18,7 @@ pub fn not_found_error(err: String) -> ErrorResponse {
     ErrorResponse {
         status: "fail",
         message: err,
-        code: StatusCode::NOT_FOUND
+        code: StatusCode::NOT_FOUND,
     }
 }
 
@@ -21,11 +26,11 @@ pub fn unauthorized_error(err: String) -> ErrorResponse {
     ErrorResponse {
         status: "fail",
         message: err,
-        code: StatusCode::UNAUTHORIZED
+        code: StatusCode::UNAUTHORIZED,
     }
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 pub struct ErrorResponse {
     pub status: &'static str,
     pub message: String,

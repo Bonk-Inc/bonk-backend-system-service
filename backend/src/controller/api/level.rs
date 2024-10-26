@@ -61,7 +61,7 @@ pub async fn index(
     ),
     responses(
         (status = StatusCode::OK, description = "Levels fetched by game successfully", body = LevelsResponseBody),
-        (status = StatusCode::NOT_FOUND, description = "No Game found by game id")
+        (status = StatusCode::NOT_FOUND, description = "No Game found by game id", body = ErrorResponse)
     )
 )]
 pub async fn game_levels(
@@ -84,7 +84,7 @@ pub async fn game_levels(
     request_body = LevelDTO,
     responses(
         (status = StatusCode::CREATED, description = "Level created successfully", body = LevelsResponseBody),
-        (status = StatusCode::BAD_REQUEST, description = "Invalid input")
+        (status = StatusCode::BAD_REQUEST, description = "Invalid input", body = ErrorResponse)
     )
 )]
 pub async fn store(
@@ -110,8 +110,8 @@ pub async fn store(
     ),
     responses(
         (status = StatusCode::OK, description = "Level updated successfully", body = LevelsResponseBody),
-        (status = StatusCode::BAD_REQUEST, description = "Invalid input"),
-        (status = StatusCode::NOT_FOUND, description = "No level found by id")
+        (status = StatusCode::BAD_REQUEST, description = "Invalid input", body = ErrorResponse),
+        (status = StatusCode::NOT_FOUND, description = "No level found by id", body = ErrorResponse)
     )
 )]
 pub async fn update(
@@ -137,7 +137,7 @@ pub async fn update(
     ),
     responses(
         (status = StatusCode::NO_CONTENT, description = "Level deleted successfully"),
-        (status = StatusCode::NOT_FOUND, description = "No level found by id")
+        (status = StatusCode::NOT_FOUND, description = "No level found by id", body = ErrorResponse)
     )
 )]
 pub async fn destroy(
