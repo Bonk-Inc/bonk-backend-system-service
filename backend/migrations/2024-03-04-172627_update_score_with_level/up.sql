@@ -2,7 +2,7 @@ ALTER TABLE "score"
     ADD COLUMN "level_id" uuid;
 
 ALTER TABLE "score"
-    ALTER COLUMN "game_id" DROP NOT NULL;
+    DROP COLUMN "game_id" CASCADE;
 
 ALTER TABLE "score"
     ADD CONSTRAINT "fk_level_score"

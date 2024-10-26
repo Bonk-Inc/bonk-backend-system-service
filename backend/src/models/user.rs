@@ -46,7 +46,7 @@ impl Model<User, Uuid, ScoreDTO> for User {
     fn update(user_id: Uuid, data: ScoreDTO, conn: &mut Connection) -> QueryResult<User> {
         diesel::update(user)
             .filter(id.eq(user_id))
-            .set((data))
+            .set(data)
             .get_result::<User>(conn)
     }
 
