@@ -9,7 +9,7 @@ use std::{
 };
 
 use config::db::{init_db_pool, run_migration, Pool};
-use controller::api::{game::GameApi, level::LevelApi, score::ScoreApi};
+use controller::api::{game::GameApi, level::LevelApi, score::ScoreApi, user::UserApi};
 #[cfg(debug_assertions)]
 use dotenvy::dotenv;
 use error::ErrorResponse;
@@ -38,12 +38,14 @@ pub const JWK_FILE_PATH: &str = "data/jwk.json";
     nest(
         (path = "/game", api = GameApi),
         (path = "/level", api = LevelApi),
-        (path = "/score", api = ScoreApi)
+        (path = "/score", api = ScoreApi),
+        (path = "/user", api = UserApi)
     ),
     tags(
         (name = "Game", description = "Game management endpoints."),
         (name = "Level", description = " "),
-        (name = "Score", description = "Score management endpoints.")
+        (name = "Score", description = "Score management endpoints."),
+        (name = "User", description = " ")
     ),
     components(schemas(ErrorResponse))
 )]
