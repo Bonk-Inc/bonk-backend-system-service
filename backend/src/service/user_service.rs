@@ -29,8 +29,8 @@ pub fn find_by_id(id: Uuid, pool: &Pool) -> Result<User, ErrorResponse> {
     }
 }
 
-pub fn insert(new_score: UserDTO, pool: &Pool) -> Result<User, ErrorResponse> {
-    match User::insert(new_score, &mut pool.get().unwrap()) {
+pub fn insert(new_user: UserDTO, pool: &Pool) -> Result<User, ErrorResponse> {
+    match User::insert(new_user, &mut pool.get().unwrap()) {
         Ok(score) => Ok(score),
         Err(err) => Err(internal_error(format!("Error saving new user, {}", err))),
     }
