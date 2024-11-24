@@ -100,6 +100,20 @@ pub fn find_by_level(
     query.select(Score::as_select()).load(conn)
 }
 
+pub fn find_by_user(
+    user: Uuid,
+    include_hidden: bool,
+    conn: &mut Connection,
+) -> QueryResult<Vec<Score>> {
+    let mut query = score::table.into_boxed().filter(user_id.eq(user));
+    
+    if !include_hidden {
+        query = query.filter(is_hidden.eq(false));
+    }
+
+    query.select(Score::as_select()).load(conn)
+}
+
 pub fn count_score(game_uuid: Option<Uuid>, conn: &mut Connection) -> QueryResult<i64> {
     let mut query = score::table.into_boxed().left_join(level::table);
 

@@ -11,7 +11,7 @@ use crate::{
     },
 };
 
-use super::{game_service, level_service};
+use super::{game_service, level_service, user_service};
 
 pub fn find_all(pool: &Pool) -> Result<Vec<Score>, ErrorResponse> {
     match Score::find_all(&mut pool.get().unwrap()) {
@@ -65,6 +65,26 @@ pub fn find_by_level(
     }
 
     match score::find_by_level(level_id, include_hidden, &mut pool.get().unwrap()) {
+        Ok(score) => Ok(score),
+        Err(_) => Err(internal_error(
+            "An error occured when trying to fetch scores".to_string(),
+        )),
+    }
+}
+
+pub fn find_by_user(
+    user_id: Uuid,
+    include_hidden: bool,
+    pool: &Pool,
+) -> Result<Vec<Score>, ErrorResponse> {
+    if !user_service::user_exists(user_id, pool) {
+        return Err(not_found_error(format!(
+            "User with id '{}' not found",
+            user_id.to_string()
+        )));
+    }
+
+    match score::find_by_user(user_id, include_hidden, &mut pool.get().unwrap()) {
         Ok(score) => Ok(score),
         Err(_) => Err(internal_error(
             "An error occured when trying to fetch scores".to_string(),
