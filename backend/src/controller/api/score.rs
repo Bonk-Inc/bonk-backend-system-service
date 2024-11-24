@@ -18,7 +18,7 @@ use crate::{
 
 #[derive(OpenApi)]
 #[openapi(
-    paths(index, show, game_scores, level_scores, store, update, destroy),
+    paths(index, show, game_scores, level_scores, user_scores, store, update, destroy),
     components(schemas(Score, ScoreDTO, ScoreResponseBody, ScoresResponseBody))
 )]
 pub struct ScoreApi;
@@ -144,6 +144,38 @@ pub async fn level_scores(
         .eq("true");
 
     match score_service::find_by_level(level_id, show_hidden, pool) {
+        Ok(scores) => Ok(Json(ResponseBody::new("Scores fetched", scores))),
+        Err(err) => Err(err),
+    }
+}
+
+#[utoipa::path(
+    get,
+    path = "/level/{userId}",
+    tag = "Score",
+    operation_id = "score_user_score",
+    params(
+        ("userId", Path, description = "Unique id of a User"),
+        ("hidden", Query, description = "If hidden scores should also be fetched")
+    ),
+    responses(
+        (status = StatusCode::OK, description = "Score fetched by user successfully", body = ScoresResponseBody),
+        (status = StatusCode::NOT_FOUND, description = "No user found by user id", body = ErrorResponse)
+    )
+)]
+pub async fn user_scores(
+    State(app_state): State<SharedState>,
+    Path(user_id): Path<Uuid>,
+    Query(params): Query<HashMap<String, String>>,
+) -> Result<Json<ResponseBody<Vec<Score>>>, ErrorResponse> {
+    let pool = &app_state.read().unwrap().db;
+    let show_hidden = params
+        .get("hidden")
+        .unwrap_or(&"false".to_string())
+        .to_lowercase()
+        .eq("true");
+
+     match score_service::find_by_user(user_id, show_hidden, pool) {
         Ok(scores) => Ok(Json(ResponseBody::new("Scores fetched", scores))),
         Err(err) => Err(err),
     }
