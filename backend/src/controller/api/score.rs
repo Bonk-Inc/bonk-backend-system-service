@@ -10,15 +10,27 @@ use utoipa::{OpenApi, ToSchema};
 use uuid::Uuid;
 
 use crate::{
-    error::ErrorResponse, models::{
+    error::ErrorResponse,
+    models::{
         respone::ResponseBody,
         score::{Score, ScoreDTO},
-    }, service::score_service, SharedState
+    },
+    service::score_service,
+    SharedState,
 };
 
 #[derive(OpenApi)]
 #[openapi(
-    paths(index, show, game_scores, level_scores, user_scores, store, update, destroy),
+    paths(
+        index,
+        show,
+        game_scores,
+        level_scores,
+        user_scores,
+        store,
+        update,
+        destroy
+    ),
     components(schemas(Score, ScoreDTO, ScoreResponseBody, ScoresResponseBody))
 )]
 pub struct ScoreApi;
@@ -175,7 +187,7 @@ pub async fn user_scores(
         .to_lowercase()
         .eq("true");
 
-     match score_service::find_by_user(user_id, show_hidden, pool) {
+    match score_service::find_by_user(user_id, show_hidden, pool) {
         Ok(scores) => Ok(Json(ResponseBody::new("Scores fetched", scores))),
         Err(err) => Err(err),
     }
