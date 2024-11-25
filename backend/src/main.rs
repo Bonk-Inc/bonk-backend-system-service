@@ -43,9 +43,9 @@ pub const JWK_FILE_PATH: &str = "data/jwk.json";
     ),
     tags(
         (name = "Game", description = "Game management endpoints."),
-        (name = "Level", description = " "),
+        (name = "Level", description = "Level management endpoints."),
         (name = "Score", description = "Score management endpoints."),
-        (name = "User", description = " ")
+        (name = "User", description = "User management endpoints.")
     ),
     components(schemas(ErrorResponse))
 )]
@@ -76,6 +76,15 @@ async fn main() {
     axum::serve(listener, app).await.unwrap();
 }
 
+/// Fetches the JWKS data from the authorization server and saves the 
+/// content to a json file.
+/// 
+/// # Errors
+/// 
+/// This function fails if:
+/// - JWKS data could not be fetched
+/// - JWKS content could not be saved to file
+/// 
 async fn fetch_and_save_jwks() -> Result<(), Box<dyn Error>> {
     let jwsk_url = env::var("OAUTH_JWKS_URL").expect("OAUTH_JWKS_URL must be set");
     let tokens = reqwest::get(&jwsk_url).await?.text().await;
@@ -107,6 +116,8 @@ async fn fetch_and_save_jwks() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
+/// Calls the [`fetch_and_save_jwks`] function every month to make sure the 
+/// JWKS info is valid.
 async fn refresh_jwk() {
     let mut delay = interval(Duration::from_secs(604_800));
 

@@ -13,6 +13,13 @@ use crate::{
 
 use super::{game_service, level_service, user_service};
 
+/// Queries the database and fetches all the registerd scores.
+/// 
+/// # Errors
+/// 
+/// This function fails if:
+/// - an error occured during execution.
+/// 
 pub fn find_all(pool: &Pool) -> Result<Vec<Score>, ErrorResponse> {
     match Score::find_all(&mut pool.get().unwrap()) {
         Ok(scores) => Ok(scores),
@@ -22,6 +29,13 @@ pub fn find_all(pool: &Pool) -> Result<Vec<Score>, ErrorResponse> {
     }
 }
 
+/// Queries the database and fetches the registerd score by the given id.
+/// 
+/// # Errors
+/// 
+/// This function fails if:
+/// - could not find score with given id.
+/// 
 pub fn find_by_id(id: Uuid, pool: &Pool) -> Result<Score, ErrorResponse> {
     match Score::find_by_id(id, &mut pool.get().unwrap()) {
         Ok(score) => Ok(score),
@@ -32,6 +46,14 @@ pub fn find_by_id(id: Uuid, pool: &Pool) -> Result<Score, ErrorResponse> {
     }
 }
 
+/// Queries the database and fetches the registerd scores by the given game.
+/// 
+/// # Errors
+/// 
+/// This function fails if:
+/// - could not find game with given id.
+/// - an error occured during execution.
+/// 
 pub fn find_by_game(
     game_id: Uuid,
     include_hidden: bool,
@@ -52,6 +74,14 @@ pub fn find_by_game(
     }
 }
 
+/// Queries the database and fetches the registerd scores by the given level.
+/// 
+/// # Errors
+/// 
+/// This function fails if:
+/// - could not find level with given id.
+/// - an error occured during execution.
+/// 
 pub fn find_by_level(
     level_id: Uuid,
     include_hidden: bool,
@@ -72,6 +102,14 @@ pub fn find_by_level(
     }
 }
 
+/// Queries the database and fetches the registerd scores by the given user.
+/// 
+/// # Errors
+/// 
+/// This function fails if:
+/// - could not find user with given id.
+/// - an error occured during execution.
+/// 
 pub fn find_by_user(
     user_id: Uuid,
     include_hidden: bool,
@@ -92,6 +130,13 @@ pub fn find_by_user(
     }
 }
 
+/// Inserts a new score object and into the database.
+/// 
+/// # Errors
+/// 
+/// This function fails if:
+/// - an error occured during execution.
+/// 
 pub fn insert(new_score: ScoreDTO, pool: &Pool) -> Result<Score, ErrorResponse> {
     match Score::insert(new_score, &mut pool.get().unwrap()) {
         Ok(score) => Ok(score),
@@ -99,6 +144,14 @@ pub fn insert(new_score: ScoreDTO, pool: &Pool) -> Result<Score, ErrorResponse> 
     }
 }
 
+/// Updates the score with the given id in the database.
+/// 
+/// # Errors
+/// 
+/// This function fails if:
+/// - an error occured during execution.
+/// - no score could be find with the given id.
+/// 
 pub fn update(
     id: Uuid,
     updated_score: ScoreDTO,
@@ -117,6 +170,14 @@ pub fn update(
     }
 }
 
+/// Deletes a score from the database with the given id.
+/// 
+/// # Errors
+/// 
+/// This function fails if:
+/// - an error occured during execution.
+/// - no score could be found with the given id.
+/// 
 pub fn delete(ids: String, pool: &Pool) -> Result<usize, ErrorResponse> {
     let score_ids = ids
         .split(',')
@@ -129,6 +190,7 @@ pub fn delete(ids: String, pool: &Pool) -> Result<usize, ErrorResponse> {
     }
 }
 
+/// Checks if a score exists in the database with the given id.
 pub fn score_exisits(id: Uuid, pool: &Pool) -> bool {
     let score = Score::find_by_id(id, &mut pool.get().unwrap());
 

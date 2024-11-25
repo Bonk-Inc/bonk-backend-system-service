@@ -6,6 +6,13 @@ use crate::{
     models::{game, score},
 };
 
+/// Queries the database and counts the registerd games.
+/// 
+/// # Errors
+/// 
+/// This function fails if:
+/// - an error occured during execution.
+/// 
 pub fn count_games(pool: &Pool) -> Result<i64, ErrorResponse> {
     match game::count_games(&mut pool.get().unwrap()) {
         Ok(count) => Ok(count),
@@ -13,6 +20,13 @@ pub fn count_games(pool: &Pool) -> Result<i64, ErrorResponse> {
     }
 }
 
+/// Queries the database and counts the registerd score in a game.
+/// 
+/// # Errors
+/// 
+/// This function fails if:
+/// - an error occured during execution.
+/// 
 pub fn count_scores(id: Option<Uuid>, pool: &Pool) -> Result<i64, ErrorResponse> {
     match score::count_score(id, &mut pool.get().unwrap()) {
         Ok(count) => Ok(count),

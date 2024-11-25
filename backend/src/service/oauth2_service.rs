@@ -7,6 +7,15 @@ use jsonwebtoken::jwk::{Jwk, JwkSet};
 
 use crate::JWK_FILE_PATH;
 
+/// Reads the contents of the JWKs file.
+/// 
+/// # Erros
+/// 
+/// This function fails if:
+/// - The JWKS file cannot be opend
+/// - Content of the JWKS file cannot be read
+/// - Content of the JWKS file cannot be serialized to a [`Jwk`] struct
+/// 
 pub fn get_jwk_tokens() -> Result<Option<Jwk>, String> {
     let file = File::open(JWK_FILE_PATH).map_err(|_| "Cannot open JWK file".to_string())?;
     let mut buffer_reader = BufReader::new(file);
