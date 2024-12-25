@@ -84,8 +84,8 @@ const columns: ColumnDef<Score>[] = [
 
 onMounted(async () => {
   try {
-    const responseScores = await apiService?.get<Score[]>(`api/score/game/${gameId}/?hidden=true`);
-    const responseLevels = await apiService?.get<Level[]>(`api/level/game/${gameId}/`);
+    const responseScores = await apiService?.get<Score[]>(`api/score/game/${gameId}?hidden=true`);
+    const responseLevels = await apiService?.get<Level[]>(`api/level/game/${gameId}`);
 
     scores.value = responseScores?.data!;
     levels.value = responseLevels?.data!;
@@ -100,8 +100,8 @@ onMounted(async () => {
 
 const filterLevel = async (level: string) => {
   const url = level.length > 0
-    ? `api/score/level/${level}/?hidden=true`
-    : `api/score/game/${gameId}/?hidden=true`;
+    ? `api/score/level/${level}?hidden=true`
+    : `api/score/game/${gameId}?hidden=true`;
 
   try {
     const response = await apiService?.get<Score[]>(url);
@@ -117,7 +117,7 @@ const filterLevel = async (level: string) => {
 
 const updateVisibility = async (score: Score) => {
   try {
-    const response = await apiService?.put<Score>(`api/score/${score.id}/`, JSON.stringify(score));
+    const response = await apiService?.put<Score>(`api/score/${score.id}`, JSON.stringify(score));
     const index = scores.value.findIndex(s => s.id === response?.data.id);
     scores.value.splice(index, 1, response?.data as Score);
   } catch (e: unknown) {
@@ -132,8 +132,8 @@ const deleteSelectedRows = async () => {
     .join(',');
 
   try {
-    await apiService?.delete(`api/score/(${ids})/`);
-    const response = await apiService?.get<Score[]>(`api/score/game/${gameId}/?hidden=true`);
+    await apiService?.delete(`api/score/(${ids})`);
+    const response = await apiService?.get<Score[]>(`api/score/game/${gameId}?hidden=true`);
 
     scores.value = response?.data!;
     selectedScores.value = {};

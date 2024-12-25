@@ -51,9 +51,11 @@ router.beforeEach(async (to, from, next) => {
     } catch(e) {
       next('/authenticate');
     }
+
+    return;
   }
 
-  next()
+  next();
 });
 
 export default router;
