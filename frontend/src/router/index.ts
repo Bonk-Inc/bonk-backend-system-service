@@ -38,24 +38,21 @@ const router = createRouter({
   ]
 });
 
-router.beforeEach(async (to, from, next) => {
+router.beforeEach(async (to, _, next) => {
   const authenticated = await authService.isUserLoggedIn();
+
   if (to.meta.requireAuth && !authenticated) {
     next('/authenticate');
-  }
-
-  if (to.path === '/login') {
+  } else if (to.path === '/login') {
     try {
       await authService.handleLoginRedirect();
       next('/app');  
     } catch(e) {
       next('/authenticate');
     }
-
-    return;
+  } else {
+    next();
   }
-
-  next();
 });
 
 export default router;
