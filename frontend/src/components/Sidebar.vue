@@ -18,7 +18,7 @@ const games = ref<Game[]>([]);
 const errors = ref<string>('');
 
 try {
-  const gamesResponse = await apiService?.get<Game[]>('api/game/');
+  const gamesResponse = await apiService?.get<Game[]>('api/game');
 
   if (gamesResponse)
     games.value = gamesResponse.data;
@@ -35,7 +35,7 @@ const saveGame = async () => {
   const body = JSON.stringify(newGame.value);
 
   try {
-    const response = await apiService?.post<Game>('api/game/', body);
+    const response = await apiService?.post<Game>('api/game', body);
     games.value.push(response?.data as Game);
   } catch (e: any) {
     errors.value = e.message;

@@ -27,7 +27,7 @@ onMounted(async () => {
 
 const fetchLevels = async (id: string) => {
   try {
-    const response = await apiService?.get<Level[]>(`api/level/game/${id}/`);
+    const response = await apiService?.get<Level[]>(`api/level/game/${id}`);
     levels.value = response?.data ?? [];
   } catch(e: unknown) {
     toast({
@@ -52,7 +52,7 @@ const copyLevelId = async (id: string) => {
 
 const deleteLevel = async (id: string) => {
   try {
-    await apiService?.delete(`api/level/${id}/`);
+    await apiService?.delete(`api/level/${id}`);
     await fetchLevels(gameId);
 
     toast({
@@ -72,7 +72,7 @@ const addLevel = async () => {
   try { 
     newLevel.value = { ...newLevel.value, game_id: gameId };
     const body = JSON.stringify(newLevel.value);
-    const response = await apiService?.post<Level>('api/level/', body);
+    const response = await apiService?.post<Level>('api/level', body);
 
     levels.value.push(response?.data!);
 

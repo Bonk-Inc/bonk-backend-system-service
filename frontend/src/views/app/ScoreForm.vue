@@ -41,10 +41,10 @@ const onSubmit = handleSubmit(async (values) => {
   try {
     let description = '';
     if (scoreId) {
-      await apiService?.put<Score>(`api/score/${scoreId}/`, JSON.stringify(values));
+      await apiService?.put<Score>(`api/score/${scoreId}`, JSON.stringify(values));
       description = 'Het updaten van de score is gelukt'
     } else {
-      await apiService?.post<Score>('api/score/', JSON.stringify(values));
+      await apiService?.post<Score>('api/score', JSON.stringify(values));
       description = 'Het opslaan van de nieuwe score is geluk';
     }
 
@@ -64,12 +64,12 @@ const onSubmit = handleSubmit(async (values) => {
 
 onMounted(async () => {
   try {
-    const url = gameId ? `api/level/game/${gameId}/` : 'api/level/';
+    const url = gameId ? `api/level/game/${gameId}` : 'api/level';
     const response = await apiService?.get<Level[]>(url);
     levels.value = response?.data!;
 
     if (scoreId) {
-      const scoreResponse = await apiService?.get<ScoreDTO>(`api/score/${scoreId}/`);
+      const scoreResponse = await apiService?.get<ScoreDTO>(`api/score/${scoreId}`);
       const data = scoreResponse?.data!;
       
       setValues({

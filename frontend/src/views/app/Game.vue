@@ -22,7 +22,7 @@ watch(
 
 async function fetchStats(gameId: string) {
   try {
-    const statsResponse = await apiService?.get<GameStats>(`api/stats/game/${gameId}/`);
+    const statsResponse = await apiService?.get<GameStats>(`api/stats/game/${gameId}`);
     stats.value = statsResponse?.data;
   } catch(e: unknown) {
     toast({

@@ -26,7 +26,7 @@ onMounted(async () => {
 
 const fetchGame = async () => {
   try {
-    const response = await apiService?.get<Game>(`api/game/${gameId}/`);
+    const response = await apiService?.get<Game>(`api/game/${gameId}`);
     game.value = response?.data;
     editedGame.value = response?.data;
   } catch (e: unknown) {
@@ -54,7 +54,7 @@ const updateGame = async() => {
   try {
     const body = JSON.stringify(editedGame.value);
 
-    await apiService?.put(`api/game/${gameId}/`, body);
+    await apiService?.put(`api/game/${gameId}`, body);
     await fetchGame();
 
     toast({
@@ -72,7 +72,7 @@ const updateGame = async() => {
 
 const deleteGame = async() => {
   try {
-    await apiService?.delete(`api/game/${gameId}/`);
+    await apiService?.delete(`api/game/${gameId}`);
     router.push({ name: 'app_home' });
   } catch(e: unknown) {
     toast({
