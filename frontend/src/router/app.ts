@@ -25,6 +25,11 @@ export const appRoutes: RouteRecordRaw[] = [
                 component: () => import('../views/app/Scores.vue'),
             },
             {
+                path: "users",
+                name: "game_users",
+                component: () => import('../views/app/User.vue'),
+            },
+            {
                 path: "settings",
                 name: "game_settings",
                 component: () => import('../views/app/Settings.vue')
