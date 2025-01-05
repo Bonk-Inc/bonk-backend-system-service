@@ -1,26 +1,25 @@
 use chrono::NaiveDateTime;
-use diesel::{dsl::count_star, prelude::*, AsChangeset, Insertable};
+use diesel::{dsl::count_star, prelude::*, result::Error, AsChangeset, Insertable};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use uuid::Uuid;
 
 use crate::{
     config::db::Connection,
-    models::{level::Level, user::User},
+    models::{game::Game, level::Level, user::User},
     schema::{
         level,
         score::{self, dsl::*},
     },
 };
 
-#[derive(Serialize, Clone, Associations, Identifiable, Queryable, Selectable, ToSchema)]
+#[derive(Associations, Identifiable, Queryable, Selectable)]
 #[diesel(table_name = score)]
 #[diesel(belongs_to(Level))]
 #[diesel(belongs_to(User))]
 pub struct Score {
     pub id: Uuid,
     pub username: Option<String>,
-    #[serde(rename = "score")]
     pub highscore: i32,
     pub is_hidden: bool,
     pub created_at: NaiveDateTime,
@@ -29,9 +28,9 @@ pub struct Score {
     pub user_id: Option<Uuid>,
 }
 
-#[derive(Insertable, AsChangeset, Serialize, Deserialize, ToSchema)]
+#[derive(Insertable, AsChangeset, Deserialize, ToSchema)]
 #[diesel(table_name = score)]
-pub struct ScoreDTO {
+pub struct ScoreForm {
     pub username: Option<String>,
     #[serde(rename = "score")]
     pub highscore: i32,
@@ -40,58 +39,110 @@ pub struct ScoreDTO {
     pub user_id: Option<Uuid>,
 }
 
+#[derive(Serialize, ToSchema)]
+pub struct ScoreDto {
+    pub id: Uuid,
+    pub score: i32,
+    pub is_hidden: bool,
+    pub level: Option<Level>,
+    pub user: Option<User>,
+    pub created_at: NaiveDateTime,
+    pub updated_at: Option<NaiveDateTime>,
+}
+
+impl ScoreDto {
+    fn new(score_value: Score, conn: &mut PgConnection) -> Self {
+        ScoreDto {
+            id: score_value.id,
+            score: score_value.highscore,
+            is_hidden: score_value.is_hidden,
+            user: score_value.user_id.map_or_else(|| None, |i: Uuid| Some(User::find_by_id(i, conn).unwrap())),
+            level: score_value.level_id.map_or_else(|| None, |i| Some(Level::find_by_id(i, conn).unwrap())),
+            created_at: score_value.created_at,
+            updated_at: score_value.updated_at,
+        }
+    }
+}
+
 impl Score {
-    pub fn find_all(conn: &mut Connection) -> QueryResult<Vec<Score>> {
-        score.load::<Score>(conn)
+    pub fn find_all(game: &Game, conn: &mut Connection) -> Result<Vec<ScoreDto>, Error> {
+        let levels = Level::find_by_game(game, conn)?;
+        let scores = Score::belonging_to(&levels)
+            .select(Score::as_select())
+            .load(conn)?
+            .into_iter()
+            .map(|s| ScoreDto::new(s, conn))
+            .collect::<Vec<ScoreDto>>();
+
+        Ok(scores)
     }
 
-    pub fn find_by_id(score_id: Uuid, conn: &mut Connection) -> QueryResult<Score> {
-        score.find(score_id).get_result::<Score>(conn)
+    pub fn find_by_id(score_id: Uuid, conn: &mut Connection) -> Result<ScoreDto, Error> {
+        let score_data = score.find(score_id)
+            .get_result::<Score>(conn)?;
+
+        Ok(ScoreDto::new(score_data, conn))
     }
 
     pub fn find_by_level(
         level: &Level,
         include_hidden: bool,
         conn: &mut Connection,
-    ) -> QueryResult<Vec<Score>> {
+    ) -> Result<Vec<ScoreDto>, Error> {
         let mut query = Score::belonging_to(level).into_boxed();
 
         if !include_hidden {
             query = query.filter(is_hidden.eq(false));
         }
 
-        query.select(Score::as_select()).load(conn)
+        let scores = query.select(Score::as_select())
+            .load::<Score>(conn)?
+            .into_iter()
+            .map(|s| ScoreDto::new(s, conn))
+            .collect::<Vec<ScoreDto>>();
+
+        Ok(scores)
     }
 
     pub fn find_by_user(
         user: &User,
         include_hidden: bool,
         conn: &mut Connection,
-    ) -> QueryResult<Vec<Score>> {
+    ) -> Result<Vec<ScoreDto>, Error> {
         let mut query = Score::belonging_to(user).into_boxed();
 
         if !include_hidden {
             query = query.filter(is_hidden.eq(false));
         }
 
-        query.select(Score::as_select()).load(conn)
+        let scores = query.select(Score::as_select())
+            .load::<Score>(conn)?
+            .into_iter()
+            .map(|s| ScoreDto::new(s, conn))
+            .collect::<Vec<ScoreDto>>();
+
+        Ok(scores)
     }
 
-    pub fn insert(new_score: ScoreDTO, conn: &mut Connection) -> QueryResult<Score> {
-        diesel::insert_into(score)
+    pub fn insert(new_score: ScoreForm, conn: &mut Connection) -> Result<ScoreDto, Error> {
+        let new_score = diesel::insert_into(score)
             .values(&new_score)
-            .get_result::<Score>(conn)
+            .get_result::<Score>(conn)?;
+
+        Ok(ScoreDto::new(new_score, conn))
     }
 
     pub fn update(
         score_id: Uuid,
-        updated_score: ScoreDTO,
+        updated_score: ScoreForm,
         conn: &mut Connection,
-    ) -> QueryResult<Score> {
-        diesel::update(score)
+    ) -> Result<ScoreDto, Error> {
+        let updated_score = diesel::update(score)
             .filter(id.eq(score_id))
             .set(updated_score)
-            .get_result::<Score>(conn)
+            .get_result::<Score>(conn)?;
+
+        Ok(ScoreDto::new(updated_score, conn))
     }
 
     pub fn delete_many(score_ids: Vec<Uuid>, conn: &mut Connection) -> QueryResult<usize> {

@@ -10,7 +10,7 @@ use crate::{
     schema::user::{self, dsl::*},
 };
 
-#[derive(Serialize, Clone, Associations, Identifiable, Queryable, Selectable, ToSchema)]
+#[derive(Serialize, Associations, Identifiable, Queryable, Selectable, ToSchema)]
 #[diesel(table_name = user)]
 #[diesel(belongs_to(Game))]
 pub struct User {

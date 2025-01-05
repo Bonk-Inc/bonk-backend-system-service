@@ -1,20 +1,24 @@
-use axum::{extract::{State, Path}, http::StatusCode, Json};
+use axum::{
+    extract::{Path, State},
+    http::StatusCode,
+    Json,
+};
 use utoipa::{OpenApi, ToSchema};
 use uuid::Uuid;
 
 use crate::{
-    error::ErrorResponse, models::{level::{Level, LevelForm}, respone::ResponseBody}, service::level_service, SharedState
+    error::ErrorResponse,
+    models::{
+        level::{Level, LevelForm},
+        respone::ResponseBody,
+    },
+    service::level_service,
+    SharedState,
 };
 
 #[derive(OpenApi)]
 #[openapi(
-    paths(
-        index,
-        game_levels,
-        store,
-        update,
-        destroy
-    ),
+    paths(index, store, update, destroy),
     components(schemas(Level, LevelForm, LevelResponseBody, LevelsResponseBody))
 )]
 pub struct LevelApi;
@@ -33,26 +37,6 @@ pub struct LevelsResponseBody {
 
 #[utoipa::path(
     get,
-    path = "",
-    tag = "Level",
-    operation_id = "level_index",
-    responses(
-        (status = StatusCode::OK, description = "Level fetched successfully", body = LevelsResponseBody)
-    )
-)]
-pub async fn index(
-    State(app_state): State<SharedState>,
-) -> Result<Json<ResponseBody<Vec<Level>>>, ErrorResponse> {
-    let pool = &app_state.read().unwrap().db;
-
-    match level_service::find_all(pool) {
-        Ok(levels) => Ok(Json(ResponseBody::new("Levels fetched", levels))),
-        Err(err) => Err(err),
-    }
-}
-
-#[utoipa::path(
-    get,
     path = "/game/{gameId}",
     tag = "Level",
     operation_id = "level_games",
@@ -64,7 +48,7 @@ pub async fn index(
         (status = StatusCode::NOT_FOUND, description = "No Game found by game id", body = ErrorResponse)
     )
 )]
-pub async fn game_levels(
+pub async fn index(
     State(app_state): State<SharedState>,
     Path(game_id): Path<Uuid>,
 ) -> Result<Json<ResponseBody<Vec<Level>>>, ErrorResponse> {
@@ -94,7 +78,10 @@ pub async fn store(
     let pool = &app_state.read().unwrap().db;
 
     match level_service::insert(new_level, pool) {
-        Ok(level) => Ok((StatusCode::CREATED, Json(ResponseBody::new("Level created", level)))),
+        Ok(level) => Ok((
+            StatusCode::CREATED,
+            Json(ResponseBody::new("Level created", level)),
+        )),
         Err(error) => Err(error),
     }
 }

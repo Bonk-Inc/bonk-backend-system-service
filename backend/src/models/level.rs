@@ -10,7 +10,7 @@ use crate::{
     schema::level::{self, dsl::*},
 };
 
-#[derive(Serialize, Clone, Associations, Identifiable, Queryable, Selectable, ToSchema)]
+#[derive(Serialize, Associations, Identifiable, Queryable, Selectable, ToSchema)]
 #[diesel(table_name = level)]
 #[diesel(belongs_to(Game))]
 pub struct Level {
