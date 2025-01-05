@@ -16,14 +16,15 @@ pub fn game_routes() -> Router<SharedState> {
 
 pub fn level_routes() -> Router<SharedState> {
     Router::new()
-        .route("/", get(level::index).post(level::store))
-        .route("/game/{id}", get(level::game_levels))
+        .route("/", post(level::store))
+        .route("/game/{id}", get(level::index))
         .route("/{id}", put(level::update).delete(level::destroy))
 }
 
 pub fn score_routes() -> Router<SharedState> {
     Router::new()
-        .route("/", get(score::index).post(score::store))
+        .route("/", post(score::store))
+        .route("/game/{gameId}", get(score::index))
         .route("/{id}", get(score::show).put(score::update).delete(score::destroy))
         .route("/level/{id}", get(score::level_scores))
 }

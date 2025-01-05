@@ -9,7 +9,7 @@ use crate::{
     schema::game::{self, dsl::*},
 };
 
-#[derive(Queryable, Serialize, Identifiable, Deserialize, Default, ToSchema, Clone)]
+#[derive(Queryable, Serialize, Identifiable, Deserialize, Default, ToSchema)]
 #[diesel(table_name = game)]
 pub struct Game {
     pub id: Uuid,
