@@ -10,7 +10,7 @@ use crate::{
     error::ErrorResponse,
     models::{
         respone::ResponseBody,
-        user::{User, UserDTO},
+        user::{User, UserForm},
     },
     service::user_service,
     SharedState,
@@ -24,7 +24,7 @@ use crate::{
         update,
         destroy
     ),
-    components(schemas(User, UserDTO, UserResponseBody, UsersResponseBody))
+    components(schemas(User, UserForm, UserResponseBody, UsersResponseBody))
 )]
 pub struct UserApi;
 
@@ -69,7 +69,7 @@ pub async fn index(
     path = "",
     tag = "User",
     operation_id = "user_store",
-    request_body = UserDTO,
+    request_body = UserForm,
     responses(
         (status = StatusCode::CREATED, description = "New user created", body = UsersResponseBody),
         (status = StatusCode::BAD_REQUEST, description = "Invalid input", body = ErrorResponse)
@@ -77,7 +77,7 @@ pub async fn index(
 )]
 pub async fn store(
     State(app_state): State<SharedState>,
-    Json(new_user): Json<UserDTO>,
+    Json(new_user): Json<UserForm>,
 ) -> Result<(StatusCode, Json<ResponseBody<User>>), ErrorResponse> {
     let pool = &app_state.read().unwrap().db;
 
@@ -95,7 +95,7 @@ pub async fn store(
     path = "/{id}",
     tag = "User",
     operation_id = "user_update",
-    request_body = UserDTO,
+    request_body = UserForm,
     params(
         ("id", Path, description = "Unique id of a user"),
     ),
@@ -108,7 +108,7 @@ pub async fn store(
 pub async fn update(
     State(app_state): State<SharedState>,
     Path(id): Path<Uuid>,
-    Json(updated_user): Json<UserDTO>,
+    Json(updated_user): Json<UserForm>,
 ) -> Result<Json<ResponseBody<User>>, ErrorResponse> {
     let pool = &app_state.read().unwrap().db;
 

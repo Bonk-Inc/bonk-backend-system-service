@@ -3,7 +3,7 @@ use utoipa::{OpenApi, ToSchema};
 use uuid::Uuid;
 
 use crate::{
-    error::ErrorResponse, models::{level::{Level, LevelDTO}, respone::ResponseBody}, service::level_service, SharedState
+    error::ErrorResponse, models::{level::{Level, LevelForm}, respone::ResponseBody}, service::level_service, SharedState
 };
 
 #[derive(OpenApi)]
@@ -15,7 +15,7 @@ use crate::{
         update,
         destroy
     ),
-    components(schemas(Level, LevelDTO, LevelResponseBody, LevelsResponseBody))
+    components(schemas(Level, LevelForm, LevelResponseBody, LevelsResponseBody))
 )]
 pub struct LevelApi;
 
@@ -81,7 +81,7 @@ pub async fn game_levels(
     path = "",
     tag = "Level",
     operation_id = "level_store",
-    request_body = LevelDTO,
+    request_body = LevelForm,
     responses(
         (status = StatusCode::CREATED, description = "Level created successfully", body = LevelsResponseBody),
         (status = StatusCode::BAD_REQUEST, description = "Invalid input", body = ErrorResponse)
@@ -89,7 +89,7 @@ pub async fn game_levels(
 )]
 pub async fn store(
     State(app_state): State<SharedState>,
-    Json(new_level): Json<LevelDTO>,
+    Json(new_level): Json<LevelForm>,
 ) -> Result<(StatusCode, Json<ResponseBody<Level>>), ErrorResponse> {
     let pool = &app_state.read().unwrap().db;
 
@@ -104,7 +104,7 @@ pub async fn store(
     path = "/{id}",
     tag = "Level",
     operation_id = "level_update",
-    request_body = LevelDTO,
+    request_body = LevelForm,
     params(
         ("id", Path, description = "Unique id of a Level"),
     ),
@@ -117,7 +117,7 @@ pub async fn store(
 pub async fn update(
     State(app_state): State<SharedState>,
     Path(id): Path<Uuid>,
-    Json(updated_level): Json<LevelDTO>,
+    Json(updated_level): Json<LevelForm>,
 ) -> Result<Json<ResponseBody<Level>>, ErrorResponse> {
     let pool = &app_state.read().unwrap().db;
 

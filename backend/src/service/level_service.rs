@@ -3,10 +3,7 @@ use uuid::Uuid;
 use crate::{
     config::db::Pool,
     error::{internal_error, not_found_error, ErrorResponse},
-    models::{
-        level::{self, Level, LevelDTO},
-        Model,
-    },
+    models::level::{Level, LevelForm}
 };
 
 use super::game_service;
@@ -52,14 +49,15 @@ pub fn find_by_id(id: Uuid, pool: &Pool) -> Result<Level, ErrorResponse> {
 /// - an error occured during execution.
 /// 
 pub fn find_by_game(game_id: Uuid, pool: &Pool) -> Result<Vec<Level>, ErrorResponse> {
-    if !game_service::game_exisits(game_id, pool) {
+    let game = game_service::find_by_id(game_id, pool);
+    if game.is_err() {
         return Err(not_found_error(format!(
             "Game with id '{}' not found",
             game_id.to_string()
         )));
     }
 
-    match level::find_by_game(game_id, &mut pool.get().unwrap()) {
+    match Level::find_by_game(&game.unwrap(), &mut pool.get().unwrap()) {
         Ok(levels) => Ok(levels),
         Err(_) => Err(internal_error(
             "Cannot add a new level in database".to_string(),
@@ -74,7 +72,7 @@ pub fn find_by_game(game_id: Uuid, pool: &Pool) -> Result<Vec<Level>, ErrorRespo
 /// This function fails if:
 /// - an error occured during execution.
 /// 
-pub fn insert(new_level: LevelDTO, pool: &Pool) -> Result<Level, ErrorResponse> {
+pub fn insert(new_level: LevelForm, pool: &Pool) -> Result<Level, ErrorResponse> {
     match Level::insert(new_level, &mut pool.get().unwrap()) {
         Ok(level) => Ok(level),
         Err(_) => Err(internal_error(
@@ -93,7 +91,7 @@ pub fn insert(new_level: LevelDTO, pool: &Pool) -> Result<Level, ErrorResponse> 
 /// 
 pub fn update(
     id: Uuid,
-    updated_level: LevelDTO,
+    updated_level: LevelForm,
     pool: &Pool,
 ) -> Result<Level, ErrorResponse> {
     if !level_exists(id, pool) {
