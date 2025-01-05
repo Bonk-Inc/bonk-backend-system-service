@@ -23,7 +23,7 @@ onMounted(async () => {
 
 const fetchUsers = async (id: string) => {
   try {
-    const response = await apiService?.get<User[]>(`api/user/${id}`);
+    const response = await apiService?.get<User[]>(`api/user/game/${id}`);
     users.value = response?.data ?? [];
   } catch(e: unknown) {
     toast({
@@ -35,7 +35,16 @@ const fetchUsers = async (id: string) => {
 };
 
 const deleteUser = async (id: string) => {
-  console.log(id);
+  try {
+    await apiService?.delete(`api/user/${id}`);
+    await fetchUsers(gameId); 
+  } catch(e: unknown) {
+    toast({
+      title: 'Er ging wat fout :(',
+      variant: 'destructive',
+      description: 'Er is wat fout gegaan tijdens het verwijderen van de user'
+    });
+  }
 }
 
 const columns: ColumnDef<User>[] = [

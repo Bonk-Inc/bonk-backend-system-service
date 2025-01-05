@@ -42,9 +42,12 @@ pub struct UserResponseBody {
 
 #[utoipa::path(
     get,
-    path = "",
+    path = "game/{id}",
     tag = "User",
     operation_id = "user_index",
+    params(
+        ("id", Path, description = "Unique id of a game"),
+    ),
     responses(
         (status = StatusCode::OK, description = "User fetched successfully", body = UsersResponseBody)
     )
