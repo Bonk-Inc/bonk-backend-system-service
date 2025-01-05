@@ -6,11 +6,11 @@ use uuid::Uuid;
 
 use crate::{
     config::db::Connection,
-    models::Model,
-    schema::{user, user::dsl::*},
+    models::{game::Game, Model},
+    schema::user::{self, dsl::*},
 };
 
-#[derive(Serialize, Clone, Deserialize, Default, Queryable, Selectable, ToSchema)]
+#[derive(Serialize, Clone, Deserialize, Associations, Default, Queryable, Selectable, ToSchema)]
 #[diesel(table_name = user)]
 #[diesel(belongs_to(Game))]
 pub struct User {

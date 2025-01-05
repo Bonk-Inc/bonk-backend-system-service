@@ -64,8 +64,8 @@ const onSubmit = handleSubmit(async (values) => {
 
 onMounted(async () => {
   try {
-    const url = gameId ? `api/level/game/${gameId}` : 'api/level';
-    const response = await apiService?.get<Level[]>(url);
+    const levelUrl = `api/level/game/${gameId}`;
+    const response = await apiService?.get<Level[]>(levelUrl);
     levels.value = response?.data!;
 
     if (scoreId) {
