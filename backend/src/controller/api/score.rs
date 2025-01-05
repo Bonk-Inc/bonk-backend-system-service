@@ -24,7 +24,6 @@ use crate::{
     paths(
         index,
         show,
-        game_scores,
         level_scores,
         user_scores,
         store,
@@ -93,38 +92,6 @@ pub async fn show(
 
     match score_service::find_by_id(id, pool) {
         Ok(score) => Ok(Json(ResponseBody::new("Score fetched", score))),
-        Err(err) => Err(err),
-    }
-}
-
-#[utoipa::path(
-    get,
-    path = "/game/{gameId}",
-    tag = "Score",
-    operation_id = "score_game_score",
-    params(
-        ("gameId", Path, description = "Unique id of a Game"),
-        ("hidden", Query, description = "If hidden scores should also be fetched")
-    ),
-    responses(
-        (status = StatusCode::OK, description = "Score fetched by game successfully", body = ScoresResponseBody),
-        (status = StatusCode::NOT_FOUND, description = "No Game found by game id", body = ErrorResponse)
-    )
-)]
-pub async fn game_scores(
-    State(app_state): State<SharedState>,
-    Path(game_id): Path<Uuid>,
-    Query(params): Query<HashMap<String, String>>,
-) -> Result<Json<ResponseBody<Vec<Score>>>, ErrorResponse> {
-    let pool = &app_state.read().unwrap().db;
-    let show_hidden = params
-        .get("hidden")
-        .unwrap_or(&"false".to_string())
-        .to_lowercase()
-        .eq("true");
-
-    match score_service::find_by_game(game_id, show_hidden, pool) {
-        Ok(scores) => Ok(Json(ResponseBody::new("Scores fetched", scores))),
         Err(err) => Err(err),
     }
 }

@@ -3,7 +3,7 @@ use uuid::Uuid;
 use crate::{
     config::db::Pool,
     error::{internal_error, not_found_error, ErrorResponse},
-    models::{user::{self, User, UserDTO}, Model},
+    models::user::{User, UserForm}
 };
 
 use super::game_service;
@@ -17,14 +17,15 @@ use super::game_service;
 /// - no game could be found with the given id.
 /// 
 pub fn find_by_game(game_id: Uuid, pool: &Pool) -> Result<Vec<User>, ErrorResponse> {
-    if !game_service::game_exisits(game_id, pool) {
+    let game = game_service::find_by_id(game_id, pool);
+    if game.is_err()  {
         return Err(not_found_error(format!(
             "Game with id '{}' not found",
             game_id.to_string()
         )));
     }
 
-    match user::find_by_game(game_id, &mut pool.get().unwrap()) {
+    match User::find_by_game(&game.unwrap(), &mut pool.get().unwrap()) {
         Ok(users) => Ok(users),
         Err(_) => Err(internal_error("Cannot fetch users".to_string())),
     }
@@ -52,7 +53,7 @@ pub fn find_by_id(id: Uuid, pool: &Pool) -> Result<User, ErrorResponse> {
 /// This function fails if:
 /// - an error occured during execution.
 /// 
-pub fn insert(new_user: UserDTO, pool: &Pool) -> Result<User, ErrorResponse> {
+pub fn insert(new_user: UserForm, pool: &Pool) -> Result<User, ErrorResponse> {
     match User::insert(new_user, &mut pool.get().unwrap()) {
         Ok(score) => Ok(score),
         Err(err) => Err(internal_error(format!("Error saving new user, {}", err))),
@@ -69,7 +70,7 @@ pub fn insert(new_user: UserDTO, pool: &Pool) -> Result<User, ErrorResponse> {
 /// 
 pub fn update(
     id: Uuid,
-    updated_level: UserDTO,
+    updated_level: UserForm,
     pool: &Pool,
 ) -> Result<User, ErrorResponse> {
     if !user_exists(id, pool) {

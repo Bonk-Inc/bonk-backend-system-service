@@ -3,8 +3,7 @@ use uuid::Uuid;
 use crate::{
     config::db::Pool, error::{internal_error, not_found_error, ErrorResponse}, models::{
         game::{Game, GameDTO},
-        level::{Level, LevelDTO},
-        Model,
+        level::{Level, LevelForm},
     }
 };
 
@@ -48,7 +47,7 @@ pub fn find_by_id(id: Uuid, pool: &Pool) -> Result<Game, ErrorResponse> {
 pub fn insert(new_game: GameDTO, pool: &Pool) -> Result<Game, ErrorResponse> {
     match Game::insert(new_game, &mut pool.get().unwrap()) {
         Ok(game) => {
-            let level = LevelDTO {
+            let level = LevelForm {
                 name: "Level 1".to_owned(),
                 game_id: game.id,
             };

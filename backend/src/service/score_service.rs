@@ -5,13 +5,10 @@ use uuid::Uuid;
 use crate::{
     config::db::Pool,
     error::{internal_error, not_found_error, ErrorResponse},
-    models::{
-        score::{self, Score, ScoreDTO},
-        Model,
-    },
+    models::score::{Score, ScoreDTO},
 };
 
-use super::{game_service, level_service, user_service};
+use super::{level_service, user_service};
 
 /// Queries the database and fetches all the registerd scores.
 /// 
@@ -46,34 +43,6 @@ pub fn find_by_id(id: Uuid, pool: &Pool) -> Result<Score, ErrorResponse> {
     }
 }
 
-/// Queries the database and fetches the registerd scores by the given game.
-/// 
-/// # Errors
-/// 
-/// This function fails if:
-/// - could not find game with given id.
-/// - an error occured during execution.
-/// 
-pub fn find_by_game(
-    game_id: Uuid,
-    include_hidden: bool,
-    pool: &Pool,
-) -> Result<Vec<Score>, ErrorResponse> {
-    if !game_service::game_exisits(game_id, pool) {
-        return Err(not_found_error(format!(
-            "Game with id '{}' not found",
-            game_id.to_string()
-        )));
-    }
-
-    match score::find_by_game(game_id, include_hidden, &mut pool.get().unwrap()) {
-        Ok(score) => Ok(score),
-        Err(_) => Err(internal_error(
-            "An error occured when trying to fetch scores".to_string(),
-        )),
-    }
-}
-
 /// Queries the database and fetches the registerd scores by the given level.
 /// 
 /// # Errors
@@ -87,14 +56,15 @@ pub fn find_by_level(
     include_hidden: bool,
     pool: &Pool,
 ) -> Result<Vec<Score>, ErrorResponse> {
-    if !level_service::level_exists(level_id, pool) {
+    let level = level_service::find_by_id(level_id, pool);
+    if level.is_err() {
         return Err(not_found_error(format!(
             "Level with id '{}' not found",
             level_id.to_string()
         )));
     }
 
-    match score::find_by_level(level_id, include_hidden, &mut pool.get().unwrap()) {
+    match Score::find_by_level(&level.unwrap(), include_hidden, &mut pool.get().unwrap()) {
         Ok(score) => Ok(score),
         Err(_) => Err(internal_error(
             "An error occured when trying to fetch scores".to_string(),
@@ -115,14 +85,15 @@ pub fn find_by_user(
     include_hidden: bool,
     pool: &Pool,
 ) -> Result<Vec<Score>, ErrorResponse> {
-    if !user_service::user_exists(user_id, pool) {
+    let user = user_service::find_by_id(user_id, pool);
+    if user.is_err() {
         return Err(not_found_error(format!(
             "User with id '{}' not found",
             user_id.to_string()
         )));
     }
 
-    match score::find_by_user(user_id, include_hidden, &mut pool.get().unwrap()) {
+    match Score::find_by_user(&user.unwrap(), include_hidden, &mut pool.get().unwrap()) {
         Ok(score) => Ok(score),
         Err(_) => Err(internal_error(
             "An error occured when trying to fetch scores".to_string(),
