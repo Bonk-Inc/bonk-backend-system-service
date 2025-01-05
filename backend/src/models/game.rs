@@ -7,10 +7,11 @@ use uuid::Uuid;
 use crate::{
     config::db::Connection,
     models::Model,
-    schema::{game, game::dsl::*},
+    schema::game::{self, dsl::*},
 };
 
 #[derive(Queryable, Serialize, Deserialize, Default, ToSchema)]
+#[diesel(table_name = game)]
 pub struct Game {
     pub id: Uuid,
     pub name: String,

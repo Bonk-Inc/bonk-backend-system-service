@@ -50,6 +50,7 @@ diesel::table! {
 diesel::joinable!(level -> game (game_id));
 diesel::joinable!(score -> level (level_id));
 diesel::joinable!(score -> user (user_id));
+diesel::joinable!(user -> game (game_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     game,
