@@ -158,13 +158,20 @@ impl Score {
             .execute(conn)
     }
 
-    pub fn count_score(game_uuid: Option<Uuid>, conn: &mut Connection) -> QueryResult<i64> {
-        let mut query = score::table.into_boxed().left_join(level::table);
+    pub fn count(game: &Option<Game>, conn: &mut Connection) -> Result<i64, Error> {
+        let count = if let Some(value) = game {
+            let levels = Level::belonging_to(value)
+                .select(Level::as_select())
+                .load(conn)?;
 
-        if let Some(value) = game_uuid {
-            query = query.filter(level::game_id.eq(value));
-        }
+            Score::belonging_to(&levels)
+                .select(count_star())
+                .first(conn)?
+        } else {
+            score.select(count_star())
+                .first(conn)?
+        };
 
-        query.select(count_star()).first(conn)
+        Ok(count)
     }
 }

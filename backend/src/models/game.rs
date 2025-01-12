@@ -50,7 +50,7 @@ impl Game {
         diesel::delete(game).filter(id.eq(model_id)).execute(conn)
     }
 
-    pub fn count_games(conn: &mut Connection) -> QueryResult<i64> {
+    pub fn count(conn: &mut Connection) -> QueryResult<i64> {
         game.select(count_star()).first(conn)
     }
 }

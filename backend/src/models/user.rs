@@ -1,5 +1,5 @@
 use chrono::NaiveDateTime;
-use diesel::{prelude::*, AsChangeset, Insertable};
+use diesel::{dsl::count_star, prelude::*, result::Error, AsChangeset, Insertable};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use uuid::Uuid;
@@ -58,5 +58,18 @@ impl User {
 
     pub fn delete(user_id: Uuid, conn: &mut Connection) -> QueryResult<usize> {
         diesel::delete(user).filter(id.eq(user_id)).execute(conn)
+    }
+
+    pub fn count(game: &Option<Game>, conn: &mut Connection) -> Result<i64, Error> {
+        let count = if let Some(value) = game {
+            User::belonging_to(value)
+                .select(count_star())
+                .first(conn)?
+        } else {
+            user.select(count_star())
+                .first(conn)?
+        };
+
+        Ok(count)
     }
 }

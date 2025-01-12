@@ -5,7 +5,7 @@ import { useToast } from '@/components/ui/toast';
 import type { ApiService } from '@/lib/ApiService';
 import type { AuthService } from '@/lib/AuthService';
 import type { GlobalStats } from '@/lib/Models';
-import { Joystick, Tally5 } from 'lucide-vue-next';
+import { Joystick, Tally5, Users } from 'lucide-vue-next';
 import type { UserProfile } from 'oidc-client-ts';
 import { inject, onMounted, ref } from 'vue';
 
@@ -60,6 +60,15 @@ const fetchStats = async () => {
             <div>
               <p class="mb-3">Scores</p>
               <p class="mt-3 text-xl text-right text-blue-500">{{ stats?.scores }}</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card class="w-[288px]">
+          <CardContent class="pt-6 flex justify-between items-center">
+            <Users :size="36" class="mr-2 text-blue-500" />
+            <div>
+              <p class="mb-3">Gebruikers</p>
+              <p class="mt-3 text-xl text-right text-blue-500">{{ stats?.users }}</p>
             </div>
           </CardContent>
         </Card>
