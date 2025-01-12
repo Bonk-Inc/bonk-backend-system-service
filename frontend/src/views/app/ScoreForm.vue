@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/components/ui/toast';
 import { ApiService } from '@/lib/ApiService';
 import type { Score, Level, ScoreDTO } from '@/lib/Models';
+import type { User } from '@/lib/Models/User';
 import { toTypedSchema } from '@vee-validate/zod';
 import { useForm } from 'vee-validate';
 import { inject, onMounted, ref } from 'vue';
@@ -22,13 +23,14 @@ const apiService = inject<ApiService>('api');
 const { toast } = useToast();
 
 const levels = ref<Level[]>([]);
+const users = ref<User[]>([]);
 
 const gameId = route.query['gameId'] as string ?? '';
 const scoreId = route.query['scoreId'] ?? '';
 
 const formSchema = toTypedSchema(z.object({
   level_id: z.string().uuid(),
-  username: z.string().max(50),
+  user_id: z.string().uuid(),
   score: z.number(),
   is_hidden: z.boolean().default(false)
 }));
@@ -64,9 +66,8 @@ const onSubmit = handleSubmit(async (values) => {
 
 onMounted(async () => {
   try {
-    const levelUrl = `api/level/game/${gameId}`;
-    const response = await apiService?.get<Level[]>(levelUrl);
-    levels.value = response?.data!;
+    await fetchLevels(gameId);
+    await fetchUsers(gameId);
 
     if (scoreId) {
       const scoreResponse = await apiService?.get<ScoreDTO>(`api/score/${scoreId}`);
@@ -74,7 +75,7 @@ onMounted(async () => {
       
       setValues({
         is_hidden: data.is_hidden,
-        username: data.username,
+        user_id: data.user_id,
         level_id: data.level_id,
         score: data.score
       })
@@ -87,6 +88,20 @@ onMounted(async () => {
     });
   }
 });
+
+const fetchLevels = async (gameId: string) => {
+  const levelUrl = `api/level/game/${gameId}`;
+  const response = await apiService?.get<Level[]>(levelUrl);
+
+  levels.value = response?.data!;
+}
+
+const fetchUsers = async (gameId: string) => {
+  const userUrl = `api/user/game/${gameId}`;
+  const response = await apiService?.get<User[]>(userUrl);
+
+  users.value = response?.data!;
+}
 </script>
 
 <template>
@@ -117,12 +132,21 @@ onMounted(async () => {
             </FormItem>
           </FormField>
           <div class="flex items-center mt-4 w-full gap-4">
-            <FormField v-slot="{ componentField }" name="username">
+            <FormField v-slot="{ componentField }" name="user_id">
               <FormItem class="w-4/5">
-                <FormLabel>Gebruikersnaam</FormLabel>
-                <FormControl>
-                  <Input type="text" v-bind="componentField" />
-                </FormControl>
+                <FormLabel>Gebruiker</FormLabel>
+                <Select v-bind="componentField">
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecteer gebruiker" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem v-for="user in users" :value="user.id" :key="user.id">
+                      {{ user.name }}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
 
                 <FormMessage />
               </FormItem>

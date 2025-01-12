@@ -40,7 +40,7 @@ const fetchStats = async () => {
 <template>
   <MainLayout>
     <h1 class="text-3xl font-medium">
-      Welkom! {{ user?.name }}
+      Welkom, {{ user?.name }}!
     </h1>
     <section class="mt-8">
       <h2 class="text-xl font-medium">Statistieken</h2>
