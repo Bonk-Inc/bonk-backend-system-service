@@ -34,9 +34,12 @@ const fetchUsers = async (id: string) => {
   }
 };
 
-const deleteUser = async (id: string) => {
+const deleteUser = async (user: User) => {
   try {
-    await apiService?.delete(`api/user/${id}`);
+    if(!confirm(`Wil je gebruiker ${user.name} verwijderen?`))
+      return;
+
+    await apiService?.delete(`api/user/${user.id}`);
     await fetchUsers(gameId); 
   } catch(e: unknown) {
     toast({
@@ -67,7 +70,7 @@ const columns: ColumnDef<User>[] = [
     header: '',
     cell: ({ row }) => h(
       Button,
-      { variant: 'ghost', size: 'icon', onClick: () => deleteUser(row.original.id) },
+      { variant: 'ghost', size: 'icon', onClick: () => deleteUser(row.original) },
       () => h(Trash, { size: 20 })
     )
   }
