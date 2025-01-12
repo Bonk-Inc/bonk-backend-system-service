@@ -44,6 +44,7 @@ pub struct ScoreDto {
     pub id: Uuid,
     pub score: i32,
     pub is_hidden: bool,
+    pub username: Option<String>,
     pub level: Option<Level>,
     pub user: Option<User>,
     pub created_at: NaiveDateTime,
@@ -56,8 +57,13 @@ impl ScoreDto {
             id: score_value.id,
             score: score_value.highscore,
             is_hidden: score_value.is_hidden,
-            user: score_value.user_id.map_or_else(|| None, |i: Uuid| Some(User::find_by_id(i, conn).unwrap())),
-            level: score_value.level_id.map_or_else(|| None, |i| Some(Level::find_by_id(i, conn).unwrap())),
+            username: score_value.username,
+            user: score_value
+                .user_id
+                .map_or_else(|| None, |i: Uuid| Some(User::find_by_id(i, conn).unwrap())),
+            level: score_value
+                .level_id
+                .map_or_else(|| None, |i| Some(Level::find_by_id(i, conn).unwrap())),
             created_at: score_value.created_at,
             updated_at: score_value.updated_at,
         }
@@ -78,8 +84,7 @@ impl Score {
     }
 
     pub fn find_by_id(score_id: Uuid, conn: &mut Connection) -> Result<ScoreDto, Error> {
-        let score_data = score.find(score_id)
-            .get_result::<Score>(conn)?;
+        let score_data = score.find(score_id).get_result::<Score>(conn)?;
 
         Ok(ScoreDto::new(score_data, conn))
     }
@@ -95,7 +100,8 @@ impl Score {
             query = query.filter(is_hidden.eq(false));
         }
 
-        let scores = query.select(Score::as_select())
+        let scores = query
+            .select(Score::as_select())
             .load::<Score>(conn)?
             .into_iter()
             .map(|s| ScoreDto::new(s, conn))
@@ -115,7 +121,8 @@ impl Score {
             query = query.filter(is_hidden.eq(false));
         }
 
-        let scores = query.select(Score::as_select())
+        let scores = query
+            .select(Score::as_select())
             .load::<Score>(conn)?
             .into_iter()
             .map(|s| ScoreDto::new(s, conn))

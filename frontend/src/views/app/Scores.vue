@@ -37,7 +37,9 @@ const columns: ColumnDef<Score>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: 'username',
+    accessorKey: 'user.name',
+    
+    id: 'username',
     header: 'Username',
     cell: ({ row }) => h('p', {}, row.getValue('username')),
     enableHiding: false
