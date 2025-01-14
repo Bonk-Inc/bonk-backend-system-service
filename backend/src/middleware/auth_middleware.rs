@@ -19,6 +19,14 @@ struct Claims {
     exp: usize,
 }
 
+/// This function validates if the given request contains a valid OAuth2 access token using the given JWKS token from 
+/// the authorization server.
+/// 
+/// # Erros
+/// - if no Authorization header is present.
+/// - if the JWKS tokens could not be read.
+/// - if the JWKS tokens could not be decoded.
+/// - If the given access token is invalid.
 pub async fn verify_token(
     headers: HeaderMap,
     req: Request,

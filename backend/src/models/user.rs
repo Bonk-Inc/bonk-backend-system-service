@@ -29,26 +29,41 @@ pub struct UserForm {
 }
 
 impl User {
+    /// Fetchets all the users in the database
     pub fn find_all(conn: &mut Connection) -> QueryResult<Vec<User>> {
         user.load::<User>(conn)
     }
 
+    /// Fetches a user from the database with the given id.
+    /// 
+    /// # Errors
+    /// - If no user is found with the given id.
     pub fn find_by_id(user_id: Uuid, conn: &mut Connection) -> QueryResult<User> {
         user.find(user_id).get_result::<User>(conn)
     }
 
+    /// Fetches levels related to the given game from the database.
     pub fn find_by_game(game: &Game, conn: &mut Connection) -> QueryResult<Vec<User>> {
         User::belonging_to(game)
             .select(User::as_select())
             .load(conn)
     }
 
+    /// Adds a new user to the database.
+    /// 
+    /// Errors
+    /// - If one of the fields contain invalid data.
     pub fn insert(data: UserForm, conn: &mut Connection) -> QueryResult<User> {
         diesel::insert_into(user)
             .values(&data)
             .get_result::<User>(conn)
     }
 
+    /// Updates a user with the given id in the database.
+    /// 
+    /// Errors
+    /// - If no user is found with the given id.
+    /// - If one of the fields contain invalid data.
     pub fn update(user_id: Uuid, data: UserForm, conn: &mut Connection) -> QueryResult<User> {
         diesel::update(user)
             .filter(id.eq(user_id))
@@ -56,10 +71,13 @@ impl User {
             .get_result::<User>(conn)
     }
 
+    /// Deletes a user with the given id from the database.
     pub fn delete(user_id: Uuid, conn: &mut Connection) -> QueryResult<usize> {
         diesel::delete(user).filter(id.eq(user_id)).execute(conn)
     }
 
+    /// Counts the number of users in the database. If a game is given, only the number of users relates to the game are
+    /// counted.
     pub fn count(game: &Option<Game>, conn: &mut Connection) -> Result<i64, Error> {
         let count = if let Some(value) = game {
             User::belonging_to(value)

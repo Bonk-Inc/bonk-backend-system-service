@@ -7,10 +7,7 @@ use uuid::Uuid;
 use crate::{
     config::db::Connection,
     models::{game::Game, level::Level, user::User},
-    schema::{
-        level,
-        score::{self, dsl::*},
-    },
+    schema::score::{self, dsl::*},
 };
 
 #[derive(Associations, Identifiable, Queryable, Selectable)]
@@ -71,6 +68,8 @@ impl ScoreDto {
 }
 
 impl Score {
+    /// Fetchets all the scores in the database by looking up all the levels related to the given game. And using 
+    /// the levels to fetch all the scores.
     pub fn find_all(game: &Game, conn: &mut Connection) -> Result<Vec<ScoreDto>, Error> {
         let levels = Level::find_by_game(game, conn)?;
         let scores = Score::belonging_to(&levels)
@@ -83,12 +82,17 @@ impl Score {
         Ok(scores)
     }
 
+    /// Fetches a score from the database with the given id.
+    /// 
+    /// # Errors
+    /// - If no score is found with the given id.
     pub fn find_by_id(score_id: Uuid, conn: &mut Connection) -> Result<ScoreDto, Error> {
         let score_data = score.find(score_id).get_result::<Score>(conn)?;
 
         Ok(ScoreDto::new(score_data, conn))
     }
 
+    /// Fetchets all the scores in the database related to the given level. 
     pub fn find_by_level(
         level: &Level,
         include_hidden: bool,
@@ -110,6 +114,7 @@ impl Score {
         Ok(scores)
     }
 
+    /// Fetchets all the scores in the database related to the given user. 
     pub fn find_by_user(
         user: &User,
         include_hidden: bool,
@@ -131,6 +136,10 @@ impl Score {
         Ok(scores)
     }
 
+    /// Adds a new score to the database.
+    /// 
+    /// Errors
+    /// - If one of the fields contain invalid data.
     pub fn insert(new_score: ScoreForm, conn: &mut Connection) -> Result<ScoreDto, Error> {
         let new_score = diesel::insert_into(score)
             .values(&new_score)
@@ -139,6 +148,11 @@ impl Score {
         Ok(ScoreDto::new(new_score, conn))
     }
 
+    /// Updates a score with the given id in the database.
+    /// 
+    /// Errors
+    /// - If no score is found with the given id.
+    /// - If one of the fields contain invalid data.
     pub fn update(
         score_id: Uuid,
         updated_score: ScoreForm,
@@ -152,12 +166,15 @@ impl Score {
         Ok(ScoreDto::new(updated_score, conn))
     }
 
+    /// Deletes multiple scores from the database with the given ids.
     pub fn delete_many(score_ids: Vec<Uuid>, conn: &mut Connection) -> QueryResult<usize> {
         diesel::delete(score)
             .filter(id.eq_any(score_ids))
             .execute(conn)
     }
 
+    /// Counts the number of scores in the database. If a game is given, only the number of scores relates to the game are
+    /// counted.
     pub fn count(game: &Option<Game>, conn: &mut Connection) -> Result<i64, Error> {
         let count = if let Some(value) = game {
             let levels = Level::belonging_to(value)
@@ -168,8 +185,7 @@ impl Score {
                 .select(count_star())
                 .first(conn)?
         } else {
-            score.select(count_star())
-                .first(conn)?
+            score.select(count_star()).first(conn)?
         };
 
         Ok(count)

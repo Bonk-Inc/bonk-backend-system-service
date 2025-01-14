@@ -6,6 +6,7 @@ use axum::{
 use serde::Serialize;
 use utoipa::ToSchema;
 
+// Creates a new error response with a 500 status code
 pub fn internal_error(err: String) -> ErrorResponse {
     ErrorResponse {
         status: "fail",
@@ -14,6 +15,7 @@ pub fn internal_error(err: String) -> ErrorResponse {
     }
 }
 
+// Creates a new error response with a 404 status code
 pub fn not_found_error(err: String) -> ErrorResponse {
     ErrorResponse {
         status: "fail",
@@ -22,6 +24,7 @@ pub fn not_found_error(err: String) -> ErrorResponse {
     }
 }
 
+// Creates a new error response with a 401 status code
 pub fn unauthorized_error(err: String) -> ErrorResponse {
     ErrorResponse {
         status: "fail",

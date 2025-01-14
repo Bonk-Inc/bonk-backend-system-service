@@ -135,7 +135,7 @@ pub async fn level_scores(
 
 #[utoipa::path(
     get,
-    path = "/level/{userId}",
+    path = "/user/{userId}",
     tag = "Score",
     operation_id = "score_user_score",
     params(
