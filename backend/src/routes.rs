@@ -24,7 +24,7 @@ pub async fn create_app(state: SharedState) -> Router {
     Router::new()
         .nest("/api", controller::api_routes())
         .fallback_service(front_end)
-        //.merge(SwaggerUi::new("/swagger").url("/api-docs/openapi.json", ApiDoc::openapi()))
+        .merge(SwaggerUi::new("/swagger").url("/api-docs/openapi.json", ApiDoc::openapi()))
         .layer(setup_cors())
         .with_state(state)
 }

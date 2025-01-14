@@ -42,7 +42,7 @@ pub struct UserResponseBody {
 
 #[utoipa::path(
     get,
-    path = "game/{id}",
+    path = "/game/{id}",
     tag = "User",
     operation_id = "user_index",
     params(
