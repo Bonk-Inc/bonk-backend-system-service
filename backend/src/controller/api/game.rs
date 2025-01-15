@@ -7,10 +7,10 @@ use utoipa::{OpenApi, ToSchema};
 use uuid::Uuid;
 
 use crate::{
-    error::ErrorResponse, models::{
-        game::{Game, GameDTO},
-        respone::ResponseBody,
-    }, service::game_service, SharedState
+    models::game::{Game, GameDTO},
+    respone::{ErrorResponse, ResponseBody},
+    service::game_service,
+    SharedState,
 };
 
 #[derive(OpenApi)]
@@ -43,11 +43,11 @@ pub struct GamesResponseBody {
 )]
 pub async fn index(
     State(app_state): State<SharedState>,
-) -> Result<Json<ResponseBody<Vec<Game>>>, ErrorResponse> {
+) -> Result<ResponseBody<Vec<Game>>, ErrorResponse> {
     let pool = &app_state.read().unwrap().db;
 
     match game_service::find_all(pool) {
-        Ok(games) => Ok(Json(ResponseBody::new("Games fetched", games))),
+        Ok(games) => Ok(ResponseBody::ok("Games fetched", games)),
         Err(err) => Err(err),
     }
 }
@@ -68,11 +68,11 @@ pub async fn index(
 pub async fn show(
     State(app_state): State<SharedState>,
     Path(id): Path<Uuid>,
-) -> Result<Json<ResponseBody<Game>>, ErrorResponse> {
+) -> Result<ResponseBody<Game>, ErrorResponse> {
     let pool = &app_state.read().unwrap().db;
 
     match game_service::find_by_id(id, pool) {
-        Ok(game) => Ok(Json(ResponseBody::new("Game fetched", game))),
+        Ok(game) => Ok(ResponseBody::ok("Game fetched", game)),
         Err(err) => Err(err),
     }
 }
@@ -91,14 +91,11 @@ pub async fn show(
 pub async fn store(
     State(app_state): State<SharedState>,
     Json(new_game): Json<GameDTO>,
-) -> Result<(StatusCode, Json<ResponseBody<Game>>), ErrorResponse> {
+) -> Result<ResponseBody<Game>, ErrorResponse> {
     let pool = &app_state.read().unwrap().db;
 
     match game_service::insert(new_game, pool) {
-        Ok(game) => Ok((
-            StatusCode::CREATED,
-            Json(ResponseBody::new("Game created", game)),
-        )),
+        Ok(game) => Ok(ResponseBody::created("Game created", game)),
         Err(err) => Err(err),
     }
 }
@@ -122,11 +119,11 @@ pub async fn update(
     State(app_state): State<SharedState>,
     Path(id): Path<Uuid>,
     Json(updated_game): Json<GameDTO>,
-) -> Result<Json<ResponseBody<Game>>, ErrorResponse> {
+) -> Result<ResponseBody<Game>, ErrorResponse> {
     let pool = &app_state.read().unwrap().db;
 
     match game_service::update(id, updated_game, pool) {
-        Ok(game) => Ok(Json(ResponseBody::new("Game updated", game))),
+        Ok(game) => Ok(ResponseBody::ok("Game updated", game)),
         Err(err) => Err(err),
     }
 }

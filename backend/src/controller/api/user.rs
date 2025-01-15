@@ -7,23 +7,15 @@ use utoipa::{OpenApi, ToSchema};
 use uuid::Uuid;
 
 use crate::{
-    error::ErrorResponse,
-    models::{
-        respone::ResponseBody,
-        user::{User, UserForm},
-    },
+    models::user::{User, UserForm},
+    respone::{ErrorResponse, ResponseBody},
     service::user_service,
     SharedState,
 };
 
 #[derive(OpenApi)]
 #[openapi(
-    paths(
-        index,
-        store,
-        update,
-        destroy
-    ),
+    paths(index, store, update, destroy),
     components(schemas(User, UserForm, UserResponseBody, UsersResponseBody))
 )]
 pub struct UserApi;
@@ -55,11 +47,11 @@ pub struct UserResponseBody {
 pub async fn index(
     State(app_state): State<SharedState>,
     Path(game_id): Path<Uuid>,
-) -> Result<Json<ResponseBody<Vec<User>>>, ErrorResponse> {
+) -> Result<ResponseBody<Vec<User>>, ErrorResponse> {
     let pool = &app_state.read().unwrap().db;
 
     match user_service::find_by_game(game_id, pool) {
-        Ok(users) => Ok(Json(ResponseBody::new("Users fetched", users))),
+        Ok(users) => Ok(ResponseBody::ok("Users fetched", users)),
         Err(err) => Err(err),
     }
 }
@@ -78,14 +70,11 @@ pub async fn index(
 pub async fn store(
     State(app_state): State<SharedState>,
     Json(new_user): Json<UserForm>,
-) -> Result<(StatusCode, Json<ResponseBody<User>>), ErrorResponse> {
+) -> Result<ResponseBody<User>, ErrorResponse> {
     let pool = &app_state.read().unwrap().db;
 
     match user_service::insert(new_user, pool) {
-        Ok(added_user) => Ok((
-            StatusCode::CREATED,
-            Json(ResponseBody::new("User created", added_user)),
-        )),
+        Ok(added_user) => Ok(ResponseBody::created("User created", added_user)),
         Err(err) => Err(err),
     }
 }
@@ -109,11 +98,11 @@ pub async fn update(
     State(app_state): State<SharedState>,
     Path(id): Path<Uuid>,
     Json(updated_user): Json<UserForm>,
-) -> Result<Json<ResponseBody<User>>, ErrorResponse> {
+) -> Result<ResponseBody<User>, ErrorResponse> {
     let pool = &app_state.read().unwrap().db;
 
     match user_service::update(id, updated_user, pool) {
-        Ok(level) => Ok(Json(ResponseBody::new("User updated", level))),
+        Ok(level) => Ok(ResponseBody::ok("User updated", level)),
         Err(error) => Err(error),
     }
 }

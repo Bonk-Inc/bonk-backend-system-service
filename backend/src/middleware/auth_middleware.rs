@@ -1,16 +1,14 @@
 use std::env;
 
-use axum::{
-    extract::Request,
-    http::HeaderMap,
-    middleware::Next,
-    response::Response
-};
+use axum::{extract::Request, http::HeaderMap, middleware::Next, response::Response};
 use jsonwebtoken::{Algorithm, DecodingKey, Validation};
 use log::{error, info};
 use serde::{Deserialize, Serialize};
 
-use crate::{error::{unauthorized_error, ErrorResponse}, service::oauth2_service};
+use crate::{
+    respone::{ErrorResponse, ResponseBody},
+    service::oauth2_service,
+};
 
 #[derive(Debug, Serialize, Deserialize)]
 struct Claims {
@@ -19,9 +17,9 @@ struct Claims {
     exp: usize,
 }
 
-/// This function validates if the given request contains a valid OAuth2 access token using the given JWKS token from 
+/// This function validates if the given request contains a valid OAuth2 access token using the given JWKS token from
 /// the authorization server.
-/// 
+///
 /// # Erros
 /// - if no Authorization header is present.
 /// - if the JWKS tokens could not be read.
@@ -37,7 +35,7 @@ pub async fn verify_token(
     let auth_token = headers.get("Authorization");
 
     if auth_token.is_none() || jwk_token.is_err() {
-        return Err(unauthorized_error("Invalid token".to_string()));
+        return Err(ResponseBody::unauthorized_error("Invalid token"));
     }
 
     let token = auth_token.unwrap().to_str().unwrap().replace("Bearer ", "");
@@ -50,13 +48,17 @@ pub async fn verify_token(
             Err(_) => {
                 error!("Could not decode the JWK");
 
-                return Err(unauthorized_error("Error during authenticating".to_string()));
+                return Err(ResponseBody::unauthorized_error(
+                    "Error during authenticating",
+                ));
             }
         },
         None => {
             error!("Could not get a JWK");
 
-            return Err(unauthorized_error("Error during authenticating".to_string()));
+            return Err(ResponseBody::unauthorized_error(
+                "Error during authenticating",
+            ));
         }
     };
 
@@ -68,7 +70,7 @@ pub async fn verify_token(
                 err.kind()
             );
 
-            return Err(unauthorized_error("Invalid token".to_string()));
+            return Err(ResponseBody::unauthorized_error("Invalid token"));
         }
     }
 

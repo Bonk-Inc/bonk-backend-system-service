@@ -10,26 +10,15 @@ use utoipa::{OpenApi, ToSchema};
 use uuid::Uuid;
 
 use crate::{
-    error::ErrorResponse,
-    models::{
-        respone::ResponseBody,
-        score::{ScoreDto, ScoreForm},
-    },
+    models::score::{ScoreDto, ScoreForm},
+    respone::{ErrorResponse, ResponseBody},
     service::score_service,
     SharedState,
 };
 
 #[derive(OpenApi)]
 #[openapi(
-    paths(
-        index,
-        show,
-        level_scores,
-        user_scores,
-        store,
-        update,
-        destroy
-    ),
+    paths(index, show, level_scores, user_scores, store, update, destroy),
     components(schemas(ScoreDto, ScoreForm, ScoreResponseBody, ScoresResponseBody))
 )]
 pub struct ScoreApi;
@@ -67,11 +56,11 @@ pub struct QueryParams {
 pub async fn index(
     State(app_state): State<SharedState>,
     Path(game_id): Path<Uuid>,
-) -> Result<Json<ResponseBody<Vec<ScoreDto>>>, ErrorResponse> {
+) -> Result<ResponseBody<Vec<ScoreDto>>, ErrorResponse> {
     let pool = &app_state.read().unwrap().db;
 
     match score_service::find_all(game_id, pool) {
-        Ok(scores) => Ok(Json(ResponseBody::new("Scores fetched", scores))),
+        Ok(scores) => Ok(ResponseBody::ok("Scores fetched", scores)),
         Err(err) => Err(err),
     }
 }
@@ -92,11 +81,11 @@ pub async fn index(
 pub async fn show(
     State(app_state): State<SharedState>,
     Path(id): Path<Uuid>,
-) -> Result<Json<ResponseBody<ScoreDto>>, ErrorResponse> {
+) -> Result<ResponseBody<ScoreDto>, ErrorResponse> {
     let pool = &app_state.read().unwrap().db;
 
     match score_service::find_by_id(id, pool) {
-        Ok(score) => Ok(Json(ResponseBody::new("Score fetched", score))),
+        Ok(score) => Ok(ResponseBody::ok("Score fetched", score)),
         Err(err) => Err(err),
     }
 }
@@ -119,7 +108,7 @@ pub async fn level_scores(
     State(app_state): State<SharedState>,
     Path(level_id): Path<Uuid>,
     Query(params): Query<HashMap<String, String>>,
-) -> Result<Json<ResponseBody<Vec<ScoreDto>>>, ErrorResponse> {
+) -> Result<ResponseBody<Vec<ScoreDto>>, ErrorResponse> {
     let pool = &app_state.read().unwrap().db;
     let show_hidden = params
         .get("hidden")
@@ -128,7 +117,7 @@ pub async fn level_scores(
         .eq("true");
 
     match score_service::find_by_level(level_id, show_hidden, pool) {
-        Ok(scores) => Ok(Json(ResponseBody::new("Scores fetched", scores))),
+        Ok(scores) => Ok(ResponseBody::ok("Scores fetched", scores)),
         Err(err) => Err(err),
     }
 }
@@ -151,7 +140,7 @@ pub async fn user_scores(
     State(app_state): State<SharedState>,
     Path(user_id): Path<Uuid>,
     Query(params): Query<HashMap<String, String>>,
-) -> Result<Json<ResponseBody<Vec<ScoreDto>>>, ErrorResponse> {
+) -> Result<ResponseBody<Vec<ScoreDto>>, ErrorResponse> {
     let pool = &app_state.read().unwrap().db;
     let show_hidden = params
         .get("hidden")
@@ -160,7 +149,7 @@ pub async fn user_scores(
         .eq("true");
 
     match score_service::find_by_user(user_id, show_hidden, pool) {
-        Ok(scores) => Ok(Json(ResponseBody::new("Scores fetched", scores))),
+        Ok(scores) => Ok(ResponseBody::ok("Scores fetched", scores)),
         Err(err) => Err(err),
     }
 }
@@ -179,14 +168,11 @@ pub async fn user_scores(
 pub async fn store(
     State(app_state): State<SharedState>,
     Json(new_score): Json<ScoreForm>,
-) -> Result<(StatusCode, Json<ResponseBody<ScoreDto>>), ErrorResponse> {
+) -> Result<ResponseBody<ScoreDto>, ErrorResponse> {
     let pool = &app_state.read().unwrap().db;
 
     match score_service::insert(new_score, pool) {
-        Ok(scores) => Ok((
-            StatusCode::CREATED,
-            Json(ResponseBody::new("Score saved", scores)),
-        )),
+        Ok(scores) => Ok(ResponseBody::created("Score saved", scores)),
         Err(err) => Err(err),
     }
 }
@@ -210,11 +196,11 @@ pub async fn update(
     State(app_state): State<SharedState>,
     Path(id): Path<Uuid>,
     Json(updated_score): Json<ScoreForm>,
-) -> Result<Json<ResponseBody<ScoreDto>>, ErrorResponse> {
+) -> Result<ResponseBody<ScoreDto>, ErrorResponse> {
     let pool = &app_state.read().unwrap().db;
 
     match score_service::update(id, updated_score, pool) {
-        Ok(scores) => Ok(Json(ResponseBody::new("Score updated", scores))),
+        Ok(scores) => Ok(ResponseBody::ok("Score updated", scores)),
         Err(err) => Err(err),
     }
 }
