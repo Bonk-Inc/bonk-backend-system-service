@@ -2,8 +2,8 @@ use uuid::Uuid;
 
 use crate::{
     config::db::Pool,
-    error::{internal_error, not_found_error, ErrorResponse},
     models::{game::Game, score::Score, user::User},
+    respone::{ErrorResponse, ResponseBody},
 };
 
 use super::game_service;
@@ -18,7 +18,9 @@ use super::game_service;
 pub fn count_games(pool: &Pool) -> Result<i64, ErrorResponse> {
     match Game::count(&mut pool.get().unwrap()) {
         Ok(count) => Ok(count),
-        Err(_) => Err(internal_error("Cannot count games in database".to_string())),
+        Err(_) => Err(ResponseBody::internal_error(
+            "Cannot count games in database",
+        )),
     }
 }
 
@@ -36,7 +38,7 @@ pub fn count_scores(game_id: Option<Uuid>, pool: &Pool) -> Result<i64, ErrorResp
     if let Some(id) = game_id {
         let fetched_game = game_service::find_by_id(id, pool);
         if fetched_game.is_err() {
-            return Err(not_found_error(format!(
+            return Err(ResponseBody::not_found_error(&format!(
                 "Game with id '{}' not found",
                 id.to_string()
             )));
@@ -47,8 +49,8 @@ pub fn count_scores(game_id: Option<Uuid>, pool: &Pool) -> Result<i64, ErrorResp
 
     match Score::count(&game, &mut pool.get().unwrap()) {
         Ok(count) => Ok(count),
-        Err(_) => Err(internal_error(
-            "Cannot count scores in database".to_string(),
+        Err(_) => Err(ResponseBody::internal_error(
+            "Cannot count scores in database",
         )),
     }
 }
@@ -58,19 +60,19 @@ pub fn count_users(game_id: Option<Uuid>, pool: &Pool) -> Result<i64, ErrorRespo
     if let Some(id) = game_id {
         let fetched_game = game_service::find_by_id(id, pool);
         if fetched_game.is_err() {
-            return Err(not_found_error(format!(
+            return Err(ResponseBody::not_found_error(&format!(
                 "Game with id '{}' not found",
                 id.to_string()
             )));
         }
 
         game = Some(fetched_game?)
-    } 
+    }
 
     match User::count(&game, &mut pool.get().unwrap()) {
         Ok(count) => Ok(count),
-        Err(_) => Err(internal_error(
-            "Cannot count users in database".to_string(),
+        Err(_) => Err(ResponseBody::internal_error(
+            "Cannot count users in database",
         )),
     }
 }

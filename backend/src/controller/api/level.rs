@@ -7,11 +7,8 @@ use utoipa::{OpenApi, ToSchema};
 use uuid::Uuid;
 
 use crate::{
-    error::ErrorResponse,
-    models::{
-        level::{Level, LevelForm},
-        respone::ResponseBody,
-    },
+    models::level::{Level, LevelForm},
+    respone::{ErrorResponse, ResponseBody},
     service::level_service,
     SharedState,
 };
@@ -51,11 +48,11 @@ pub struct LevelsResponseBody {
 pub async fn index(
     State(app_state): State<SharedState>,
     Path(game_id): Path<Uuid>,
-) -> Result<Json<ResponseBody<Vec<Level>>>, ErrorResponse> {
+) -> Result<ResponseBody<Vec<Level>>, ErrorResponse> {
     let pool = &app_state.read().unwrap().db;
 
     match level_service::find_by_game(game_id, pool) {
-        Ok(levels) => Ok(Json(ResponseBody::new("Levels fetched", levels))),
+        Ok(levels) => Ok(ResponseBody::ok("Levels fetched", levels)),
         Err(err) => Err(err),
     }
 }
@@ -74,14 +71,11 @@ pub async fn index(
 pub async fn store(
     State(app_state): State<SharedState>,
     Json(new_level): Json<LevelForm>,
-) -> Result<(StatusCode, Json<ResponseBody<Level>>), ErrorResponse> {
+) -> Result<ResponseBody<Level>, ErrorResponse> {
     let pool = &app_state.read().unwrap().db;
 
     match level_service::insert(new_level, pool) {
-        Ok(level) => Ok((
-            StatusCode::CREATED,
-            Json(ResponseBody::new("Level created", level)),
-        )),
+        Ok(level) => Ok(ResponseBody::created("Level created", level)),
         Err(error) => Err(error),
     }
 }
@@ -105,11 +99,11 @@ pub async fn update(
     State(app_state): State<SharedState>,
     Path(id): Path<Uuid>,
     Json(updated_level): Json<LevelForm>,
-) -> Result<Json<ResponseBody<Level>>, ErrorResponse> {
+) -> Result<ResponseBody<Level>, ErrorResponse> {
     let pool = &app_state.read().unwrap().db;
 
     match level_service::update(id, updated_level, pool) {
-        Ok(level) => Ok(Json(ResponseBody::new("Level updated", level))),
+        Ok(level) => Ok(ResponseBody::ok("Level updated", level)),
         Err(error) => Err(error),
     }
 }

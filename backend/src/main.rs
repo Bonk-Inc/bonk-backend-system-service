@@ -12,16 +12,15 @@ use config::db::{init_db_pool, run_migration, Pool};
 use controller::api::{game::GameApi, level::LevelApi, score::ScoreApi, user::UserApi};
 #[cfg(debug_assertions)]
 use dotenvy::dotenv;
-use error::ErrorResponse;
 use log::{error, info};
 use tokio::{net::TcpListener, spawn, time::interval};
 use utoipa::OpenApi;
 
 pub mod config;
 pub mod controller;
-pub mod error;
 pub mod middleware;
 pub mod models;
+pub mod respone;
 pub mod routes;
 pub mod schema;
 pub mod service;
@@ -46,8 +45,7 @@ pub const JWK_FILE_PATH: &str = "data/jwk.json";
         (name = "Level", description = "Level management endpoints."),
         (name = "Score", description = "Score management endpoints."),
         (name = "User", description = "User management endpoints.")
-    ),
-    components(schemas(ErrorResponse))
+    )
 )]
 struct ApiDoc;
 
