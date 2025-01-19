@@ -20,15 +20,21 @@ use crate::{
 )]
 pub struct LevelApi;
 
+/// The structure of the response body where there is a single level returend. This struct is primarily used for
+/// the OpenAPI docs.
 #[derive(ToSchema)]
 pub struct LevelResponseBody {
     pub message: String,
+    pub status: String,
     pub data: Level,
 }
 
+/// The structure of the response body where there are multiple levels returend. This struct is primarily used for
+/// the OpenAPI docs.
 #[derive(ToSchema)]
 pub struct LevelsResponseBody {
     pub message: String,
+    pub status: String,
     pub data: Vec<Level>,
 }
 

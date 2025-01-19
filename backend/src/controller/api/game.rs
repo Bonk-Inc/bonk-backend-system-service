@@ -20,15 +20,21 @@ use crate::{
 )]
 pub struct GameApi;
 
+/// The structure of the response body where there is a single games returend. This struct is primarily used for
+/// the OpenAPI docs.
 #[derive(ToSchema)]
 pub struct GameResponseBody {
     pub message: String,
+    pub status: String,
     pub data: Game,
 }
 
+/// The structure of the response body where there are multiple games returend. This struct is primarily used for
+/// the OpenAPI docs.
 #[derive(ToSchema)]
 pub struct GamesResponseBody {
     pub message: String,
+    pub status: String,
     pub data: Vec<Game>,
 }
 

@@ -22,6 +22,7 @@ pub struct ResponseBody<T> {
     pub status: &'static str,
     pub message: String,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schema(ignore)]
     pub data: Option<T>,
     #[serde(skip)]
     pub code: StatusCode,

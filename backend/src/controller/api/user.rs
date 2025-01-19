@@ -20,15 +20,21 @@ use crate::{
 )]
 pub struct UserApi;
 
+/// The structure of the response body where there is a single returend. This struct is primarily used for
+/// the OpenAPI docs.
 #[derive(ToSchema)]
 pub struct UsersResponseBody {
     pub message: String,
+    pub status: String,
     pub data: User,
 }
 
+/// The structure of the response body where there are multiple users returend. This struct is primarily used for
+/// the OpenAPI docs.
 #[derive(ToSchema)]
 pub struct UserResponseBody {
     pub message: String,
+    pub status: String,
     pub data: Vec<User>,
 }
 
