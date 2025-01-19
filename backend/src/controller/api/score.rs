@@ -23,18 +23,25 @@ use crate::{
 )]
 pub struct ScoreApi;
 
+/// The structure of the response body where there is a single score returend. This struct is primarily used for
+/// the OpenAPI docs.
 #[derive(ToSchema)]
 pub struct ScoreResponseBody {
     pub message: String,
+    pub status: String,
     pub data: ScoreDto,
 }
 
+/// The structure of the response body where there are multiple scores returend. This struct is primarily used for
+/// the OpenAPI docs.
 #[derive(ToSchema)]
 pub struct ScoresResponseBody {
     pub message: String,
+    pub status: String,
     pub data: Vec<ScoreDto>,
 }
 
+/// The structure of the query parameters that can be used in request related to fetching scores.
 #[derive(Deserialize)]
 pub struct QueryParams {
     pub hidden: bool,

@@ -16,9 +16,9 @@ jsonwebtoken = "9.3.0"
 log = "0.4.25"
 reqwest = { version = "0.12.12", features = ["json"] }
 serde = { version = "1.0.217", features = ["derive"] }
-serde_json = "1.0.135"
+serde_json = "1.0.136"
 tokio = { version = "1.43.0", features = ["full"] }
 tower-http = { version = "0.6.2", features = ["cors", "fs"] }
 utoipa = { version = "5.3.1", features = ["axum_extras", "chrono", "uuid"] }
-utoipa-swagger-ui = { version = "8.1.1", features = ["axum", "reqwest"] }
+utoipa-swagger-ui = { version = "9.0.0", features = ["axum", "reqwest"] }
 uuid = { version = "1.12.0", features = ["serde", "v4"] }
