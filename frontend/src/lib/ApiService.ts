@@ -2,6 +2,7 @@ import { authService, type AuthService } from './AuthService';
 
 export interface ResponseBody<T> {
     message: string,
+    status: string,
     data: T
 }
 
