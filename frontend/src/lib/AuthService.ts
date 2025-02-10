@@ -38,7 +38,7 @@ export class AuthService {
     }
     
     /**
-     * Checks whether or not a user is currently logged in.
+     * Checks whether a user is currently logged in.
      *
      * Returns a promise which will be resolved to true/false or be rejected with an error.
      */

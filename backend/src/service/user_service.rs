@@ -3,17 +3,17 @@ use uuid::Uuid;
 use crate::{
     config::db::Pool,
     models::user::{User, UserForm},
-    respone::{ErrorResponse, ResponseBody},
+    response::{ErrorResponse, ResponseBody},
 };
 
 use super::game_service;
 
-/// Queries the database and fetches the registerd users in a game.
+/// Queries the database and fetches the registered users in a game.
 ///
 /// # Errors
 ///
 /// This function fails if:
-/// - an error occured during execution.
+/// - an error occurred during execution.
 /// - no game could be found with the given id.
 ///
 pub fn find_by_game(game_id: Uuid, pool: &Pool) -> Result<Vec<User>, ErrorResponse> {
@@ -25,18 +25,18 @@ pub fn find_by_game(game_id: Uuid, pool: &Pool) -> Result<Vec<User>, ErrorRespon
         )));
     }
 
-    match User::find_by_game(&game.unwrap(), &mut pool.get().unwrap()) {
+    match User::find_by_game(&game?, &mut pool.get().unwrap()) {
         Ok(users) => Ok(users),
         Err(_) => Err(ResponseBody::internal_error("Cannot fetch users")),
     }
 }
 
-/// Queries the database and fetches the registerd user with id.
+/// Queries the database and fetches the registered user with id.
 ///
 /// # Errors
 ///
 /// This function fails if:
-/// - an error occured during execution.
+/// - an error occurred during execution.
 /// - no user could be found with the given id.
 ///
 pub fn find_by_id(id: Uuid, pool: &Pool) -> Result<User, ErrorResponse> {
@@ -54,7 +54,7 @@ pub fn find_by_id(id: Uuid, pool: &Pool) -> Result<User, ErrorResponse> {
 /// # Errors
 ///
 /// This function fails if:
-/// - an error occured during execution.
+/// - an error occurred during execution.
 ///
 pub fn insert(new_user: UserForm, pool: &Pool) -> Result<User, ErrorResponse> {
     match User::insert(new_user, &mut pool.get().unwrap()) {
@@ -71,10 +71,10 @@ pub fn insert(new_user: UserForm, pool: &Pool) -> Result<User, ErrorResponse> {
 /// # Errors
 ///
 /// This function fails if:
-/// - an error occured during execution.
+/// - an error occurred during execution.
 /// - no user could be found with the given id.
 ///
-pub fn update(id: Uuid, updated_level: UserForm, pool: &Pool) -> Result<User, ErrorResponse> {
+pub fn update(id: Uuid, updated_user: UserForm, pool: &Pool) -> Result<User, ErrorResponse> {
     if !user_exists(id, pool) {
         return Err(ResponseBody::not_found_error(&format!(
             "User with id '{}' not found",
@@ -82,7 +82,7 @@ pub fn update(id: Uuid, updated_level: UserForm, pool: &Pool) -> Result<User, Er
         )));
     }
 
-    match User::update(id, updated_level, &mut pool.get().unwrap()) {
+    match User::update(id, updated_user, &mut pool.get().unwrap()) {
         Ok(level) => Ok(level),
         Err(_) => Err(ResponseBody::internal_error("Could not update user")),
     }
@@ -93,7 +93,7 @@ pub fn update(id: Uuid, updated_level: UserForm, pool: &Pool) -> Result<User, Er
 /// # Errors
 ///
 /// This function fails if:
-/// - an error occured during execution.
+/// - an error occurred during execution.
 /// - no user could be found with the given id.
 ///
 pub fn delete(id: Uuid, pool: &Pool) -> Result<usize, ErrorResponse> {

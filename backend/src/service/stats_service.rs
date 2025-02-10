@@ -3,12 +3,12 @@ use uuid::Uuid;
 use crate::{
     config::db::Pool,
     models::{game::Game, score::Score, user::User},
-    respone::{ErrorResponse, ResponseBody},
+    response::{ErrorResponse, ResponseBody},
 };
 
 use super::game_service;
 
-/// Queries the database and counts the registerd games.
+/// Queries the database and counts the registered games.
 ///
 /// # Errors
 ///
@@ -24,14 +24,14 @@ pub fn count_games(pool: &Pool) -> Result<i64, ErrorResponse> {
     }
 }
 
-/// Queries the database and counts all the registerd scores. If a game is defined, only the
+/// Queries the database and counts all the registered scores. If a game is defined, only the
 /// related score of the game will be counted.
 ///
 /// # Errors
 ///
 /// This function fails if:
 /// - no game was found with the given id.
-/// - an error occured during execution.
+/// - an error occurred during execution.
 ///
 pub fn count_scores(game_id: Option<Uuid>, pool: &Pool) -> Result<i64, ErrorResponse> {
     let mut game: Option<Game> = None;

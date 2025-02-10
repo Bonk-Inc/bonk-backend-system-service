@@ -8,7 +8,7 @@ use uuid::Uuid;
 
 use crate::{
     models::level::{Level, LevelForm},
-    respone::{ErrorResponse, ResponseBody},
+    response::{ErrorResponse, ResponseBody},
     service::level_service,
     SharedState,
 };
@@ -20,7 +20,7 @@ use crate::{
 )]
 pub struct LevelApi;
 
-/// The structure of the response body where there is a single level returend. This struct is primarily used for
+/// The structure of the response body where there is a single level returned. This struct is primarily used for
 /// the OpenAPI docs.
 #[derive(ToSchema)]
 pub struct LevelResponseBody {
@@ -29,7 +29,7 @@ pub struct LevelResponseBody {
     pub data: Level,
 }
 
-/// The structure of the response body where there are multiple levels returend. This struct is primarily used for
+/// The structure of the response body where there are multiple levels returned. This struct is primarily used for
 /// the OpenAPI docs.
 #[derive(ToSchema)]
 pub struct LevelsResponseBody {

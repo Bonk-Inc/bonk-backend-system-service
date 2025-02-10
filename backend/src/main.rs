@@ -20,7 +20,7 @@ pub mod config;
 pub mod controller;
 pub mod middleware;
 pub mod models;
-pub mod respone;
+pub mod response;
 pub mod routes;
 pub mod schema;
 pub mod service;

@@ -73,7 +73,7 @@ const updateGame = async() => {
 const deleteGame = async() => {
   try {
     await apiService?.delete(`api/game/${gameId}`);
-    router.push({ name: 'app_home' });
+    await router.push({ name: 'app_home' });
   } catch(e: unknown) {
     toast({
       title: 'Er ging wat fout :(',

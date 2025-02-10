@@ -9,10 +9,10 @@ use crate::JWK_FILE_PATH;
 
 /// Reads the contents of the JWKs file.
 /// 
-/// # Erros
+/// # Errors
 /// 
 /// This function fails if:
-/// - The JWKS file cannot be opend
+/// - The JWKS file cannot be opened
 /// - Content of the JWKS file cannot be read
 /// - Content of the JWKS file cannot be serialized to a [`Jwk`] struct
 /// 
