@@ -29,7 +29,7 @@ pub struct LevelForm {
 }
 
 impl Level {
-    /// Fetchets all the levels in the database.
+    /// Fetches all the levels in the database.
     pub fn find_all(conn: &mut Connection) -> QueryResult<Vec<Level>> {
         level.load::<Level>(conn)
     }

@@ -25,7 +25,7 @@ pub struct GameDTO {
 }
 
 impl Game {
-    /// Fetchets all the games in the database
+    /// Fetches all the games in the database
     pub fn find_all(conn: &mut Connection) -> QueryResult<Vec<Game>> {
         game.load::<Game>(conn)
     }

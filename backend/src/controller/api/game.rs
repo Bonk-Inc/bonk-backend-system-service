@@ -8,7 +8,7 @@ use uuid::Uuid;
 
 use crate::{
     models::game::{Game, GameDTO},
-    respone::{ErrorResponse, ResponseBody},
+    response::{ErrorResponse, ResponseBody},
     service::game_service,
     SharedState,
 };
@@ -20,7 +20,7 @@ use crate::{
 )]
 pub struct GameApi;
 
-/// The structure of the response body where there is a single games returend. This struct is primarily used for
+/// The structure of the response body where there is a single games returned. This struct is primarily used for
 /// the OpenAPI docs.
 #[derive(ToSchema)]
 pub struct GameResponseBody {
@@ -29,7 +29,7 @@ pub struct GameResponseBody {
     pub data: Game,
 }
 
-/// The structure of the response body where there are multiple games returend. This struct is primarily used for
+/// The structure of the response body where there are multiple games returned. This struct is primarily used for
 /// the OpenAPI docs.
 #[derive(ToSchema)]
 pub struct GamesResponseBody {

@@ -6,15 +6,15 @@ use crate::{
         game::{Game, GameDTO},
         level::{Level, LevelForm},
     },
-    respone::{ErrorResponse, ResponseBody},
+    response::{ErrorResponse, ResponseBody},
 };
 
-/// Queries the database and fetches all the registerd games.
+/// Queries the database and fetches all the registered games.
 ///
 /// # Errors
 ///
 /// This function fails if:
-/// - an error occured during execution.
+/// - an error occurred during execution.
 ///
 pub fn find_all(pool: &Pool) -> Result<Vec<Game>, ErrorResponse> {
     match Game::find_all(&mut pool.get().unwrap()) {
@@ -23,12 +23,12 @@ pub fn find_all(pool: &Pool) -> Result<Vec<Game>, ErrorResponse> {
     }
 }
 
-/// Queries the database and fetches the registerd game by the given id.
+/// Queries the database and fetches the registered game by the given id.
 ///
 /// # Errors
 ///
 /// This function fails if:
-/// - an error occured during execution.
+/// - an error occurred during execution.
 /// - could not find game with given id.
 ///
 pub fn find_by_id(id: Uuid, pool: &Pool) -> Result<Game, ErrorResponse> {
@@ -47,7 +47,7 @@ pub fn find_by_id(id: Uuid, pool: &Pool) -> Result<Game, ErrorResponse> {
 /// # Errors
 ///
 /// This function fails if:
-/// - an error occured during execution.
+/// - an error occurred during execution.
 ///
 pub fn insert(new_game: GameDTO, pool: &Pool) -> Result<Game, ErrorResponse> {
     match Game::insert(new_game, &mut pool.get().unwrap()) {
@@ -75,8 +75,8 @@ pub fn insert(new_game: GameDTO, pool: &Pool) -> Result<Game, ErrorResponse> {
 /// # Errors
 ///
 /// This function fails if:
-/// - an error occured during execution.
-/// - no game could be find with the given id.
+/// - an error occurred during execution.
+/// - no game could be found with the given id.
 ///
 pub fn update(id: Uuid, updated_game: GameDTO, pool: &Pool) -> Result<Game, ErrorResponse> {
     if !game_exisits(id, pool) {
@@ -97,7 +97,7 @@ pub fn update(id: Uuid, updated_game: GameDTO, pool: &Pool) -> Result<Game, Erro
 /// # Errors
 ///
 /// This function fails if:
-/// - an error occured during execution.
+/// - an error occurred during execution.
 /// - no game could be found with the given id.
 ///
 pub fn delete(id: Uuid, pool: &Pool) -> Result<usize, ErrorResponse> {
@@ -111,7 +111,7 @@ pub fn delete(id: Uuid, pool: &Pool) -> Result<usize, ErrorResponse> {
     match Game::delete(id, &mut pool.get().unwrap()) {
         Ok(result) => Ok(result),
         Err(_) => Err(ResponseBody::internal_error(
-            "Error occured when deleting game",
+            "Error occurred when deleting game",
         )),
     }
 }

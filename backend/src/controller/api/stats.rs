@@ -3,7 +3,7 @@ use uuid::Uuid;
 
 use crate::{
     models::stats::{GameStats, GlobalStats},
-    respone::{ErrorResponse, ResponseBody},
+    response::{ErrorResponse, ResponseBody},
     service::stats_service,
     SharedState,
 };
@@ -22,7 +22,7 @@ pub async fn all(
         users: user_count,
     };
 
-    Ok(ResponseBody::ok("Global stats fechted", stats))
+    Ok(ResponseBody::ok("Global stats fetched", stats))
 }
 
 pub async fn game_stats(

@@ -3,17 +3,17 @@ use uuid::Uuid;
 use crate::{
     config::db::Pool,
     models::level::{Level, LevelForm},
-    respone::{ErrorResponse, ResponseBody},
+    response::{ErrorResponse, ResponseBody},
 };
 
 use super::game_service;
 
-/// Queries the database and fetches all the registerd levels.
+/// Queries the database and fetches all the registered levels.
 ///
 /// # Errors
 ///
 /// This function fails if:
-/// - an error occured during execution.
+/// - an error occurred during execution.
 ///
 pub fn find_all(pool: &Pool) -> Result<Vec<Level>, ErrorResponse> {
     match Level::find_all(&mut pool.get().unwrap()) {
@@ -22,12 +22,12 @@ pub fn find_all(pool: &Pool) -> Result<Vec<Level>, ErrorResponse> {
     }
 }
 
-/// Queries the database and fetches the registerd level by the given id.
+/// Queries the database and fetches the registered level by the given id.
 ///
 /// # Errors
 ///
 /// This function fails if:
-/// - an error occured during execution.
+/// - an error occurred during execution.
 /// - could not find level with given id.
 ///
 pub fn find_by_id(id: Uuid, pool: &Pool) -> Result<Level, ErrorResponse> {
@@ -40,13 +40,13 @@ pub fn find_by_id(id: Uuid, pool: &Pool) -> Result<Level, ErrorResponse> {
     }
 }
 
-/// Queries the database and fetches the registerd levels by the given game.
+/// Queries the database and fetches the registered levels by the given game.
 ///
 /// # Errors
 ///
 /// This function fails if:
 /// - could not find game with given id.
-/// - an error occured during execution.
+/// - an error occurred during execution.
 ///
 pub fn find_by_game(game_id: Uuid, pool: &Pool) -> Result<Vec<Level>, ErrorResponse> {
     let game = game_service::find_by_id(game_id, pool);
@@ -57,7 +57,7 @@ pub fn find_by_game(game_id: Uuid, pool: &Pool) -> Result<Vec<Level>, ErrorRespo
         )));
     }
 
-    match Level::find_by_game(&game.unwrap(), &mut pool.get().unwrap()) {
+    match Level::find_by_game(&game?, &mut pool.get().unwrap()) {
         Ok(levels) => Ok(levels),
         Err(_) => Err(ResponseBody::internal_error(
             "Cannot add a new level in database",
@@ -70,7 +70,7 @@ pub fn find_by_game(game_id: Uuid, pool: &Pool) -> Result<Vec<Level>, ErrorRespo
 /// # Errors
 ///
 /// This function fails if:
-/// - an error occured during execution.
+/// - an error occurred during execution.
 ///
 pub fn insert(new_level: LevelForm, pool: &Pool) -> Result<Level, ErrorResponse> {
     match Level::insert(new_level, &mut pool.get().unwrap()) {
@@ -86,8 +86,8 @@ pub fn insert(new_level: LevelForm, pool: &Pool) -> Result<Level, ErrorResponse>
 /// # Errors
 ///
 /// This function fails if:
-/// - an error occured during execution.
-/// - no level could be find with the given id.
+/// - an error occurred during execution.
+/// - no level could be found with the given id.
 ///
 pub fn update(id: Uuid, updated_level: LevelForm, pool: &Pool) -> Result<Level, ErrorResponse> {
     if !level_exists(id, pool) {
@@ -108,7 +108,7 @@ pub fn update(id: Uuid, updated_level: LevelForm, pool: &Pool) -> Result<Level, 
 /// # Errors
 ///
 /// This function fails if:
-/// - an error occured during execution.
+/// - an error occurred during execution.
 /// - no level could be found with the given id.
 ///
 pub fn delete(id: Uuid, pool: &Pool) -> Result<usize, ErrorResponse> {

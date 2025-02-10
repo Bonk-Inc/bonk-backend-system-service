@@ -68,7 +68,7 @@ impl ScoreDto {
 }
 
 impl Score {
-    /// Fetchets all the scores in the database by looking up all the levels related to the given game. And using 
+    /// Fetches all the scores in the database by looking up all the levels related to the given game. And using
     /// the levels to fetch all the scores.
     pub fn find_all(game: &Game, conn: &mut Connection) -> Result<Vec<ScoreDto>, Error> {
         let levels = Level::find_by_game(game, conn)?;
@@ -92,7 +92,7 @@ impl Score {
         Ok(ScoreDto::new(score_data, conn))
     }
 
-    /// Fetchets all the scores in the database related to the given level. 
+    /// Fetches all the scores in the database related to the given level.
     pub fn find_by_level(
         level: &Level,
         include_hidden: bool,
@@ -114,7 +114,7 @@ impl Score {
         Ok(scores)
     }
 
-    /// Fetchets all the scores in the database related to the given user. 
+    /// Fetches all the scores in the database related to the given user.
     pub fn find_by_user(
         user: &User,
         include_hidden: bool,

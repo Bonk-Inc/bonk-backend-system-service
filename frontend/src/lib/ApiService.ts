@@ -7,7 +7,7 @@ export interface ResponseBody<T> {
 }
 
 export class ApiService {
-    #baseUrl: string;
+    readonly #baseUrl: string;
     #authService: AuthService;
 
     constructor(baseUrl: string) {
@@ -24,7 +24,7 @@ export class ApiService {
         const data = await response.json() as ResponseBody<T>;
         if (!response.ok) {
             if(response.status === 401) {
-                this.#authService.logout();
+                await this.#authService.logout();
             }
 
             throw new Error(data.message)
@@ -47,7 +47,7 @@ export class ApiService {
         const data = await response.json() as ResponseBody<T>;
         if (!response.ok) {
             if(response.status === 401) {
-                this.#authService.logout();
+                await this.#authService.logout();
             }
 
             throw new Error(data.message)
@@ -70,7 +70,7 @@ export class ApiService {
         const data = await response.json() as ResponseBody<T>;
         if (!response.ok) {
             if(response.status === 401) {
-                this.#authService.logout();
+                await this.#authService.logout();
             }
 
             throw new Error(data.message)
@@ -88,7 +88,7 @@ export class ApiService {
 
         if (!response.ok) {
             if(response.status === 401) {
-                this.#authService.logout();
+                await this.#authService.logout();
             }
 
             const data = await response.json() as ResponseBody<void>;

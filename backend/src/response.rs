@@ -28,7 +28,7 @@ pub struct ResponseBody<T> {
     pub code: StatusCode,
 }
 
-/// Type alias for [`ResponseBody`] whose type generic is set to a empty value, because a error
+/// Type alias for [`ResponseBody`] whose type generic is set to an empty value, because an error
 /// response contains no data.
 pub type ErrorResponse = ResponseBody<()>;
 

@@ -49,7 +49,7 @@ const onSubmit = handleSubmit(async (values) => {
       description = 'Het opslaan van de nieuwe score is geluk';
     }
 
-    router.push({ name: 'game_scores', params: { gameId }});
+    await router.push({ name: 'game_scores', params: { gameId }});
     toast({
       title: 'Gelukt!',
       description

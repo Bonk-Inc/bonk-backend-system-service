@@ -11,7 +11,7 @@ use uuid::Uuid;
 
 use crate::{
     models::score::{ScoreDto, ScoreForm},
-    respone::{ErrorResponse, ResponseBody},
+    response::{ErrorResponse, ResponseBody},
     service::score_service,
     SharedState,
 };
@@ -23,7 +23,7 @@ use crate::{
 )]
 pub struct ScoreApi;
 
-/// The structure of the response body where there is a single score returend. This struct is primarily used for
+/// The structure of the response body where there is a single score returned. This struct is primarily used for
 /// the OpenAPI docs.
 #[derive(ToSchema)]
 pub struct ScoreResponseBody {
@@ -32,7 +32,7 @@ pub struct ScoreResponseBody {
     pub data: ScoreDto,
 }
 
-/// The structure of the response body where there are multiple scores returend. This struct is primarily used for
+/// The structure of the response body where there are multiple scores returned. This struct is primarily used for
 /// the OpenAPI docs.
 #[derive(ToSchema)]
 pub struct ScoresResponseBody {

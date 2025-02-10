@@ -14,7 +14,7 @@ const error = ref(false);
 onMounted(async () => {
   const loggedIn = await auth?.isUserLoggedIn();
   if (loggedIn) {
-    router.push({ name: 'app_home' });
+    await router.push({ name: 'app_home' });
   }
 });
 

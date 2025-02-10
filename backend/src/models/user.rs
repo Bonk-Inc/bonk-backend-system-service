@@ -29,7 +29,7 @@ pub struct UserForm {
 }
 
 impl User {
-    /// Fetchets all the users in the database
+    /// Fetches all the users in the database
     pub fn find_all(conn: &mut Connection) -> QueryResult<Vec<User>> {
         user.load::<User>(conn)
     }

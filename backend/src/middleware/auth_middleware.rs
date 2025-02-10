@@ -6,7 +6,7 @@ use log::{error, info};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    respone::{ErrorResponse, ResponseBody},
+    response::{ErrorResponse, ResponseBody},
     service::oauth2_service,
 };
 
@@ -20,7 +20,7 @@ struct Claims {
 /// This function validates if the given request contains a valid OAuth2 access token using the given JWKS token from
 /// the authorization server.
 ///
-/// # Erros
+/// # Errors
 /// - if no Authorization header is present.
 /// - if the JWKS tokens could not be read.
 /// - if the JWKS tokens could not be decoded.

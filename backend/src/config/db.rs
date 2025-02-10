@@ -12,7 +12,7 @@ pub fn init_db_pool(url: &str) -> Pool {
     info!("Configuring database pool");
 
     let manager = ConnectionManager::<Connection>::new(url);
-    let pool = r2d2::Pool::builder()
+    let pool = Pool::builder()
         .build(manager)
         .expect("Failed to create pool.");
 

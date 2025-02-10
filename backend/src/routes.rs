@@ -16,7 +16,7 @@ use utoipa_swagger_ui::SwaggerUi;
 
 use crate::{controller, ApiDoc, SharedState};
 
-/// Setup the entire routing for the web service and create the OpenAPI
+/// Set up the entire routing for the web service and create the OpenAPI
 /// documentation page
 pub async fn create_app(state: SharedState) -> Router {
     let front_end = ServeDir::new("./dist/").append_index_html_on_directories(true);
@@ -29,7 +29,7 @@ pub async fn create_app(state: SharedState) -> Router {
         .with_state(state)
 }
 
-/// Creates a new [`CorsLayer`] to allow external orgins making a call
+/// Creates a new [`CorsLayer`] to allow external origins making a call
 /// to the server.
 fn setup_cors() -> CorsLayer {
     CorsLayer::new()

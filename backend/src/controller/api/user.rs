@@ -8,7 +8,7 @@ use uuid::Uuid;
 
 use crate::{
     models::user::{User, UserForm},
-    respone::{ErrorResponse, ResponseBody},
+    response::{ErrorResponse, ResponseBody},
     service::user_service,
     SharedState,
 };
@@ -20,7 +20,7 @@ use crate::{
 )]
 pub struct UserApi;
 
-/// The structure of the response body where there is a single returend. This struct is primarily used for
+/// The structure of the response body where there is a single returned. This struct is primarily used for
 /// the OpenAPI docs.
 #[derive(ToSchema)]
 pub struct UsersResponseBody {
@@ -29,7 +29,7 @@ pub struct UsersResponseBody {
     pub data: User,
 }
 
-/// The structure of the response body where there are multiple users returend. This struct is primarily used for
+/// The structure of the response body where there are multiple users returned. This struct is primarily used for
 /// the OpenAPI docs.
 #[derive(ToSchema)]
 pub struct UserResponseBody {
