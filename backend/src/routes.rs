@@ -7,6 +7,7 @@ use axum::{
     },
     Router,
 };
+use axum::routing::get_service;
 use tower_http::{
     cors::{Any, CorsLayer},
     services::ServeDir,
@@ -19,11 +20,11 @@ use crate::{controller, ApiDoc, SharedState};
 /// Set up the entire routing for the web service and create the OpenAPI
 /// documentation page
 pub async fn create_app(state: SharedState) -> Router {
-    let front_end = ServeDir::new("./dist/").append_index_html_on_directories(true);
+    let front_end = get_service(ServeDir::new("./dist/").append_index_html_on_directories(true));
 
     Router::new()
+        .fallback(front_end)
         .nest("/api", controller::api_routes())
-        .fallback_service(front_end)
         .merge(SwaggerUi::new("/swagger").url("/api-docs/openapi.json", ApiDoc::openapi()))
         .layer(setup_cors())
         .with_state(state)
