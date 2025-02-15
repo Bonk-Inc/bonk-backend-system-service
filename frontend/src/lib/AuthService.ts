@@ -18,7 +18,7 @@ export class AuthService {
     }
 
     async login() {
-        await this.#userManager.signinRedirect();
+        await this.#userManager.signinRedirect({ redirectMethod: 'replace' });
     }
 
     async logout() {

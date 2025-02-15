@@ -42,13 +42,13 @@ router.beforeEach(async (to, _, next) => {
   const authenticated = await authService.isUserLoggedIn();
 
   if (to.meta.requireAuth && !authenticated) {
-    next('/authenticate');
+    next({ name: 'authenticate', query: {} });
   } else if (to.path === '/login') {
     try {
       await authService.handleLoginRedirect();
-      next('/app');  
+      next({ name: 'app_home', query: {} });
     } catch(e) {
-      next('/authenticate');
+      next({ name: 'authenticate', query: {} });
     }
   } else {
     next();
