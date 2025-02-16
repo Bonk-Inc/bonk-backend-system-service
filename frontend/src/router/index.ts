@@ -1,5 +1,5 @@
 import { authService } from '@/lib/AuthService';
-import { createRouter, createWebHashHistory } from 'vue-router';
+import { createRouter, createWebHistory } from 'vue-router';
 import { appRoutes } from './app';
 
 declare module 'vue-router' {
@@ -9,7 +9,7 @@ declare module 'vue-router' {
 }
 
 const router = createRouter({
-  history: createWebHashHistory(),
+  history: createWebHistory(),
   routes: [
     {
       path: '/',
