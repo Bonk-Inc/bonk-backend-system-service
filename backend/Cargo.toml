@@ -6,19 +6,19 @@ edition = "2021"
 readme = "README.md"
 
 [dependencies]
-axum = { version = "0.8.1", features = ["macros"] }
-chrono = { version = "0.4.39", features = ["serde"] }
-diesel = { version = "2.2.7", features = ["postgres", "chrono", "uuid", "r2d2"] }
+axum = { version = "0.8.4", features = ["macros"] }
+chrono = { version = "0.4.41", features = ["serde"] }
+diesel = { version = "2.2.10", features = ["postgres", "chrono", "uuid", "r2d2"] }
 diesel_migrations = "2.2.0"
 dotenvy = "0.15.7"
-env_logger = "0.11.6"
+env_logger = "0.11.8"
 jsonwebtoken = "9.3.1"
-log = "0.4.25"
-reqwest = { version = "0.12.12", features = ["json"] }
-serde = { version = "1.0.217", features = ["derive"] }
-serde_json = "1.0.138"
+log = "0.4.27"
+reqwest = { version = "0.12.15", features = ["json"] }
+serde = { version = "1.0.219", features = ["derive"] }
+serde_json = "1.0.140"
 tokio = { version = "1.43.0", features = ["full"] }
 tower-http = { version = "0.6.2", features = ["cors", "fs"] }
 utoipa = { version = "5.3.1", features = ["axum_extras", "chrono", "uuid"] }
-utoipa-swagger-ui = { version = "9.0.0", features = ["axum", "reqwest"] }
-uuid = { version = "1.13.1", features = ["serde", "v4"] }
+utoipa-swagger-ui = { version = "9.0.1", features = ["axum", "reqwest"] }
+uuid = { version = "1.16.0", features = ["serde", "v4"] }
