@@ -1,8 +1,8 @@
 [package]
 name = "babs-server"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Traxx186"]
-edition = "2021"
+edition = "2024"
 readme = "README.md"
 
 [dependencies]
